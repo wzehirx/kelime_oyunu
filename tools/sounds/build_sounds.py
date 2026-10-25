@@ -29,7 +29,8 @@ import numpy as np
 SR = 44100
 SEED = 20261025
 PEAK_DBFS = -3.0          # tepe tavani
-TARGET_RMS_DBFS = -19.0   # tum dosyalar icin hedef RMS (kirpilmis dosya uzerinden)
+SAMPLE_RMS_DBFS = -17.0   # orneklerin hedef RMS'i (yumusak sinirlayici ile ulasilir)
+SYNTH_MAX_RMS_DBFS = -12.5  # sentezlenenlerde RMS ust siniri (tepe -3 dBFS'te bundan yuksekse kisilir)
 MIN_DUR, MAX_DUR = 0.05, 2.5
 LETTER_BASE_HZ = 523.25   # C5; playbackRate 0.8..1.6 -> ~418..837 Hz
 
@@ -52,10 +53,8 @@ KENNEY = {
 SAMPLES = {
     "delete":  ("interface-sounds", "Audio/drop_001.ogg", 0.30, "head"),
     "clear":   ("interface-sounds", "Audio/scratch_001.ogg", 0.30, "head"),
-    "hint":    ("interface-sounds", "Audio/bong_001.ogg", 0.40, "head"),
-    "nav":     ("ui-audio", "Audio/rollover1.ogg", 0.20, "head"),
-    "coin":    ("casino-audio", "Audio/chips-stack-1.ogg", 0.35, "head"),
-    "shuffle": ("casino-audio", "Audio/card-shuffle.ogg", 0.80, "loudest"),
+    "nav":     ("interface-sounds", "Audio/tick_004.ogg", 0.20, "head"),
+    "shuffle": ("casino-audio", "Audio/card-fan-1.ogg", 0.80, "head"),
 }
 
 
@@ -119,24 +118,21 @@ def rms_db(x):
     return 20 * np.log10(max(np.sqrt(np.mean(x ** 2)), 1e-9))
 
 
-def level(x):
-    """Yumusak sinirlayici ile tepe <= PEAK_DBFS, RMS ~ TARGET_RMS_DBFS (mumkun oldugunca)."""
+def level(x, target_db):
+    """Tepe <= PEAK_DBFS (tanh yumusak sinirlayici), RMS ~ target_db.
+    Tepe -3 dBFS'ten once normalize edilir; RMS hedefin ustundeyse sinyal kisilir (tepe < -3 olur)."""
     ceil = 10 ** (PEAK_DBFS / 20)
-    x = x / np.max(np.abs(x))
-
-    def shaped(g):
-        return ceil * np.tanh(g * x / ceil)
-
-    lo, hi = 0.01, 40.0
-    for _ in range(60):  # bisection: RMS gain ile monoton artar
-        mid = np.sqrt(lo * hi)
-        if rms_db(shaped(mid)) < TARGET_RMS_DBFS:
-            lo = mid
-        else:
-            hi = mid
-    y = shaped(np.sqrt(lo * hi))
-    # tanh tepeyi tam ceil'e dayamaz ama asla gecmez; yine de tepeyi -3 dBFS'e olcekle
-    return y * (ceil / np.max(np.abs(y)))
+    x = x / np.max(np.abs(x)) * ceil
+    if rms_db(x) <= target_db:      # hedefin altinda: sinirlayiciyla yukari it
+        lo, hi = 1.0, 60.0
+        for _ in range(60):
+            mid = np.sqrt(lo * hi)
+            if rms_db(ceil * np.tanh(mid * x / ceil)) < target_db:
+                lo = mid
+            else:
+                hi = mid
+        return ceil * np.tanh(np.sqrt(lo * hi) * x / ceil)
+    return x * 10 ** ((target_db - rms_db(x)) / 20)
 
 
 def write_wav(path, x):
@@ -177,6 +173,16 @@ def place(parts, total):
         e = min(len(out), s + len(y))
         out[s:e] += y[: e - s]
     return out
+
+
+def bell(freq, dur, partials, attack=0.002):
+    """partials: (oran, genlik, tau). Kismi ses basina ussel sonumlu sinus."""
+    t = t_axis(dur)
+    y = sum(a * np.sin(2 * np.pi * freq * r * t) * np.exp(-t / tau) for r, a, tau in partials)
+    y = y * np.minimum(1, t / attack)
+    tail = int(0.008 * SR)
+    y[-tail:] *= np.linspace(1, 0, tail)
+    return y
 
 
 def synth_all(rng):
@@ -223,14 +229,19 @@ def synth_all(rng):
     S["error"] = g + buzz * np.max(np.abs(g))
 
     # tekrar: notr cift tik, sabit perde (700 Hz), ikisi de ayni
-    tk = tone(700.0, 0.06, harm=(1, 0.1), attack=0.002, tau=0.014)
+    tk = tone(900.0, 0.06, harm=(1, 0.1), attack=0.002, tau=0.014)
     S["duplicate"] = place([(0.0, tk), (0.085, tk)], 0.15)
+
+    # jeton: yuksek, metalik (harmonik olmayan kismi seslerle) tek "ting", sabit perde
+    S["coin"] = bell(2093.0, 0.30, partials=((1, 1.0, 0.09), (2.76, 0.45, 0.05), (5.40, 0.2, 0.03)))
+    # ipucu: yumusak, daha alcak, harmonik "ting" (ampul), daha uzun sonumlu
+    S["hint"] = bell(784.0, 0.50, partials=((1, 1.0, 0.16), (2, 0.30, 0.09), (3, 0.10, 0.05)))
     return S
 
 
 def process_synth(x):
     x = trim(x, thresh_db=-50.0, pad_ms=1.0)
-    return level(fades(x, 0.5, 4.0))
+    return level(fades(x, 0.5, 4.0), SYNTH_MAX_RMS_DBFS)
 
 
 def process_sample(x, maxdur, mode):
@@ -242,14 +253,14 @@ def process_sample(x, maxdur, mode):
         x = fades(x, 3.0, fo)
     else:
         x = fades(x, 1.0, 8.0)
-    return level(x)
+    return level(x, SAMPLE_RMS_DBFS)
 
 
 # --------------------------------------------------------------------------- SOUNDS.md
 def sounds_md(info):
     L = ["# Ses efektleri: kaynak ve lisans", "",
          "Bu dosya `tools/sounds/build_sounds.py` tarafindan uretilir; elle degistirmeyin.",
-         "Tum dosyalar: mono, 44.1 kHz, 16-bit WAV; tepe -3 dBFS; hedef RMS -19 dBFS.",
+         "Tum dosyalar: mono, 44.1 kHz, 16-bit WAV; tepe -3 dBFS; hedef RMS -17 dBFS (ornekler) / en fazla -12.5 dBFS (sentez).",
          "Hicbir dosya atif gerektirmez. Lisansi kanitlanamayan ses kullanilmamistir.", "",
          "| Olay | Dosya | Kaynak | Lisans |", "|---|---|---|---|"]
     for ev in EVENTS:

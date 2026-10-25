@@ -1,7 +1,7 @@
 # Ses efektleri: kaynak ve lisans
 
 Bu dosya `tools/sounds/build_sounds.py` tarafindan uretilir; elle degistirmeyin.
-Tum dosyalar: mono, 44.1 kHz, 16-bit WAV; tepe -3 dBFS; hedef RMS -19 dBFS.
+Tum dosyalar: mono, 44.1 kHz, 16-bit WAV; tepe -3 dBFS; hedef RMS -17 dBFS (ornekler) / en fazla -12.5 dBFS (sentez).
 Hicbir dosya atif gerektirmez. Lisansi kanitlanamayan ses kullanilmamistir.
 
 | Olay | Dosya | Kaynak | Lisans |
@@ -13,12 +13,12 @@ Hicbir dosya atif gerektirmez. Lisansi kanitlanamayan ses kullanilmamistir.
 | bonus | `bonus.wav` | prosedürel sentez, build_sounds.py | CC0 (kendi üretimimiz) |
 | duplicate | `duplicate.wav` | prosedürel sentez, build_sounds.py | CC0 (kendi üretimimiz) |
 | invalid | `invalid.wav` | prosedürel sentez, build_sounds.py | CC0 (kendi üretimimiz) |
-| shuffle | `shuffle.wav` | Kenney Casino Audio 1.1, `card-shuffle.ogg` (https://kenney.nl/assets/casino-audio), en yuksek enerjili 0.8 sn'lik kesit | CC0 |
-| hint | `hint.wav` | Kenney Interface Sounds 1.0, `bong_001.ogg` (https://kenney.nl/assets/interface-sounds) | CC0 |
-| coin | `coin.wav` | Kenney Casino Audio 1.1, `chips-stack-1.ogg` (https://kenney.nl/assets/casino-audio) | CC0 |
+| shuffle | `shuffle.wav` | Kenney Casino Audio 1.1, `card-fan-1.ogg` (https://kenney.nl/assets/casino-audio) | CC0 |
+| hint | `hint.wav` | prosedürel sentez, build_sounds.py | CC0 (kendi üretimimiz) |
+| coin | `coin.wav` | prosedürel sentez, build_sounds.py | CC0 (kendi üretimimiz) |
 | bonus_full | `bonus_full.wav` | prosedürel sentez, build_sounds.py | CC0 (kendi üretimimiz) |
 | level_complete | `level_complete.wav` | prosedürel sentez, build_sounds.py | CC0 (kendi üretimimiz) |
-| nav | `nav.wav` | Kenney UI Audio, `rollover1.ogg` (https://kenney.nl/assets/ui-audio) | CC0 |
+| nav | `nav.wav` | Kenney Interface Sounds 1.0, `tick_004.ogg` (https://kenney.nl/assets/interface-sounds) | CC0 |
 | error | `error.wav` | prosedürel sentez, build_sounds.py | CC0 (kendi üretimimiz) |
 
 ## Kaynak paketler (CC0)
