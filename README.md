@@ -10,7 +10,16 @@ Words of Wonders tarzı bir Türkçe kelime bulmaca oyunu. **Görme engelli kull
 - Bulmacada olmayan ama geçerli bir kelime **bonus kelimedir**. 5 bonus kelime 20 jeton kazandırır.
 - Seviye bitince 10 jeton kazanırsın. Başlangıçta 50 jeton var.
 - Puan sistemi yok. Amaç seviyeleri geçmek. **10.000 seviye** var.
+- **Dünya turu:** 10.000 seviye 100 ülkeye bölünmüştür (aşağıda).
 - Kelime listesi TDK madde başlarından oluşur; çekimli biçimler (ör. "kitaplar") listede yoktur, geçersiz sayılır.
+
+## Dünya turu
+Oyun, Türkiye'den başlayıp ülke ülke ilerleyen bir yolculuktur. Görsel arka plan yoktur; her şey ses ve anlatımla yaşar.
+- **100 ülke, 10.000 seviye:** ilk 10 ülke 20'şer, sonraki 30 ülke 50'şer seviyedir; kalan 60 ülke artan 8.300 seviyeyi eşit paylaşır (138 ya da 139). Türkiye 20 seviyedir.
+- **Yeni ülke:** ülkenin ilk seviyesi açılınca önce bölgesine özel bir melodi çalar (Avrupa, Asya, Orta Doğu, Afrika, Amerika, Okyanusya için altı ayrı melodi); yaklaşık 1 saniye sonra ülke tanıtılır: "Yeni ülke: Türkiye, Asya. Başkenti Ankara. 20 seviyelik yolculuk başlıyor. Biliyor muydun? …". Ses kapalıysa tanıtım gecikmeden okunur.
+- **Ülke bitişi:** ülkenin son seviyesi bitince ülke tamamlama sesi çalar, **25 jeton** ödül (bir kez) ve ikinci bir bilgi gelir, sıradaki ülkenin adı söylenir.
+- **Dünya turu ekranı:** ana menüdeki "Dünya turu" düğmesi 100 ülkelik, TalkBack ile gezilen bir liste açar. Her satır tek düğümdür: tamamlanan ülke ("Türkiye, tamamlandı. Başkenti Ankara. …"), şu an bulunduğun ülke ("… 5 / 50 seviye, şu an buradasın") ya da kilitli ülke. Açılışta odak bulunduğun ülkededir; geri tuşu menüdeki "Dünya turu" düğmesine döner.
+- **İlerleme seviyeden türetilir:** ayrı bir kayıt alanı yoktur; bulunduğun ülke, seviye sırandan hesaplanır. Eski kayıtlar olduğu gibi çalışır. Yer listesi okunamazsa ülke özellikleri sessizce kapanır, oyun eskisi gibi sürer.
 
 ## Erişilebilirlik
 - Her düğmenin Türkçe, anlamlı bir etiketi var. Dokunma hedefleri en az 48dp.
@@ -21,7 +30,7 @@ Words of Wonders tarzı bir Türkçe kelime bulmaca oyunu. **Görme engelli kull
 - Not: Geliştirme ortamında gerçek TalkBack ile test yapılamadı. Erişilebilirlik; Compose semantik ağacı, duyuru metinleri ve odak davranışı üzerinden otomatik testlerle doğrulandı. Gerçek cihazda geri bildirim çok değerlidir.
 
 ## İndirme
-Her sürümün **debug imzalı APK**'sı [Releases](https://github.com/wzehirx/kelime_oyunu/releases) sayfasındadır. Sürümler **v1.0, v1.1 ve v1.2** ayrıca **release APK** içerir.
+Her sürümün **debug imzalı APK**'sı [Releases](https://github.com/wzehirx/kelime_oyunu/releases) sayfasındadır. Sürümler **v1.0, v1.1, v1.2 ve v1.3** ayrıca **release APK** içerir.
 
 | Sürüm | İçerik |
 |---|---|
@@ -32,6 +41,7 @@ Her sürümün **debug imzalı APK**'sı [Releases](https://github.com/wzehirx/k
 | v1.0 | İlk tam sürüm: debug ve release APK |
 | v1.1 | Harf sesi seçim sırasına göre kalından inceye; ses seti yeniden üretildi (daha doğal tını). Debug ve release APK |
 | v1.2 | Seviye eğrisi düzeltildi: harf ve kelime sayısı seviye numarasıyla hiç düşmez. Debug ve release APK |
+| v1.3 | Dünya turu: 100 ülke, bölgeye özel giriş melodileri, ülke tanıtımı ve tamamlama bonusu (25 jeton), Dünya turu ekranı. Debug ve release APK |
 
 > Debug APK'lar depodaki ortak `app/debug.keystore` ile imzalanır; sürümler birbirinin üzerine kurulur. Release APK farklı bir anahtarla imzalıdır, debug ile aynı cihazda üst üste kurulmaz (önce birini kaldır).
 
@@ -43,7 +53,8 @@ v1.0 release APK, bu proje için üretilen özel bir anahtarla imzalanmıştır.
 
 ## Veri kaynakları ve lisanslar
 - **Kelime listesi:** TDK Güncel Türkçe Sözlük kaynaklı, [bilalozdemir/tr-word-list](https://github.com/bilalozdemir/tr-word-list) deposundan alınıp temizlendi (çok sözcüklü, kısaltma, özel isim, harf dışı karakter içerenler çıkarıldı, sapkalı ünlüler düzleştirildi). Kaynak README'si CC BY-SA 4.0 beyan eder; depoda LICENSE dosyası yoktur ve TDK'nın yeniden dağıtım koşulları belirsizdir. Ayrıntı: [`tools/words/SOURCES.md`](tools/words/SOURCES.md). Ticari bir kullanım öncesi hukuki kontrol önerilir.
-- **Ses efektleri:** 20 ses dosyasının tamamı bu projede, harici örnek veya indirme olmadan, `tools/sounds/build_sounds.py` ile prosedürel olarak sentezlenir (marimba/kalimba/ahşap ve hafif çan tınısı; yalnızca numpy). Kendi üretimimiz, CC0. Olay, dosya, kaynak ve lisans tablosu: [`app/src/main/assets/sounds/SOUNDS.md`](app/src/main/assets/sounds/SOUNDS.md).
+- **Ses efektleri:** 27 ses dosyasının tamamı bu projede, harici örnek veya indirme olmadan, `tools/sounds/build_sounds.py` ile prosedürel olarak sentezlenir (marimba/kalimba/ahşap ve hafif çan tınısı; yalnızca numpy). Kendi üretimimiz, CC0. Olay, dosya, kaynak ve lisans tablosu: [`app/src/main/assets/sounds/SOUNDS.md`](app/src/main/assets/sounds/SOUNDS.md).
+- **Yerler (Dünya turu):** `app/src/main/assets/places.json` (100 yer: ad, kıta, bölge, başkent ve iki kısa bilgi). Bilgiler elle yazıldı, harici kaynaktan kopyalanmadı; CC0. Biçim ve içerik denetimi: `python3 tools/places/validate_places.py` (testi: `tools/places/test_validate_places.py`).
 - **Seviyeler:** `tools/levels/` altındaki araçla bu sözlükten üretildi (10.000 seviye, hepsi otomatik doğrulandı: çözülebilir, plansız ek kelime yok, ızgara en çok 9×9, benzersiz). Zorluk yalnızca artar: harf sayısı seviye numarasıyla hiç düşmez (sırayla 3 harf 110, 4 harf 450, 5 harf 1.600, 6 harf 3.800, 7 harf 4.040 seviye) ve kelime sayısı da küresel olarak düşmez (2 kelimeden 16 kelimeye). Yeniden üretim: `python3 tools/levels/generate_levels.py --count 10000 --seed 1`, denetim: `python3 tools/levels/validate_levels.py`.
 
 ## Geliştirme
@@ -51,7 +62,7 @@ v1.0 release APK, bu proje için üretilen özel bir anahtarla imzalanmıştır.
 - Android SDK kurulumu: `tools/setup-android-sdk.sh`
 - Test ve debug derleme: `./gradlew :app:testDebugUnitTest :app:assembleDebug`
 - Release derleme (kendi anahtarınla): ortam değişkenleri `KELIME_KEYSTORE`, `KELIME_KEYSTORE_PASSWORD`, `KELIME_KEY_ALIAS`, `KELIME_KEY_PASSWORD` ayarlanıp `./gradlew :app:assembleRelease`
-- Kelime/seviye/ses araçları: `tools/words`, `tools/levels`, `tools/sounds` (Python 3).
+- Kelime/seviye/ses araçları: `tools/words`, `tools/levels`, `tools/sounds`, `tools/places` (Python 3).
 - Tasarım ve plan: [`docs/superpowers/specs`](docs/superpowers/specs), [`docs/superpowers/plans`](docs/superpowers/plans).
 - Yayın: sürüm numarası (`versionName`) değiştirilip dala push edildiğinde GitHub Actions testleri çalıştırır, debug APK'yı derler ve o sürüm için GitHub release oluşturur (`.github/workflows/release.yml`).
 

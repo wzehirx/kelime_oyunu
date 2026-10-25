@@ -69,4 +69,16 @@ class AnnouncerTest {
         advanceTimeBy(120); runCurrent()
         assertEquals(listOf("Bir. İki"), spoken)
     }
+
+    @Test fun delayedAnnouncementComesLaterAndNormalOnesAreNotHeld() = runTest {
+        val a = Announcer({ spoken += it }, backgroundScope)
+        a.say("Geç", delayMs = 1000)
+        a.say("Erken")
+        advanceTimeBy(120); runCurrent()
+        assertEquals(listOf("Erken"), spoken)
+        advanceTimeBy(879); runCurrent()
+        assertEquals(listOf("Erken"), spoken)
+        advanceTimeBy(2 + 120); runCurrent()
+        assertEquals(listOf("Erken", "Geç"), spoken)
+    }
 }

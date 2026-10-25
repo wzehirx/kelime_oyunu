@@ -105,4 +105,39 @@ class AnnouncingFeedbackSinkTest {
         flush()
         assertEquals(listOf("M. Doğru, KALEM"), spoken)
     }
+
+    private val tr = com.kelimeoyunu.TestPlaces.turkey
+
+    @Test fun placeEnteredWithSoundWaitsForMelody() = runTest {
+        val s = AnnouncingFeedbackSink(Announcer({ spoken += it }, backgroundScope), { state }, { now }, soundOn = { true })
+        s.onEvent(GameEvent.PlaceEntered(tr, 20))
+        advanceTimeBy(999 + 120); runCurrent()
+        assertEquals(emptyList<String>(), spoken)
+        advanceTimeBy(2); runCurrent()
+        assertEquals(listOf(Announcements.placeEntered(tr, 20).trimEnd('.')), spoken)
+    }
+
+    @Test fun placeEnteredWithSoundOffIsImmediate() = runTest {
+        val s = AnnouncingFeedbackSink(Announcer({ spoken += it }, backgroundScope), { state }, { now }, soundOn = { false })
+        s.onEvent(GameEvent.PlaceEntered(tr, 20))
+        flush()
+        assertEquals(listOf(Announcements.placeEntered(tr, 20).trimEnd('.')), spoken)
+    }
+
+    @Test fun lastLevelOfPlaceReadsLevelThenPlaceInOneSentenceWithoutDoubleDots() = runTest {
+        val s = sink()
+        state = ready()
+        s.onEvent(GameEvent.Submitted(SubmitResult.Correct("kalem")))
+        s.onEvent(GameEvent.CoinsEarned(10))
+        s.onEvent(GameEvent.LevelCompleted)
+        s.onEvent(GameEvent.PlaceCompleted(tr, 25, "Yunanistan"))
+        flush()
+        assertEquals(
+            listOf(
+                "Doğru, KALEM. 10 jeton kazandın. Seviye 3 tamamlandı. Türkiye tamamlandı! 25 jeton kazandın. " +
+                    "Biliyor muydun? Kapadokya'da peri bacaları vardır. Sıradaki ülke: Yunanistan",
+            ),
+            spoken,
+        )
+    }
 }

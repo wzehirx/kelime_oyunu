@@ -113,8 +113,8 @@ class GameViewModel(
                     _state.value = GameUiState.AllDone
                 } else {
                     startLevel(saved.levelIndex, saved)
-                    publish()
                     announceEntry(deferIfNoListener = true)
+                    publish()
                 }
             }
         } catch (e: CancellationException) {
@@ -233,8 +233,8 @@ class GameViewModel(
             emit(GameEvent.AllLevelsDone)
         } else {
             startLevel(next, null)
-            commit()
             announceEntry(deferIfNoListener = false)
+            commit()
         }
     }
 
