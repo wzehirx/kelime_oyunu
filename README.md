@@ -21,7 +21,7 @@ Words of Wonders tarzı bir Türkçe kelime bulmaca oyunu. **Görme engelli kull
 - Not: Geliştirme ortamında gerçek TalkBack ile test yapılamadı. Erişilebilirlik; Compose semantik ağacı, duyuru metinleri ve odak davranışı üzerinden otomatik testlerle doğrulandı. Gerçek cihazda geri bildirim çok değerlidir.
 
 ## İndirme
-Her sürümün **debug imzalı APK**'sı [Releases](https://github.com/wzehirx/kelime_oyunu/releases) sayfasındadır. Sürüm **v1.0** ayrıca **release APK** içerir.
+Her sürümün **debug imzalı APK**'sı [Releases](https://github.com/wzehirx/kelime_oyunu/releases) sayfasındadır. Sürüm **v1.0** ve **v1.1** ayrıca **release APK** içerir.
 
 | Sürüm | İçerik |
 |---|---|
@@ -29,7 +29,8 @@ Her sürümün **debug imzalı APK**'sı [Releases](https://github.com/wzehirx/k
 | v0.3 | Arayüz, TalkBack duyuruları, menüler, ayarlar |
 | v0.4 | Ses efektleri |
 | v0.5 | Hata düzeltmeleri, imza ve cila |
-| v1.0 | Final: debug ve release APK |
+| v1.0 | İlk tam sürüm: debug ve release APK |
+| v1.1 | Harf sesi seçim sırasına göre kalından inceye; ses seti yeniden üretildi (daha doğal tını). Debug ve release APK |
 
 > Debug APK'lar depodaki ortak `app/debug.keystore` ile imzalanır; sürümler birbirinin üzerine kurulur. Release APK farklı bir anahtarla imzalıdır, debug ile aynı cihazda üst üste kurulmaz (önce birini kaldır).
 
