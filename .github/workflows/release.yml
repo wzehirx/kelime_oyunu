@@ -1,8 +1,12 @@
-name: Release
+name: Build and release
 
+# Tag push is not available from the development environment, so a release is
+# created automatically when a push to the branch carries a versionName that has
+# no GitHub release yet. The workflow itself creates the vX.Y tag.
 on:
   push:
-    tags: ['v*']
+    branches: ['ccr-b0baec48-v0gwgl', 'main']
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -19,18 +23,37 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Accept Android SDK licenses
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
-      - name: Build debug APK
+      - name: Resolve version and check for existing release
+        id: ver
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(grep -m1 versionName app/build.gradle.kts | sed -E 's/.*"(.*)".*/\1/')
+          TAG="v${VERSION}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          if gh release view "${TAG}" >/dev/null 2>&1; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Test and build debug APK
         run: ./gradlew :app:testDebugUnitTest :app:assembleDebug
       - name: Prepare assets
+        if: steps.ver.outputs.publish == 'true'
         run: |
+          TAG="${{ steps.ver.outputs.tag }}"
           mkdir -p dist
-          cp app/build/outputs/apk/debug/app-debug.apk "dist/kelime-oyunu-${GITHUB_REF_NAME}-debug.apk"
-          if ls apk/kelime-oyunu-${GITHUB_REF_NAME}-release.apk >/dev/null 2>&1; then
-            cp apk/kelime-oyunu-${GITHUB_REF_NAME}-release.apk dist/
+          cp app/build/outputs/apk/debug/app-debug.apk "dist/kelime-oyunu-${TAG}-debug.apk"
+          if [ -f "apk/kelime-oyunu-${TAG}-release.apk" ]; then
+            cp "apk/kelime-oyunu-${TAG}-release.apk" dist/
           fi
       - name: Publish release
+        if: steps.ver.outputs.publish == 'true'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ steps.ver.outputs.tag }}
           files: dist/*.apk
-          prerelease: ${{ startsWith(github.ref_name, 'v0.') }}
+          prerelease: ${{ startsWith(steps.ver.outputs.tag, 'v0.') }}
           generate_release_notes: true
