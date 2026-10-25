@@ -4,6 +4,37 @@ Amaç: bir kelimenin gerçek (TDK sözlüğünde yer alan) olup olmadığını d
 
 Araştırma tarihi: 2026-10-25. Geçici dosyalar repoya konmadı: `/tmp/claude-0/-home-user-kelime-oyunu/8738d2b8-2244-5bc4-8edc-4bc5cda0eb10/scratchpad/words-research/`
 
+
+## 0. Nihai kaynak ve uretim (Task 3)
+
+- **Kaynak:** `bilalozdemir/tr-word-list`, `files/words.json` (`https://raw.githubusercontent.com/bilalozdemir/tr-word-list/master/files/words.json`). README'ye gore icerik TDK sozlugunden cekilmistir.
+- **Indirme tarihi:** 2026-10-25 (`tools/words/fetch_words.py` ile, proxy CA paketiyle, TLS dogrulamasi acik).
+- **Ham dosya:** 9.396.926 bayt, MD5 `e78da352ff3d2efb207a4458574df700`, 92.406 kayit; her kayit `{"word", "meanings"}`. Ozel isim alani yok; tek isaret, ozel isimlerin buyuk harfle baslamasidir.
+- **Cikti:** `app/src/main/assets/words.txt`: **58.074 benzersiz kelime**, UTF-8, LF, satir basina bir kelime, Turkce alfabe sirasinda (`abcçdefgğhıijklmnoöprsştuüvyz`).
+- **Uretim:** `python3 tools/words/fetch_words.py` (yerel dosyadan: `--json yol`). Testler: `python3 -I tools/words/test_clean_words.py`.
+
+Temizleme kurallari (`tools/words/clean_words.py`):
+
+| Kural | Etki / gerekce |
+|---|---|
+| Turkce kucuk harf (I→ı, İ→i) | `IŞIK`→`ışık`; `ısı` ve `isi` ayri kelimeler |
+| Yalnizca ALPHABET harfleri, uzunluk 2-15 | bosluk, tire, rakam, kesme isareti, q/w/x iceren her sey atilir (30.000'den fazla cok sozcuklu kayit: deyim, atasozu) |
+| Ilk harfi buyuk, gerisi kucuk girisler ozel isim sayilir ve atilir (kucuk harfli bicimi ayrica varsa o alinir) | `Ankara`, `İzmir`, `Alevi`, `Cermen` gibi ~1.900 giris dusuyor. Sezgi kaba: `Alevi`, `Duma` gibi ortak ad sayilabilecek birkac yuz kelime de gidiyor; 58 bin kelimede kabul edilebilir bir kayip |
+| Sapkali unluler duzlestirilir (â→a, î→i, û→u) | TDK `dükkân`, `bekâr`, `hâlâ` yazar; oyuncu `dukkan`, `bekar`, `hala` girer. ~760 kayit bu yuzden listeye giriyor. Yan etki: `kâr`/`kar` tek kelimede birlesir |
+| En az bir unlu zorunlu | 2 harfli sembol/kisaltma kayitlarini (cm, mg, kr, br, cb, cf, md, pb... ) eler |
+
+Kalite notlari:
+- 2 harfli 102 kelime kaliyor (ab, aç, ad, ev, su, ... ). Hepsi unlu iceriyor; elle taranan listede kisaltma kalmadi. Bazilari Turkce alfabe harf adlari (`be`, `ce`, `çe`, `de`, `fe`, `ge`, `he`, `je`, `ke`, `le`, `me`, `ne`, `pe`, `re`, `se`, `şe`, `te`, `ve`, `ye`, `ze`) ve nota adlari (`do`, `re`, `mi`, `fa`, `si`, `la`); TDK'da madde oldugundan korundu. Uzunluk 2'den 1'e inmez; tek harfler atilir.
+- Liste TDK maddelerinden olustugu icin cekimli bicimler (ornegin `kitaplar`) buyuk olasilikla yoktur; yalnizca madde basi sozcukler vardir. Oyunda bu bilinen bir sinirlamadir.
+- Kelimeler TDK sozlugundeki yazimla eslesir; sozlukte olmayan gunluk yazimlar (`isi` gibi) girmez.
+- Ham veri guncel TDK ile birebir karsilastirilmadi (`sozluk.gov.tr` bu ortamdan TLS ile erisilemiyor, bkz. bolum 1).
+
+### Lisans durumu (dürüst ozet)
+- Kaynak deponun tek lisans beyani README'deki **CC BY-SA 4.0** baglantisidir. Depoda `LICENSE` dosyasi yok; beyan dogrulanabilir bir lisans metniyle desteklenmiyor.
+- **Share-alike:** `words.txt` bu verinin turevi sayilmalidir; dagitirken CC BY-SA 4.0 ile (atif: bilalozdemir/tr-word-list) paylasilmasi gerekir. Uygulamanin geri kalan kodu bu sart nedeniyle otomatik olarak etkilenir mi (toplu eser mi turev mi) hukuki bir degerlendirme gerektirir; burada karar verilmedi.
+- **TDK kullanim kosulu belirsiz:** verinin asil sahibi TDK; kelime listesinin yeniden dagitimina dair TDK'nin acik bir izni/kosulu bu calismada bulunamadi. Tek tek sozcukler telif konusu olmayabilir, ama derleme icin kesin bir iddiada bulunmuyoruz. Yayin (ozellikle ticari) oncesi hukuki kontrol onerilir.
+- Bu sorunlar cozulemezse yedek yol: `sozluk.gov.tr` erisimi acildiginda listeyi TDK'dan dogrudan yeniden uretmek.
+
 ## 1. sozluk.gov.tr (birincil kaynak): bu ortamdan erişilemiyor
 
 | Uç | Sonuç |
