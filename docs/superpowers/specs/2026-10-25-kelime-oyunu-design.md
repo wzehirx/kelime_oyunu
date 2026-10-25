@@ -8,7 +8,7 @@ Words of Wonders tarzı kelime bulmaca oyununun, **görme engelliler için TalkB
 Başarı ölçütü: Görme engelli bir kullanıcı, ekranı görmeden ve yardım almadan, yalnızca TalkBack ile bir seviyeyi baştan sona bitirebilmeli.
 
 ## 2. Kapsam
-**v1.0'da var:** Seviyeler, harf havuzu, dokunarak harf girişi, ızgara kelimeleri, bonus kelime, karıştır, ipucu (jeton ile), ilerleme kaydı, ses efektleri, ayarlar, ana menü. Tamamen çevrimdışı, Türkçe.
+**v1.0'da var:** En az **10.000 seviye** (bkz. 8), harf havuzu, dokunarak harf girişi, ızgara kelimeleri, bonus kelime, karıştır, ipucu (jeton ile), ilerleme kaydı, ses efektleri, ayarlar, ana menü. Tamamen çevrimdışı, Türkçe.
 
 **v1.0'da yok:** Çarkıfelek, arka plan kartları, mağaza, reklam, çevrimiçi özellikler, klavye girişi.
 
@@ -62,7 +62,9 @@ Ses, görme engelli kullanıcı için ana geri bildirim kanalıdır. Konuşma (T
 - Lisans/kullanım koşulu belirsizse kullanıcıya bildirilir.
 
 ## 8. Seviye üretimi
-Geliştirme sırasında çalışan ayrı bir Python aracı sözlükten seviyeleri üretir: harf kümesi seçilir, o harflerle yazılabilen kelimeler bulunur, kesişen bir ızgara yerleştirilir. Uygulama yalnızca hazır seviye dosyalarını okur. Zorluk, harf ve kelime sayısıyla artar. Üretilen her seviye bir doğrulama betiğinden geçer (çözülebilir mi, tüm kelimeler sözlükte mi, ızgara tutarlı mı).
+**Hedef: v1.0'da en az 10.000 seviye.** Seviyeler önceden üretilir ve uygulamaya sıkıştırılmış tek dosya olarak (tahmini birkaç MB) gömülür. Seviye başına yalnızca harfler, kelimeler ve yerleşim saklanır. Zorluk eğrisi 10.000 seviyeye yayılır. İsteğe bağlı genişleme: 10.000. seviyeden sonra sıra sayısını tohum alan, cihazda çalışan deterministik bir üretici ile sonsuz mod. Bu v1.0 şartı değildir, zaman kalırsa eklenir.
+
+Geliştirme sırasında çalışan ayrı bir Python aracı sözlükten seviyeleri üretir: harf kümesi seçilir, o harflerle yazılabilen kelimeler bulunur, kesişen bir ızgara yerleştirilir. Uygulama yalnızca hazır seviye dosyalarını okur. Zorluk, harf ve kelime sayısıyla artar. Üretilen her seviye (10.000'inin tamamı) bir doğrulama betiğinden geçer, tekrarlayan harf/kelime kombinasyonları elenir (çözülebilir mi, tüm kelimeler sözlükte mi, ızgara tutarlı mı).
 
 ## 9. Süreç ve görev dağılımı
 Claude Pro limitleri değerli olduğu için iş, işin zorluğuna göre modellere dağıtılır:
@@ -95,7 +97,7 @@ Koordinasyon bu oturumdadır. Alt görevler ayrı ajanlara verilir.
 ## 11. Yayın ve imzalama
 - Tüm geliştirme GitHub'a push edilir (geliştirme dalı: `ccr-b0baec48-v0gwgl`).
 - Her sürüm için GitHub'da **debug imzalı APK** bulunur.
-- **v1.0:** debug imzalı APK **ve** release APK birlikte yayınlanır. Release APK, bu oturum için üretilen ayrı bir anahtar dosyasıyla (`keytool`) imzalanır. Anahtar dosyası depoya konur ve README'de anlatılır.
+- **v1.0:** debug imzalı APK **ve** release APK birlikte yayınlanır. Release APK, bu oturum için üretilen ayrı bir anahtar dosyasıyla (`keytool`) imzalanır. **Anahtar dosyası ve şifresi depoya konmaz**, yalnızca bu Claude oturumunun dosya sisteminde (depo dışında, `.gitignore` ile de korunan bir klasörde) tutulur. README yalnızca imzanın SHA-256 parmak izini ve anahtarın gizli tutulduğunu belirtir. İstersen v1.0 tesliminde anahtarı sana ayrıca dosya olarak veririm.
 - Yayın yöntemi: öncelik GitHub Actions + `gh release` ile. Bu çalışmazsa APK'lar depoda `apk/` klasörüne commit edilir (GitHub MCP araçlarında release asset yükleme yok).
 - README: oyun tanımı, kurulum, erişilebilirlik notları, sürüm listesi, anahtar dosyası açıklaması, lisanslar.
 
@@ -103,9 +105,9 @@ Koordinasyon bu oturumdadır. Alt görevler ayrı ajanlara verilir.
 1. **Gerçek TalkBack testi yapılamaz.** Ortamda KVM yok, emülatör çalışmaz. Semantics ve duyuru metinleri otomatik doğrulanır ama gerçek konuşma/odak deneyimini yalnızca sen v1.0'da duyacaksın. Bu yüzden ara sürümleri de dilersen telefonda denemen faydalı olur.
 2. **Android SDK ortamda kurulu değil.** `dl.google.com` erişilebilir, komut satırı araçlarını kurup derleme yapacağız. Java 21 ve Gradle 8.14 mevcut.
 3. **TDK API'ye erişilemiyor.** Yöntem 2'ye düşme ihtimali yüksek.
-4. **Anahtar dosyası herkese açık olacak.** Şifresiyle birlikte depoda olduğu için bu anahtar yalnızca bu proje için atılabilir sayılmalıdır. Başkası aynı anahtarla imzalı sahte APK üretebilir. Play Store gibi bir yayın için kullanılmamalı, uygulamayı güncelleyen herkesin aynı anahtarı kullandığına dikkat edilmeli.
+4. **Anahtar yalnızca oturumda durur.** Container geri alınırsa anahtar kaybolur. Sonraki bir güncelleme farklı bir anahtarla imzalanırsa cihazdaki eski sürümün üzerine kurulmaz (önce kaldırmak gerekir). Bunu önlemek için v1.0 tesliminde anahtarı sana dosya olarak vereceğim.
 5. **Zamanlayıcı** oturum yaşamıyorsa çalışmaz.
 
 ## 13. Açık kararlar
 - Ses kaynağı için ElevenLabs kullanımı (kredi) gerekirse ayrıca onay istenecek.
-- Seviye sayısı hedefi (öneri: v1.0'da ~100 seviye).
+- Sonsuz mod (10.000 seviyeden sonra) v1.0'a dahil mi, sonraya mı kalsın? Öneri: sonraya.
