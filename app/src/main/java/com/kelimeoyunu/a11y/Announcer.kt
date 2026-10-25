@@ -1,0 +1,44 @@
+package com.kelimeoyunu.a11y
+
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+/**
+ * Duyuruları [batchMs] penceresinde toplar ve tek cümlede ". " ile birleştirip [sink]'e verir
+ * (örn. "Doğru, KALEM. 10 jeton kazandın. Seviye 3 tamamlandı"). Pencere ilk duyuruyla açılır.
+ *
+ * `say(text, interrupt = true)` (harf seçimi): penceredeki bekleyen, daha önce `interrupt = true` ile
+ * gelmiş eski mesajları atar (yalnızca son harf okunur); diğer duyurular (sonuç, jeton...) korunur.
+ */
+class Announcer(
+    private val sink: (String) -> Unit,
+    private val scope: CoroutineScope,
+    private val batchMs: Long = 120,
+) {
+    private class Item(val text: String, val interruptible: Boolean)
+
+    private val lock = Any()
+    private val pending = ArrayList<Item>()
+    private var flushJob: Job? = null
+
+    fun say(text: String, interrupt: Boolean = false) {
+        if (text.isBlank()) return
+        synchronized(lock) {
+            if (interrupt) pending.removeAll { it.interruptible }
+            pending += Item(text, interrupt)
+            if (flushJob == null) flushJob = scope.launch { delay(batchMs); flush() }
+        }
+    }
+
+    private fun flush() {
+        val message = synchronized(lock) {
+            flushJob = null
+            val m = pending.joinToString(". ") { it.text.trimEnd('.') }
+            pending.clear()
+            m
+        }
+        if (message.isNotEmpty()) sink(message)
+    }
+}

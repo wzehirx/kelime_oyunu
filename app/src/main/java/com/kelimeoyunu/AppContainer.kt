@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.kelimeoyunu.data.LevelRepository
 import com.kelimeoyunu.data.ProgressRepository
+import com.kelimeoyunu.data.SettingsRepository
 import com.kelimeoyunu.data.loadWords
 import com.kelimeoyunu.ui.game.GameViewModel
 import java.io.ByteArrayInputStream
@@ -38,7 +39,16 @@ class AppContainer(
         produceFile = { app.preferencesDataStoreFile("progress") },
     )
 
+    private val settingsDataStore: DataStore<Preferences> by lazy {
+        PreferenceDataStoreFactory.create(
+            corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
+            scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
+            produceFile = { app.preferencesDataStoreFile("settings") },
+        )
+    }
+
     val progressRepository = ProgressRepository(dataStore)
+    val settingsRepository: SettingsRepository by lazy { SettingsRepository(settingsDataStore) }
     val levelRepository = LevelRepository { openLevelsGzip(app.assets) }
 
     fun gameViewModelFactory(): ViewModelProvider.Factory = object : ViewModelProvider.Factory {

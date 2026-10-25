@@ -148,6 +148,7 @@ class GameViewModel(
     }
 
     fun onSubmit() = act { _, e ->
+        if (e.isComplete()) return@act
         val result = e.submit(currentWord())
         emit(GameEvent.Submitted(result))
         when (result) {
@@ -245,6 +246,7 @@ class GameViewModel(
         val e = engine ?: return
         if (e.isComplete() && !levelPaid) {
             levelPaid = true
+            selected = emptyList()
             coins += LEVEL_REWARD
             emit(GameEvent.CoinsEarned(LEVEL_REWARD))
             emit(GameEvent.LevelCompleted)
