@@ -16,7 +16,7 @@ Words of Wonders tarzı bir Türkçe kelime bulmaca oyunu. **Görme engelli kull
 - Her düğmenin Türkçe, anlamlı bir etiketi var. Dokunma hedefleri en az 48dp.
 - Bulmaca ızgarası, kutu kutu değil **kelime kelime bir liste** olarak okunur: "Kelime 2, 5 harfli, açık harfler: _ A _ E _".
 - Seçtiğin her harf ve her sonuç duyurulur. Duyurular tek merkezden yönetilir, birbirini ezmez.
-- Her olay için ayrı, kısa bir ses efekti vardır (doğru yükselen, hata alçalan tonlu). Ses efektleri Ayarlar'dan kapatılabilir.
+- Her olay için ayrı, kısa bir ses efekti vardır (olumlu sesler yükselen, olumsuzlar alçalan perdeli). Harf sesi harfe değil kelimedeki sıraya bağlıdır: 1. harf en kalın, her yeni harf bir nota daha ince (7. harf en ince); harf silince bir sonraki harf yine düşük notadan başlar. Ses efektleri Ayarlar'dan kapatılabilir.
 - Büyük yazı boyutunda ve küçük ekranlarda düzen taşmaz. Açık/koyu tema ve yüksek kontrast renkler kullanılır.
 - Not: Geliştirme ortamında gerçek TalkBack ile test yapılamadı. Erişilebilirlik; Compose semantik ağacı, duyuru metinleri ve odak davranışı üzerinden otomatik testlerle doğrulandı. Gerçek cihazda geri bildirim çok değerlidir.
 
@@ -41,7 +41,7 @@ v1.0 release APK, bu proje için üretilen özel bir anahtarla imzalanmıştır.
 
 ## Veri kaynakları ve lisanslar
 - **Kelime listesi:** TDK Güncel Türkçe Sözlük kaynaklı, [bilalozdemir/tr-word-list](https://github.com/bilalozdemir/tr-word-list) deposundan alınıp temizlendi (çok sözcüklü, kısaltma, özel isim, harf dışı karakter içerenler çıkarıldı, sapkalı ünlüler düzleştirildi). Kaynak README'si CC BY-SA 4.0 beyan eder; depoda LICENSE dosyası yoktur ve TDK'nın yeniden dağıtım koşulları belirsizdir. Ayrıntı: [`tools/words/SOURCES.md`](tools/words/SOURCES.md). Ticari bir kullanım öncesi hukuki kontrol önerilir.
-- **Ses efektleri:** Kenney (CC0) örnekleri ve bu projede üretilmiş sentez sesler. Olay, dosya, kaynak ve lisans tablosu: [`app/src/main/assets/sounds/SOUNDS.md`](app/src/main/assets/sounds/SOUNDS.md).
+- **Ses efektleri:** 20 ses dosyasının tamamı bu projede, harici örnek veya indirme olmadan, `tools/sounds/build_sounds.py` ile prosedürel olarak sentezlenir (marimba/kalimba/ahşap ve hafif çan tınısı; yalnızca numpy). Kendi üretimimiz, CC0. Olay, dosya, kaynak ve lisans tablosu: [`app/src/main/assets/sounds/SOUNDS.md`](app/src/main/assets/sounds/SOUNDS.md).
 - **Seviyeler:** `tools/levels/` altındaki araçla bu sözlükten üretildi (10.000 seviye, hepsi otomatik doğrulandı: çözülebilir, plansız ek kelime yok, benzersiz).
 
 ## Geliştirme
@@ -56,4 +56,4 @@ v1.0 release APK, bu proje için üretilen özel bir anahtarla imzalanmıştır.
 ## Bilinen sınırlar
 - Çekimli kelime biçimleri sözlükte yoktur.
 - Bazı seviyelerde nadir TDK kelimeleri çıkabilir (kelime sıklığı verisi kullanılmadı).
-- Ses efektleri nicel analizle seçildi/üretildi, kulakla dinlenerek ayarlanmadı; geri bildirime açığız.
+- Ses efektleri nicel analizle (süre, seviye, temel frekans, atak, kısmi sayısı, perde yönü) denetlendi, kulakla dinlenerek ayarlanmadı; geri bildirime açığız.

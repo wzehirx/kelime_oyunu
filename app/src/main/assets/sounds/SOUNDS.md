@@ -1,34 +1,35 @@
 # Ses efektleri: kaynak ve lisans
 
-Bu dosya `tools/sounds/build_sounds.py` tarafindan uretilir; elle degistirmeyin.
-Tum dosyalar: mono, 44.1 kHz, 16-bit WAV; tepe -3 dBFS; hedef RMS -17 dBFS (ornekler) / en fazla -12.5 dBFS (sentez).
-Hicbir dosya atif gerektirmez. Lisansi kanitlanamayan ses kullanilmamistir.
+Bu dosya `tools/sounds/build_sounds.py` tarafından üretilir; elle değiştirmeyin.
+Tüm sesler **tamamen prosedürel sentezle** (yalnızca numpy) üretilmiştir: harici örnek, indirme ya da
+üçüncü taraf kaynak yoktur. Lisans: kendi üretimimiz, **CC0**. Atıf gerekmez.
+Tüm dosyalar: mono, 44.1 kHz, 16-bit WAV; tepe -3 dBFS; hedef RMS yaklaşık -18 dBFS.
+Aile: marimba / kalimba / ahşap vuruş + hafif çan (glockenspiel) tınısı; modal sentez, yumuşak
+alçak geçiren filtre, sabit seed'li mikro sapma, hafif yankı. Olumlu sesler yükselen, olumsuzlar
+alçalan perde konturu taşır. Harf sesi kelimedeki sıraya göredir (1. harf en kalın, 7. en ince;
+A majör pentatonik A3 B3 C#4 E4 F#4 A4 B4). Dosyalar kulakla doğrulanmadı, nicel analizle denetlendi.
 
 | Olay | Dosya | Kaynak | Lisans |
 |---|---|---|---|
-| letter | `letter.wav` | prosedürel sentez, build_sounds.py | CC0 (kendi üretimimiz) |
-| delete | `delete.wav` | Kenney Interface Sounds 1.0, `drop_001.ogg` (https://kenney.nl/assets/interface-sounds) | CC0 |
-| clear | `clear.wav` | Kenney Interface Sounds 1.0, `scratch_001.ogg` (https://kenney.nl/assets/interface-sounds) | CC0 |
-| correct | `correct.wav` | prosedürel sentez, build_sounds.py | CC0 (kendi üretimimiz) |
-| bonus | `bonus.wav` | prosedürel sentez, build_sounds.py | CC0 (kendi üretimimiz) |
-| duplicate | `duplicate.wav` | prosedürel sentez, build_sounds.py | CC0 (kendi üretimimiz) |
-| invalid | `invalid.wav` | prosedürel sentez, build_sounds.py | CC0 (kendi üretimimiz) |
-| shuffle | `shuffle.wav` | Kenney Casino Audio 1.1, `card-fan-1.ogg` (https://kenney.nl/assets/casino-audio) | CC0 |
-| hint | `hint.wav` | prosedürel sentez, build_sounds.py | CC0 (kendi üretimimiz) |
-| coin | `coin.wav` | prosedürel sentez, build_sounds.py | CC0 (kendi üretimimiz) |
-| bonus_full | `bonus_full.wav` | prosedürel sentez, build_sounds.py | CC0 (kendi üretimimiz) |
-| level_complete | `level_complete.wav` | prosedürel sentez, build_sounds.py | CC0 (kendi üretimimiz) |
-| nav | `nav.wav` | Kenney Interface Sounds 1.0, `tick_004.ogg` (https://kenney.nl/assets/interface-sounds) | CC0 |
-| error | `error.wav` | prosedürel sentez, build_sounds.py | CC0 (kendi üretimimiz) |
+| letter_1 | `letter_1.wav` | prosedürel sentez, build_sounds.py (marimba A3 (220.00 Hz), kelimede 1. harf) | CC0 (kendi üretimimiz) |
+| letter_2 | `letter_2.wav` | prosedürel sentez, build_sounds.py (marimba B3 (246.94 Hz), kelimede 2. harf) | CC0 (kendi üretimimiz) |
+| letter_3 | `letter_3.wav` | prosedürel sentez, build_sounds.py (marimba C#4 (277.18 Hz), kelimede 3. harf) | CC0 (kendi üretimimiz) |
+| letter_4 | `letter_4.wav` | prosedürel sentez, build_sounds.py (marimba E4 (329.63 Hz), kelimede 4. harf) | CC0 (kendi üretimimiz) |
+| letter_5 | `letter_5.wav` | prosedürel sentez, build_sounds.py (marimba F#4 (369.99 Hz), kelimede 5. harf) | CC0 (kendi üretimimiz) |
+| letter_6 | `letter_6.wav` | prosedürel sentez, build_sounds.py (marimba A4 (440.00 Hz), kelimede 6. harf) | CC0 (kendi üretimimiz) |
+| letter_7 | `letter_7.wav` | prosedürel sentez, build_sounds.py (marimba B4 (493.88 Hz), kelimede 7. harf) | CC0 (kendi üretimimiz) |
+| delete | `delete.wav` | prosedürel sentez, build_sounds.py (marimba/kalimba, kısa aşağı süpürmeli pluck) | CC0 (kendi üretimimiz) |
+| clear | `clear.wav` | prosedürel sentez, build_sounds.py (filtreli gürültü, aşağı süpüren swish) | CC0 (kendi üretimimiz) |
+| correct | `correct.wav` | prosedürel sentez, build_sounds.py (marimba, yükselen 3 notalık arpej (A4-C#5-E5)) | CC0 (kendi üretimimiz) |
+| bonus | `bonus.wav` | prosedürel sentez, build_sounds.py (glockenspiel kıvılcımı (C#6-E6-A6)) | CC0 (kendi üretimimiz) |
+| duplicate | `duplicate.wav` | prosedürel sentez, build_sounds.py (iki yumuşak ahşap vuruş, aynı perde) | CC0 (kendi üretimimiz) |
+| invalid | `invalid.wav` | prosedürel sentez, build_sounds.py (marimba, alçalan iki nota (E4-A3)) | CC0 (kendi üretimimiz) |
+| shuffle | `shuffle.wav` | prosedürel sentez, build_sounds.py (kısa filtreli gürültü darbeleri (kart hışırtısı)) | CC0 (kendi üretimimiz) |
+| hint | `hint.wav` | prosedürel sentez, build_sounds.py (çan, yukarı doğru parıltılı dizi (E5-A5-C#6-E6)) | CC0 (kendi üretimimiz) |
+| coin | `coin.wav` | prosedürel sentez, build_sounds.py (çan 'ting' (B5-E6)) | CC0 (kendi üretimimiz) |
+| bonus_full | `bonus_full.wav` | prosedürel sentez, build_sounds.py (glockenspiel + çan, uzun parıltılı yükseliş) | CC0 (kendi üretimimiz) |
+| level_complete | `level_complete.wav` | prosedürel sentez, build_sounds.py (marimba arpej + çan akoru (A majör), yankılı) | CC0 (kendi üretimimiz) |
+| nav | `nav.wav` | prosedürel sentez, build_sounds.py (çok yumuşak kısa ahşap tık) | CC0 (kendi üretimimiz) |
+| error | `error.wav` | prosedürel sentez, build_sounds.py (alçak yumuşak 'tok' (aşağı eğimli)) | CC0 (kendi üretimimiz) |
 
-## Kaynak paketler (CC0)
-
-- Kenney Interface Sounds 1.0: https://kenney.nl/assets/interface-sounds (zip: https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd4d-1677589452/kenney_interface-sounds.zip); zip icindeki `License.txt` "Creative Commons Zero, CC0" ifadesini icerir ve build sirasinda denetlenir.
-- Kenney UI Audio: https://kenney.nl/assets/ui-audio (zip: https://kenney.nl/media/pages/assets/ui-audio/490d233f68-1677590494/kenney_ui-audio.zip); zip icindeki `License.txt` "Creative Commons Zero, CC0" ifadesini icerir ve build sirasinda denetlenir.
-- Kenney Casino Audio 1.1: https://kenney.nl/assets/casino-audio (zip: https://kenney.nl/media/pages/assets/casino-audio/2472606a04-1721639069/kenney_casino-audio.zip); zip icindeki `License.txt` "Creative Commons Zero, CC0" ifadesini icerir ve build sirasinda denetlenir.
-
-## Kullanilmayan adaylar
-
-- OpenGameArt "Hi-Tech Button Sound Pack (non-themed)" (https://opengameart.org/content/hi-tech-button-sound-pack-i-non-themed): sayfada CC0 yazar, ancak zip icinde lisans dosyasi yoktur; kanitlanamadigi icin KULLANILMADI.
-- OpenGameArt UI Sound Library / ui-sound-effects-library: CC-BY 3.0, KULLANILMADI.
-- Freesound: erisilemiyor, KULLANILMADI.
+Yeniden üretim: `python3 tools/sounds/build_sounds.py` (sabit seed, aynı numpy sürümüyle bire bir aynı çıktı).

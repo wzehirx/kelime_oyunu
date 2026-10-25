@@ -44,11 +44,11 @@ Başarı ölçütü: Görme engelli bir kullanıcı, ekranı görmeden ve yardı
 ## 6. Ses efektleri ve veri seti (yüksek öncelik)
 Ses, görme engelli kullanıcı için ana geri bildirim kanalıdır. Konuşma (TalkBack) ile çakışmamalı, kısa ve ayırt edilebilir olmalıdır.
 
-**Olay listesi (en az):** harf seçme (perde harfin sırasına göre değişir), harf silme, temizleme, doğru kelime, bonus kelime, tekrar, geçersiz kelime, karıştır, ipucu kullanma, jeton kazanma, bonus sayacı dolması, seviye tamamlama, menü gezinme, hata/ipucu yok.
+**Olay listesi (en az):** harf seçme (perde kelimedeki seçim sırasına göre kalından inceye yükselir: 7 ayrı dosya, A majör pentatonik), harf silme, temizleme, doğru kelime, bonus kelime, tekrar, geçersiz kelime, karıştır, ipucu kullanma, jeton kazanma, bonus sayacı dolması, seviye tamamlama, menü gezinme, hata/ipucu yok.
 
 **Kaynak stratejisi (öncelik sırasıyla):**
-1. **CC0 / serbest lisanslı** kaynaklardan derleme (Kenney, OpenGameArt vb.). Freesound bu ortamda erişilemiyor (403).
-2. Eksik olaylar için **Python ile prosedürel sentez** (numpy, wav). Telif sorunu olmaz, tutarlı bir ses ailesi çıkar.
+1. (v1.0) CC0 kaynaklardan derleme (Kenney) ve sentez karışımıydı; **v1.1'de kaldırıldı**.
+2. **Güncel:** tüm sesler Python ile **tamamen prosedürel sentez** (yalnızca numpy, modal marimba/kalimba/çan sentezi). Telif sorunu olmaz, tutarlı bir ses ailesi çıkar.
 3. İsteğe bağlı: ElevenLabs bağlantısı ile üretim (kredi harcar, onay gerekir).
 
 **Teslimat:** `assets/sounds/` altında tutarlı biçimde (mono, 44.1 kHz, normalize edilmiş, kısa), `SOUNDS.md` ile olay → dosya → kaynak → lisans tablosu. Lisansı belirsiz hiçbir ses kullanılmaz.

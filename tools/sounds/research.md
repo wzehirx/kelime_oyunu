@@ -1,3 +1,5 @@
+> **Tarihsel not:** Bu araştırma v1.0 ses setinin (Kenney örnekleri) kaynağıydı. Güncel ses seti tamamen prosedürel sentezdir (`build_sounds.py`); Kenney/OGA dosyaları artık kullanılmıyor.
+
 # Ses efekti kaynak araştırması (Kelime Oyunu)
 
 Amaç: Görme engelli kullanıcılar için birincil geri bildirim kanalı olarak kısa, net ses efektleri. Yalnızca **CC0** (veya sayfada açıkça CC0 yazan) kaynaklar kullanıldı.
