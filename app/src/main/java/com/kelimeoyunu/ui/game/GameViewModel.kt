@@ -130,7 +130,7 @@ class GameViewModel(
         if (e.isComplete() || index !in lv.letters.indices || index in selected) return@act
         selected = selected + index
         publish()
-        emit(GameEvent.LetterAdded(lv.letters[index], index))
+        emit(GameEvent.LetterAdded(lv.letters[index], index, selected.size))
     }
 
     fun onDelete() = act { _, _ ->

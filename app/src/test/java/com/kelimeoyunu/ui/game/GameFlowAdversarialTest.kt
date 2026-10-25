@@ -68,7 +68,7 @@ class GameFlowAdversarialTest {
         val announcer = Announcer({ spoken += it }, scope, batchMs = 40)
         val feedback = CompositeFeedbackSink(
             AnnouncingFeedbackSink(announcer, { vm.state.value }, { System.nanoTime() / 1_000_000 }),
-            SoundFeedbackSink(SfxPlayer { sfx, _ -> sounds += sfx }) { 3 },
+            SoundFeedbackSink(SfxPlayer { sfx, _ -> sounds += sfx }),
         )
         rule.setContent { KelimeTheme { GameScreen(vm, feedback, onExitToMenu = {}) } }
         rule.waitUntil(30_000) { exists("Harf T") }
@@ -96,7 +96,7 @@ class GameFlowAdversarialTest {
         rule.onNodeWithContentDescription("Sonraki seviye").assertIsFocused()
         // Ses: harfler, doğru, doğru + jeton + seviye bitti
         assertEquals(
-            listOf(Sfx.LETTER, Sfx.LETTER, Sfx.LETTER, Sfx.CORRECT, Sfx.LETTER, Sfx.LETTER, Sfx.LETTER, Sfx.CORRECT, Sfx.COIN, Sfx.LEVEL_COMPLETE),
+            listOf(Sfx.LETTER_1, Sfx.LETTER_2, Sfx.LETTER_3, Sfx.CORRECT, Sfx.LETTER_1, Sfx.LETTER_2, Sfx.LETTER_3, Sfx.CORRECT, Sfx.COIN, Sfx.LEVEL_COMPLETE),
             sounds.toList(),
         )
     }
@@ -130,7 +130,7 @@ class GameFlowAdversarialTest {
         assertTrue("sadece T/E/N okunabilir: $tokens", tokens.all { it in setOf("T", "E", "N") })
         assertEquals("N", tokens.last())
         assertTrue("üçten fazla harf duyurusu: $tokens", tokens.size <= 3)
-        assertEquals(listOf(Sfx.LETTER, Sfx.LETTER, Sfx.LETTER), sounds.toList())
+        assertEquals(listOf(Sfx.LETTER_1, Sfx.LETTER_2, Sfx.LETTER_3), sounds.toList())
     }
 
     @Test fun doubleSubmitAfterCorrectDoesNotPlayErrorBuzzWhileSpeechIsSuppressed() {
@@ -158,6 +158,6 @@ class GameFlowAdversarialTest {
         repeat(5) { tap("Harf T, seçildi") }
         rule.onNodeWithContentDescription("Oluşturulan kelime: T").assertExists()
         Thread.sleep(200)
-        assertEquals(1, sounds.count { it == Sfx.LETTER })
+        assertEquals(1, sounds.count { it == Sfx.LETTER_1 })
     }
 }

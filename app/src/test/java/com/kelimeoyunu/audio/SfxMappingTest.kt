@@ -8,7 +8,8 @@ import org.junit.Test
 
 class SfxMappingTest {
     private val cases: List<Pair<GameEvent, List<Sfx>>> = listOf(
-        GameEvent.LetterAdded('A', 0) to listOf(Sfx.LETTER),
+        GameEvent.LetterAdded('A', 0, 1) to listOf(Sfx.LETTER_1),
+        GameEvent.LetterAdded('A', 5, 4) to listOf(Sfx.LETTER_4),
         GameEvent.Deleted to listOf(Sfx.DELETE),
         GameEvent.Cleared to listOf(Sfx.CLEAR),
         GameEvent.Submitted(SubmitResult.Correct("ev")) to listOf(Sfx.CORRECT),
@@ -40,23 +41,21 @@ class SfxMappingTest {
 
     @Test fun fileNameIsLowercaseNamePlusWav() {
         assertEquals("bonus_full.wav", Sfx.BONUS_FULL.fileName)
-        assertEquals("letter.wav", Sfx.LETTER.fileName)
-        assertEquals(14, Sfx.entries.size)
+        assertEquals("letter_1.wav", Sfx.LETTER_1.fileName)
+        assertEquals("letter_7.wav", Sfx.LETTER_7.fileName)
+        assertEquals(20, Sfx.entries.size)
     }
 
-    @Test fun letterRateIsMonotonicWithinRange() {
-        for (count in 2..12) {
-            val rates = (0 until count).map { letterPlaybackRate(it, count) }
-            assertEquals(0.8f, rates.first(), 1e-6f)
-            assertEquals(1.6f, rates.last(), 1e-6f)
-            rates.zipWithNext().forEach { (a, b) -> assertTrue("$count $rates", b > a) }
-        }
-    }
-
-    @Test fun letterRateDegenerateInputsStayInRange() {
-        for ((i, n) in listOf(0 to 0, 0 to 1, -3 to 7, 99 to 7, 5 to -2)) {
-            val r = letterPlaybackRate(i, n)
-            assertTrue("$i/$n -> $r", r in 0.8f..1.6f)
-        }
+    @Test fun letterSfxFollowsPositionAndClamps() {
+        assertEquals(Sfx.LETTER_1, letterSfx(1))
+        assertEquals(Sfx.LETTER_3, letterSfx(3))
+        assertEquals(Sfx.LETTER_7, letterSfx(7))
+        assertEquals(Sfx.LETTER_7, letterSfx(8))
+        assertEquals(Sfx.LETTER_1, letterSfx(0))
+        assertEquals(Sfx.LETTER_1, letterSfx(-5))
+        assertEquals(Sfx.LETTER_7, letterSfx(Int.MAX_VALUE))
+        val all = (1..7).map(::letterSfx)
+        assertEquals(7, all.toSet().size)
+        assertEquals((1..7).map { "letter_$it.wav" }, all.map { it.fileName })
     }
 }

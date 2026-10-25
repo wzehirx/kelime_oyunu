@@ -115,12 +115,8 @@ private fun GameRoute(container: AppContainer, announcer: Announcer, onExit: () 
     val feedback = remember(viewModel, announcer) {
         CompositeFeedbackSink(
             AnnouncingFeedbackSink(announcer, { viewModel.state.value }, { SystemClock.elapsedRealtime() }),
-            SoundFeedbackSink(container.soundManager) {
-                (viewModel.state.value as? GameUiState.Ready)?.tiles?.size ?: DEFAULT_TILE_COUNT
-            },
+            SoundFeedbackSink(container.soundManager),
         )
     }
     GameScreen(viewModel, feedback, onExit, modifier)
 }
-
-private const val DEFAULT_TILE_COUNT = 7

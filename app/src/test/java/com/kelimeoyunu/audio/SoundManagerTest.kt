@@ -26,10 +26,10 @@ class SoundManagerTest {
 
     @Test fun playBeforeLoadCompletesIsIgnoredWithoutCrash() {
         val b = FakeSoundBackend(autoComplete = false); val m = manager(b)
-        m.play(Sfx.LETTER)          // start() yok
-        m.start(); m.play(Sfx.LETTER) // yükleme bitmedi
+        m.play(Sfx.LETTER_1)          // start() yok
+        m.start(); m.play(Sfx.LETTER_1) // yükleme bitmedi
         assertTrue(b.played.isEmpty())
-        b.completeLoads(); m.play(Sfx.LETTER)
+        b.completeLoads(); m.play(Sfx.LETTER_1)
         assertEquals(1, b.played.size)
     }
 

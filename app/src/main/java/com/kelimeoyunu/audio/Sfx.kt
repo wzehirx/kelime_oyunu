@@ -4,7 +4,8 @@ import com.kelimeoyunu.domain.SubmitResult
 import com.kelimeoyunu.ui.game.GameEvent
 
 enum class Sfx {
-    LETTER, DELETE, CLEAR, CORRECT, BONUS, DUPLICATE, INVALID, SHUFFLE, HINT, COIN,
+    LETTER_1, LETTER_2, LETTER_3, LETTER_4, LETTER_5, LETTER_6, LETTER_7,
+    DELETE, CLEAR, CORRECT, BONUS, DUPLICATE, INVALID, SHUFFLE, HINT, COIN,
     BONUS_FULL, LEVEL_COMPLETE, NAV, ERROR;
 
     /** assets/sounds altındaki dosya adı. */
@@ -14,7 +15,7 @@ enum class Sfx {
 /** Olay -> çalınacak sesler (sırayla). Sealed `when` ile yeni olay eklenirse derleme hatası verir. */
 fun sfxFor(event: GameEvent): List<Sfx> = listOf(
     when (event) {
-        is GameEvent.LetterAdded -> Sfx.LETTER
+        is GameEvent.LetterAdded -> letterSfx(event.position)
         GameEvent.Deleted -> Sfx.DELETE
         GameEvent.Cleared -> Sfx.CLEAR
         is GameEvent.Submitted -> when (event.result) {
@@ -33,12 +34,16 @@ fun sfxFor(event: GameEvent): List<Sfx> = listOf(
     },
 )
 
-const val MIN_LETTER_RATE = 0.8f
-const val MAX_LETTER_RATE = 1.6f
-
-/** Harf havuzundaki konuma göre perde: soldan sağa 0.8..1.6, monoton artan. Geçersiz girdi uca kenetlenir. */
-fun letterPlaybackRate(tileIndex: Int, tileCount: Int): Float {
-    if (tileCount <= 1) return 1f
-    val t = tileIndex.coerceIn(0, tileCount - 1).toFloat() / (tileCount - 1)
-    return MIN_LETTER_RATE + (MAX_LETTER_RATE - MIN_LETTER_RATE) * t
+/**
+ * Kelimedeki sıraya göre harf sesi: [position] 1 tabanlı (currentWord uzunluğu). 1 en kalın,
+ * 7 en ince nota; 1'den küçük LETTER_1'e, 7'den büyük LETTER_7'ye kenetlenir.
+ */
+fun letterSfx(position: Int): Sfx = when {
+    position <= 1 -> Sfx.LETTER_1
+    position == 2 -> Sfx.LETTER_2
+    position == 3 -> Sfx.LETTER_3
+    position == 4 -> Sfx.LETTER_4
+    position == 5 -> Sfx.LETTER_5
+    position == 6 -> Sfx.LETTER_6
+    else -> Sfx.LETTER_7
 }

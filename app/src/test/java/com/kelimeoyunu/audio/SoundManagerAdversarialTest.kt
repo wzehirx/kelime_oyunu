@@ -33,10 +33,10 @@ class SoundManagerAdversarialTest {
         m.enabled = true
         m.start(); m.release(); m.start()
         b1.completeLoads() // eski nesil: yeni backend'i "yüklendi" saymamalı
-        m.play(Sfx.LETTER)
+        m.play(Sfx.LETTER_1)
         assertEquals(0, b1.plays.get()); assertEquals(0, b2.plays.get())
         b2.completeLoads()
-        m.play(Sfx.LETTER)
+        m.play(Sfx.LETTER_1)
         assertEquals(1, b2.plays.get())
     }
 
@@ -54,8 +54,8 @@ class SoundManagerAdversarialTest {
         val b = SafeBackend()
         val m = SoundManager { b }
         m.start(); m.enabled = true
-        m.play(Sfx.LETTER); m.enabled = false; m.play(Sfx.LETTER); m.play(Sfx.CORRECT)
-        m.enabled = true; m.play(Sfx.LETTER)
+        m.play(Sfx.LETTER_1); m.enabled = false; m.play(Sfx.LETTER_1); m.play(Sfx.CORRECT)
+        m.enabled = true; m.play(Sfx.LETTER_1)
         assertEquals(2, b.plays.get())
     }
 
@@ -63,7 +63,7 @@ class SoundManagerAdversarialTest {
         val b = SafeBackend()
         val m = SoundManager { b }
         m.start()
-        m.play(Sfx.LETTER)
+        m.play(Sfx.LETTER_1)
         assertEquals(0, b.plays.get())
     }
 
@@ -72,9 +72,9 @@ class SoundManagerAdversarialTest {
         val good = SafeBackend()
         val m = SoundManager { if (calls++ == 0) error("SoundPool oluşturulamadı") else good }
         m.enabled = true
-        m.start(); m.play(Sfx.LETTER)
+        m.start(); m.play(Sfx.LETTER_1)
         assertEquals(0, good.plays.get())
-        m.start(); m.play(Sfx.LETTER)  // ikinci start yeniden denemeli
+        m.start(); m.play(Sfx.LETTER_1)  // ikinci start yeniden denemeli
         assertEquals(1, good.plays.get())
     }
 
@@ -88,8 +88,8 @@ class SoundManagerAdversarialTest {
         val q = ArrayDeque(listOf<SoundBackend>(bad, good))
         val m = SoundManager { q.removeFirst() }
         m.enabled = true
-        m.start(); m.play(Sfx.LETTER, 1.2f); m.release()
-        m.start(); m.play(Sfx.LETTER)
+        m.start(); m.play(Sfx.LETTER_1, 1.2f); m.release()
+        m.start(); m.play(Sfx.LETTER_1)
         assertEquals(1, good.plays.get())
     }
 

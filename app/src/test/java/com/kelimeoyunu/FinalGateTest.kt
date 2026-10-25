@@ -275,7 +275,7 @@ class FinalGateTest {
                     vm,
                     CompositeFeedbackSink(
                         AnnouncingFeedbackSink(announcer, { vm.state.value }, { System.nanoTime() / 1_000_000 }),
-                        SoundFeedbackSink(sound) { 3 },
+                        SoundFeedbackSink(sound),
                     ),
                     onExitToMenu = {},
                 )

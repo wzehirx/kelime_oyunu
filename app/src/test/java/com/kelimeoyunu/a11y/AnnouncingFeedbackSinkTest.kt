@@ -100,7 +100,7 @@ class AnnouncingFeedbackSinkTest {
 
     @Test fun rapidLettersThenResultKeepResult() = runTest {
         val s = sink()
-        "kalem".forEachIndexed { i, c -> s.onEvent(GameEvent.LetterAdded(c, i)); advanceTimeBy(10) }
+        "kalem".forEachIndexed { i, c -> s.onEvent(GameEvent.LetterAdded(c, i, i + 1)); advanceTimeBy(10) }
         s.onEvent(GameEvent.Submitted(SubmitResult.Correct("kalem")))
         flush()
         assertEquals(listOf("M. Doğru, KALEM"), spoken)

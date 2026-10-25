@@ -26,7 +26,7 @@ sealed interface GameUiState {
 }
 
 sealed interface GameEvent {
-    data class LetterAdded(val char: Char, val index: Int) : GameEvent
+    data class LetterAdded(val char: Char, val index: Int, val position: Int) : GameEvent
     data object Deleted : GameEvent
     data object Cleared : GameEvent
     data class Submitted(val result: SubmitResult) : GameEvent

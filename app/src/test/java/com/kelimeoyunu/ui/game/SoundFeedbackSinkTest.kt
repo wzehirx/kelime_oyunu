@@ -3,7 +3,6 @@ package com.kelimeoyunu.ui.game
 import com.kelimeoyunu.audio.FakeSoundBackend
 import com.kelimeoyunu.audio.Sfx
 import com.kelimeoyunu.audio.SoundManager
-import com.kelimeoyunu.audio.letterPlaybackRate
 import com.kelimeoyunu.domain.SubmitResult
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -12,11 +11,14 @@ import org.junit.Test
 class SoundFeedbackSinkTest {
     private val backend = FakeSoundBackend()
     private val manager = SoundManager({ backend }).also { it.start(); it.enabled = true }
-    private fun sink(tiles: Int = 6) = SoundFeedbackSink(manager) { tiles }
+    private fun sink() = SoundFeedbackSink(manager)
 
-    @Test fun letterUsesTileIndexPitch() {
-        sink(6).onEvent(GameEvent.LetterAdded('K', 3))
-        assertEquals(listOf(Sfx.LETTER to letterPlaybackRate(3, 6)), backend.played)
+    @Test fun letterSoundDependsOnPositionNotTileIndex() {
+        val s = sink()
+        s.onEvent(GameEvent.LetterAdded('K', 5, 1))
+        s.onEvent(GameEvent.LetterAdded('K', 0, 3))
+        s.onEvent(GameEvent.LetterAdded('K', 2, 9))
+        assertEquals(listOf(Sfx.LETTER_1 to 1f, Sfx.LETTER_3 to 1f, Sfx.LETTER_7 to 1f), backend.played)
     }
 
     @Test fun correctThenCoinsPlayInOrder() {
@@ -31,7 +33,7 @@ class SoundFeedbackSinkTest {
         manager.enabled = false
         val s = sink()
         listOf(
-            GameEvent.LetterAdded('A', 0), GameEvent.Deleted, GameEvent.LevelCompleted,
+            GameEvent.LetterAdded('A', 0, 1), GameEvent.Deleted, GameEvent.LevelCompleted,
             GameEvent.CoinsEarned(2), GameEvent.NotEnoughCoins,
         ).forEach(s::onEvent)
         assertTrue(backend.played.isEmpty())

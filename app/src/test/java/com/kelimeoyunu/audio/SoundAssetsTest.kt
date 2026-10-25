@@ -10,6 +10,11 @@ import org.junit.Test
 class SoundAssetsTest {
     private val dir = listOf("src/main/assets/sounds", "app/src/main/assets/sounds").map(::File).first { it.isDirectory }
 
+    @Test fun exactlyTwentyWavsMatchSfx() {
+        assertEquals(20, Sfx.entries.size)
+        assertEquals(Sfx.entries.map { it.fileName }.toSet(), dir.listFiles { f -> f.extension == "wav" }!!.map { it.name }.toSet())
+    }
+
     @Test fun everySfxHasValidMono44kWav() {
         for (sfx in Sfx.entries) {
             val f = File(dir, sfx.fileName)
@@ -21,6 +26,7 @@ class SoundAssetsTest {
             assertEquals("$sfx PCM", 1, b.getShort(20).toInt())
             assertEquals("$sfx mono", 1, b.getShort(22).toInt())
             assertEquals("$sfx rate", 44100, b.getInt(24))
+            assertEquals("$sfx 16-bit", 16, b.getShort(34).toInt())
         }
     }
 }

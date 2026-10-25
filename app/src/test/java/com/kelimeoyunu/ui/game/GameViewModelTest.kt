@@ -140,7 +140,7 @@ class GameViewModelTest {
         v.onLetter(0)
         assertEquals("nt", v.ready().currentWord)
         assertEquals(listOf(true, false, true), v.ready().tiles.map { it.used })
-        assertEquals(listOf(GameEvent.LetterAdded('n', 2), GameEvent.LetterAdded('t', 0)), ev)
+        assertEquals(listOf(GameEvent.LetterAdded('n', 2, 1), GameEvent.LetterAdded('t', 0, 2)), ev)
         v.onLetter(-1)
         v.onLetter(99)
         assertEquals("nt", v.ready().currentWord)
@@ -161,6 +161,21 @@ class GameViewModelTest {
         assertTrue(v.ready().tiles.none { it.used })
         assertTrue(GameEvent.Deleted in ev && GameEvent.Cleared in ev)
         v.onClear() // boşken çökmez
+    }
+
+    @Test
+    fun letterPositionFollowsCurrentWordLength() = test {
+        val v = vm(repo())
+        val ev = events(v)
+        fun positions() = ev.filterIsInstance<GameEvent.LetterAdded>().map { it.position }
+        v.onLetter(0); v.onLetter(1); v.onLetter(2)
+        assertEquals(listOf(1, 2, 3), positions())
+        v.onDelete()                       // "te"
+        v.onLetter(2)                      // silmeden sonra sıra = currentWord uzunluğu = 3
+        assertEquals(listOf(1, 2, 3, 3), positions())
+        v.onClear()
+        v.onLetter(1)
+        assertEquals(listOf(1, 2, 3, 3, 1), positions())
     }
 
     @Test
@@ -219,7 +234,7 @@ class GameViewModelTest {
         v.onSubmit()
         assertEquals(
             listOf<GameEvent>(
-                GameEvent.LetterAdded('t', 0), GameEvent.LetterAdded('e', 1), GameEvent.LetterAdded('n', 2),
+                GameEvent.LetterAdded('t', 0, 1), GameEvent.LetterAdded('e', 1, 2), GameEvent.LetterAdded('n', 2, 3),
                 GameEvent.Submitted(SubmitResult.Correct("ten")),
                 GameEvent.Submitted(SubmitResult.Empty),
             ),
