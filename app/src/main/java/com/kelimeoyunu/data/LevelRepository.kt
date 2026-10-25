@@ -20,8 +20,10 @@ class LevelRepository(private val open: () -> InputStream) {
     private fun load(): List<Level> {
         val result = ArrayList<Level>()
         try {
-            GZIPInputStream(open()).bufferedReader(Charsets.UTF_8).useLines { lines ->
-                for (line in lines) LevelParser.parse(line)?.let { result += it }
+            open().use { raw ->
+                GZIPInputStream(raw).bufferedReader(Charsets.UTF_8).useLines { lines ->
+                    for (line in lines) LevelParser.parse(line)?.let { result += it }
+                }
             }
         } catch (_: IOException) {
             // Eksik/bozuk asset: o ana kadar okunanlarla devam.

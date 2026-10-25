@@ -12,7 +12,7 @@ class WordDictionary(private val words: Set<String>) {
     companion object {
         fun fromLines(lines: Sequence<String>): WordDictionary =
             WordDictionary(
-                lines.map { TurkishText.lower(it.trim()) }.filter { it.isNotEmpty() }.toHashSet()
+                lines.map { TurkishText.lower(it.trim { c -> c.isWhitespace() || c == '\uFEFF' }) }.filter { it.isNotEmpty() }.toHashSet()
             )
     }
 }
