@@ -10,6 +10,8 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.kelimeoyunu.audio.SoundManager
+import com.kelimeoyunu.audio.SoundPoolBackend
 import com.kelimeoyunu.data.LevelRepository
 import com.kelimeoyunu.data.ProgressRepository
 import com.kelimeoyunu.data.SettingsRepository
@@ -49,6 +51,7 @@ class AppContainer(
 
     val progressRepository = ProgressRepository(dataStore)
     val settingsRepository: SettingsRepository by lazy { SettingsRepository(settingsDataStore) }
+    val soundManager = SoundManager { SoundPoolBackend(app) }
     val levelRepository = LevelRepository { openLevelsGzip(app.assets) }
 
     fun gameViewModelFactory(): ViewModelProvider.Factory = object : ViewModelProvider.Factory {

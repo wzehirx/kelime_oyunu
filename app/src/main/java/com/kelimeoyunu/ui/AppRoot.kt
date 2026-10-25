@@ -4,6 +4,7 @@ import android.os.SystemClock
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,8 +21,11 @@ import com.kelimeoyunu.a11y.AnnouncingFeedbackSink
 import com.kelimeoyunu.a11y.Announcements
 import com.kelimeoyunu.a11y.Announcer
 import com.kelimeoyunu.data.Progress
+import com.kelimeoyunu.ui.game.CompositeFeedbackSink
 import com.kelimeoyunu.ui.game.GameScreen
+import com.kelimeoyunu.ui.game.GameUiState
 import com.kelimeoyunu.ui.game.GameViewModel
+import com.kelimeoyunu.ui.game.SoundFeedbackSink
 import com.kelimeoyunu.ui.menu.HowToPlayScreen
 import com.kelimeoyunu.ui.menu.MainMenuScreen
 import com.kelimeoyunu.ui.settings.SettingsScreen
@@ -81,8 +85,19 @@ private fun GameRoute(container: AppContainer, announcer: Announcer, onExit: () 
         ViewModelProvider(store, container.gameViewModelFactory())[GameViewModel::class.java]
     }
     DisposableEffect(store) { onDispose { store.clear() } }
+    // Ses ayarı akışı; ilk değer gelene kadar SoundManager.enabled = false (sessiz).
+    LaunchedEffect(container) {
+        container.settingsRepository.soundEnabled.collect { container.soundManager.enabled = it }
+    }
     val feedback = remember(viewModel, announcer) {
-        AnnouncingFeedbackSink(announcer, { viewModel.state.value }, { SystemClock.elapsedRealtime() })
+        CompositeFeedbackSink(
+            AnnouncingFeedbackSink(announcer, { viewModel.state.value }, { SystemClock.elapsedRealtime() }),
+            SoundFeedbackSink(container.soundManager) {
+                (viewModel.state.value as? GameUiState.Ready)?.tiles?.size ?: DEFAULT_TILE_COUNT
+            },
+        )
     }
     GameScreen(viewModel, feedback, onExit, modifier)
 }
+
+private const val DEFAULT_TILE_COUNT = 7
