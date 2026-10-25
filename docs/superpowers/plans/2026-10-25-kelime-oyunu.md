@@ -69,7 +69,7 @@ Sürüm kapıları: v0.1 (Task 0–2), v0.2 (3–4), v0.3 (5–6), v0.4 (7), v0.
 **Files:** `tools/levels/generate_levels.py`, `validate_levels.py`, `test_generate_levels.py`, `app/src/main/assets/levels.txt.gz`; `app/src/main/java/com/kelimeoyunu/data/LevelRepository.kt`; test `LevelRepositoryTest.kt`.
 **Interfaces:** Format: satır başına bir seviye, `id|HARFLER|kelime,satır,sütun,y/d;kelime,satır,sütun,y/d;...` (`y`=yatay, `d`=dikey), gzip. Produces: `generate(words, count, seed) -> list[Level]`, `validate(level, words) -> list[str]` (hata listesi, boş = geçerli). Kotlin: `class LevelRepository(open: () -> InputStream) { val count: Int; fun get(index: Int): Level? }`.
 - [ ] Test: üretilen her seviyede tüm kelimeler `canSpell` ile havuzdan yazılabilir, yerleşimde kesişen kutular aynı harfi taşır, hiçbir iki kelime çakışıp bitişik kutuları yanlış harfe zorlamaz, seviye başına 3–7 harf, en az 2 kelime.
-- [ ] Zorluk eğrisi: seviye 1–50 → 3–4 harf, 2–4 kelime; ilerledikçe 7 harfe ve 12 kelimeye kadar artar. `seed` ile yeniden üretilebilir.
+- [ ] Zorluk eğrisi (v1.2'de güncellendi): harf sayısı seviye numarasıyla hiç düşmez (önce 3, sonra 4, 5, 6, 7 harfliler), kelime sayısı da küresel olarak düşmez (2'den 16'ya). `seed` ile yeniden üretilebilir.
 - [ ] 10.000 seviye üret, `validate` ile hepsi geçmeli, benzersiz (harf kümesi + kelime kümesi) olmalı, `levels.txt.gz` boyutu < 6 MB.
 - [ ] Kotlin: `LevelRepository.get(10000)` → `null` (aralık dışı), bozuk satır atlanır ve sayılmaz. Testle. Commit. **v0.2 etiketi + debug APK**.
 

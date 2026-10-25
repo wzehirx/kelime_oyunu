@@ -3,10 +3,17 @@
 Format (levels.txt.gz, gzip + UTF-8, satır başına bir seviye):
     id|harfler|kelime,satır,sütun,y;kelime,satır,sütun,d;...
 y = yatay (soldan sağa), d = dikey (yukarıdan aşağı); satır/sütun 0 tabanlı.
+
+Zorluk sırası (v1.2): seviye numarası arttıkça harf sayısı ASLA düşmez (önce
+tüm 3 harfliler, sonra 4, 5, 6, 7) ve kelime sayısı da küresel olarak düşmez.
+Üretim: her harf grubu için geniş bir aday havuzu kurulur; gruplar sırayla
+seçilir, her grup bir önceki grubun son kelime sayısının altındaki adayları
+eler ("floor" yöntemi) ve grup içinde kelime sayısına göre sıralanır.
 """
 import argparse
 import gzip
 import itertools
+import multiprocessing
 import os
 import random
 import sys
@@ -24,13 +31,18 @@ MIN_WORD = 3
 Placement = namedtuple("Placement", "word row col dir")
 Level = namedtuple("Level", "id letters words")  # words: tuple[Placement]
 
-# (ilk id, son id, (min harf, max harf), (min kelime, max kelime))
-CURVE = [
-    (1, 100, (3, 4), (2, 4)),
-    (101, 1000, (4, 5), (3, 6)),
-    (1001, 4000, (5, 6), (4, 9)),
-    (4001, 10000, (6, 7), (5, 12)),
-]
+# harf sayısı -> (havuz için en düşük kelime hedefi, en çok kelime)
+GROUPS = {
+    3: (2, 4),
+    4: (3, 6),
+    5: (6, 10),
+    6: (10, 13),
+    7: (13, 16),
+}
+# Grupların seviye payı. 3 harfli grup: mümkün olan tüm benzersiz seviyeler.
+# 7 harfli grup kalan seviyeleri alır.
+SHARES = {4: 0.045, 5: 0.16, 6: 0.38}
+BUILDS_PER_CLASS = 6
 
 # Kısa ve yaygın görünen kelimeler için ağırlık (uzunluk -> ağırlık).
 LENGTH_WEIGHT = {3: 1.0, 4: 3.0, 5: 3.0, 6: 2.0, 7: 0.7}
@@ -68,19 +80,6 @@ def read_levels(path):
     with gzip.open(path, "rb") as f:
         text = f.read().decode("utf-8")
     return [parse_level(l) for l in text.split("\n") if l.strip()]
-
-
-# ---------------------------------------------------------------- curve
-def level_spec(level_id, rng):
-    """(min_harf, max_harf, harf_sayısı, min_kelime, max_kelime, hedef_kelime)"""
-    for a, b, (l_lo, l_hi), (w_lo, w_hi) in CURVE:
-        if level_id <= b:
-            break
-    t = min(1.0, max(0.0, (level_id - a) / float(max(1, b - a))))
-    letters = l_hi if rng.random() < t else l_lo
-    target = round(w_lo + t * (w_hi - w_lo) + rng.uniform(-1.0, 1.0))
-    target = max(w_lo, min(w_hi, target))
-    return l_lo, l_hi, letters, w_lo, w_hi, target
 
 
 # ---------------------------------------------------------------- index
@@ -222,72 +221,203 @@ def shuffle_letters(base, rng):
 
 
 # ---------------------------------------------------------------- generate
-def generate(words, count, seed, log=None):
+Candidate = namedtuple("Candidate", "klass letters words placements score")
+
+
+def _score(placements):
+    """Kısa/yaygın kelimeli seviyeler daha yüksek puan alır."""
+    return sum(LENGTH_WEIGHT.get(len(p.word), 1.0) for p in placements) / len(placements)
+
+
+def _build_class(args):
+    """Bir anagram sınıfı (aynı harf çoklu kümesi) için birkaç aday kurar."""
+    seed, key, bases, index = args
+    L = len(key)
+    lo, hi = GROUPS[L]
+    rng = random.Random("%d:%s" % (seed, key))
+    out = []
+    seen = set()
+    for _ in range(BUILDS_PER_CLASS):
+        base = bases[rng.randrange(len(bases))]
+        cands = spellable(base, index)
+        if len(cands) < 2:
+            return out
+        target = rng.randint(lo, hi)
+        grid = build_grid(base, cands, target, rng)
+        placements = grid.normalized()
+        if len(placements) < 2:
+            continue
+        ws = frozenset(p.word for p in placements)
+        if ws in seen:
+            continue
+        seen.add(ws)
+        out.append(Candidate(key, base, ws, placements, _score(placements)))
+    return out
+
+
+def build_pool(words, seed, log=None, processes=None):
+    """{harf sayısı: [Candidate]} — havuz, seed ile bire bir yeniden üretilebilir."""
+    index = build_index(words)
+    jobs = []
+    for key in sorted(index):
+        if len(key) in GROUPS:
+            jobs.append((seed, key, index[key], index))
+    if processes is None:
+        processes = min(4, os.cpu_count() or 1) if len(jobs) > 1500 else 1
+    if processes > 1:
+        # index büyük: fork ile paylaş, işe yalnızca küçük anahtar gönder
+        global _SHARED
+        _SHARED = (index,)
+        with multiprocessing.get_context("fork").Pool(processes) as pool:
+            results = pool.map(_build_shared, [(j[0], j[1], j[2]) for j in jobs], chunksize=64)
+    else:
+        results = [_build_class(j) for j in jobs]
+    pool = {L: [] for L in GROUPS}
+    for cands in results:
+        for c in cands:
+            pool[len(c.klass)].append(c)
+    if log:
+        log("aday havuzu: " + ", ".join("%d harf: %d" % (L, len(v)) for L, v in sorted(pool.items())))
+    return pool
+
+
+_SHARED = None
+
+
+def _build_shared(args):
+    seed, key, bases = args
+    return _build_class((seed, key, bases, _SHARED[0]))
+
+
+def _select_group(cands, quota, floor, cap, taken, rng):
+    """Kelime sayısı [floor, cap] aralığındaki adaylardan, sayılara eşit
+    yayılmış (water-filling) en iyi `quota` adayı seçer. Önce sınıf başına bir
+    seviye; yetmezse aynı harf kümesinden farklı kelime kümeli seviyeler."""
+    buckets = {}
+    for c in cands:
+        n = len(c.words)
+        if floor <= n <= cap and (c.klass, c.words) not in taken:
+            buckets.setdefault(n, []).append(c)
+    for n in buckets:
+        buckets[n].sort(key=lambda c: (-c.score, c.klass, sorted(c.words)))
+    chosen = []
+    used_class = set()
+    for reuse in (False, True):
+        pos = {n: 0 for n in buckets}
+        while len(chosen) < quota:
+            active = []
+            for n in sorted(buckets):
+                lst = buckets[n]
+                while pos[n] < len(lst) and (
+                    (not reuse and lst[pos[n]].klass in used_class)
+                    or (lst[pos[n]].klass, lst[pos[n]].words) in taken
+                ):
+                    pos[n] += 1
+                if pos[n] < len(lst):
+                    active.append(n)
+            if not active:
+                break
+            share = max(1, (quota - len(chosen)) // len(active))
+            progressed = False
+            for n in active:
+                for _ in range(share):
+                    lst = buckets[n]
+                    while pos[n] < len(lst) and (
+                        (not reuse and lst[pos[n]].klass in used_class)
+                        or (lst[pos[n]].klass, lst[pos[n]].words) in taken
+                    ):
+                        pos[n] += 1
+                    if pos[n] >= len(lst) or len(chosen) >= quota:
+                        break
+                    c = lst[pos[n]]
+                    pos[n] += 1
+                    chosen.append(c)
+                    used_class.add(c.klass)
+                    taken.add((c.klass, c.words))
+                    progressed = True
+            if not progressed:
+                break
+        if len(chosen) >= quota:
+            break
+    return chosen
+
+
+def generate(words, count, seed, log=None, processes=None):
     from validate_levels import validate
 
-    rng = random.Random(seed)
     words = sorted(set(w for w in words if w))
     words_set = set(words)
-    index = build_index(words)
-    bases_by_len = {}
-    for key in sorted(index):
-        for w in index[key]:
-            bases_by_len.setdefault(len(w), []).append(w)
+    pool = build_pool(words, seed, log=log, processes=processes)
+    rng = random.Random(seed)
 
-    levels = []
-    seen_keys = set()
-    used_bases = set()
+    quotas = {L: int(round(SHARES[L] * count)) for L in SHARES}
+    chosen = []
+    taken = set()
+    floor = 0
+    carry = 0
+    stats = {}
+    for L in sorted(GROUPS):
+        _, cap = GROUPS[L]
+        if L == 3:
+            quota = count  # tümü; aşağıda sınıf başına bir seviye ile sınırlı
+        elif L == 7:
+            quota = count - len(chosen)
+        else:
+            quota = quotas[L] + carry
+        quota = min(quota, count - len(chosen))
+        if L == 3:
+            picked = _select_group_one_per_class(pool[3], taken)
+        else:
+            picked = _select_group(pool[L], quota, floor, cap, taken, rng)
+        carry = max(0, quota - len(picked)) if L != 3 else 0
+        if picked:
+            floor = max(len(c.words) for c in picked)
+        stats[L] = len(picked)
+        chosen.extend(picked)
     relaxed = 0
-    for lid in range(1, count + 1):
-        l_lo, l_hi, n_letters, w_lo, w_hi, target = level_spec(lid, rng)
-        built = None
-        attempts = 0
-        while built is None:
-            attempts += 1
-            lo_w, lo_l, hi_l, tgt = w_lo, l_lo, l_hi, target
-            L = n_letters
-            if attempts > 60:  # eğriyi gevşet
-                lo_w, lo_l, hi_l = 2, 3, 7
-                L = rng.randint(lo_l, hi_l)
-                tgt = max(2, min(tgt, 4))
-                if attempts > 400:
-                    raise RuntimeError("seviye %d üretilemedi" % lid)
-            elif attempts > 20:
-                L = rng.randint(l_lo, l_hi)
-            pool_bases = bases_by_len.get(L)
-            if not pool_bases:
-                continue
-            base = pool_bases[rng.randrange(len(pool_bases))]
-            if base in used_bases:
-                continue
-            cands = spellable(base, index)
-            if len(cands) < lo_w:
-                continue
-            grid = build_grid(base, cands, tgt, rng)
-            if len(grid.placed) < lo_w:
-                continue
-            placements = grid.normalized()
-            letters = shuffle_letters(base, rng)
-            key = ("".join(sorted(letters)), frozenset(p.word for p in placements))
-            if key in seen_keys:
-                continue
-            level = Level(lid, letters, placements)
-            errs = validate(level, words_set)
-            if errs:
-                raise RuntimeError("üretici hatalı seviye üretti %d: %s" % (lid, errs))
-            built = (level, key, base)
-            if attempts > 60:
-                relaxed += 1
-        level, key, base = built
+    if len(chosen) < count:
+        # Küçük/zayıf sözlük: kalan adayları kelime monotonluğunu gevşeterek ekle.
+        rest = []
+        for L in sorted(GROUPS):
+            rest.extend(c for c in pool[L] if (c.klass, c.words) not in taken)
+        rest.sort(key=lambda c: (len(c.klass), -c.score, c.klass, sorted(c.words)))
+        for c in rest:
+            if len(chosen) >= count:
+                break
+            chosen.append(c)
+            taken.add((c.klass, c.words))
+            relaxed += 1
+    if len(chosen) < count:
+        raise RuntimeError("yeterli benzersiz seviye yok: %d/%d" % (len(chosen), count))
+    # Harf sayısı sert garanti: (harf, kelime) sözlüksel sıra; eşitlikte seçim sırası.
+    order = sorted(range(len(chosen)), key=lambda i: (len(chosen[i].klass), len(chosen[i].words), i))
+    levels = []
+    for lid, i in enumerate(order, 1):
+        c = chosen[i]
+        letters = shuffle_letters(c.letters, rng)
+        level = Level(lid, letters, c.placements)
+        errs = validate(level, words_set)
+        if errs:
+            raise RuntimeError("üretici hatalı seviye üretti %d: %s" % (lid, errs))
         levels.append(level)
-        seen_keys.add(key)
-        used_bases.add(base)
-        if log and lid % 1000 == 0:
-            log("  %d/%d seviye" % (lid, count))
     if log:
-        log("eğri gevşetilen seviye sayısı: %d" % relaxed)
+        log("grup başına seçilen: " + ", ".join("%d harf: %d" % (L, n) for L, n in sorted(stats.items())))
+        log("gevşetilerek eklenen seviye sayısı: %d" % relaxed)
     generate.last_relaxed = relaxed
     return levels
+
+
+def _select_group_one_per_class(cands, taken):
+    """3 harfli grup: sınıf başına en kalabalık (sonra en iyi) tek seviye."""
+    best = {}
+    for c in cands:
+        cur = best.get(c.klass)
+        if cur is None or (len(c.words), c.score) > (len(cur.words), cur.score):
+            best[c.klass] = c
+    out = [best[k] for k in sorted(best)]
+    for c in out:
+        taken.add((c.klass, c.words))
+    return out
 
 
 def load_words(path):

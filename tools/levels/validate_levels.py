@@ -105,6 +105,45 @@ def validate(level, words_set):
     return errors
 
 
+def check_monotonic(levels):
+    """Zorluk sırası denetimi. Döner: (hatalar, rapor).
+
+    Harf sayısı seviye numarasıyla hiç düşmemeli (sert hata). Kelime sayısı
+    düşüşleri sayılıp rapora yazılır (ilk 20 yer). Bu sürümde küresel kelime
+    monotonluğu sağlandığı için herhangi bir kelime düşüşü de sert hatadır.
+    """
+    errors = []
+    letter_drops = []
+    word_drops = []
+    for prev, cur in zip(levels, levels[1:]):
+        if len(cur.letters) < len(prev.letters):
+            letter_drops.append((cur.id, len(prev.letters), len(cur.letters)))
+        if len(cur.words) < len(prev.words):
+            word_drops.append((cur.id, len(prev.words), len(cur.words)))
+    for lid, a, b in letter_drops[:20]:
+        errors.append("harf sayısı düştü: seviye %d (%d -> %d)" % (lid, a, b))
+    if len(letter_drops) > 20:
+        errors.append("... toplam %d harf düşüşü" % len(letter_drops))
+    for lid, a, b in word_drops[:20]:
+        errors.append("kelime sayısı düştü: seviye %d (%d -> %d)" % (lid, a, b))
+    if len(word_drops) > 20:
+        errors.append("... toplam %d kelime düşüşü" % len(word_drops))
+    report = {"letter_drops": len(letter_drops), "word_drops": len(word_drops),
+              "word_drop_places": word_drops[:20]}
+    return errors, report
+
+
+def print_table(levels, step=1000):
+    print("id aralığı: harf ort/min/maks | kelime ort/min/maks")
+    for i in range(0, len(levels), step):
+        chunk = levels[i:i + step]
+        ls = [len(l.letters) for l in chunk]
+        ws = [len(l.words) for l in chunk]
+        print("%5d-%5d: %.2f/%d/%d | %.2f/%d/%d" % (
+            chunk[0].id, chunk[-1].id, sum(ls) / len(ls), min(ls), max(ls),
+            sum(ws) / len(ws), min(ws), max(ws)))
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("levels", nargs="?", default=DEFAULT_OUT)
@@ -139,6 +178,15 @@ def main(argv=None):
             bad += 1
             if bad <= 20:
                 print("seviye %d: %s" % (lv.id, "; ".join(errs)))
+    levels = [parse_level(l) for l in lines if l.strip()]
+    mono_errs, rep = check_monotonic(levels)
+    for e in mono_errs:
+        print(e)
+    bad += len(mono_errs)
+    print("harf düşüşü: %d, kelime düşüşü: %d" % (rep["letter_drops"], rep["word_drops"]))
+    for lid, x, y in rep["word_drop_places"]:
+        print("  kelime düşüşü: seviye %d (%d -> %d)" % (lid, x, y))
+    print_table(levels)
     size = os.path.getsize(a.levels)
     print("seviye: %d, hatalı: %d, tekrar: %d, boyut: %d bayt (%.2f MB)" % (n, bad, dup, size, size / 1e6))
     return 1 if bad else 0

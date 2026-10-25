@@ -43,7 +43,7 @@ v1.0 release APK, bu proje için üretilen özel bir anahtarla imzalanmıştır.
 ## Veri kaynakları ve lisanslar
 - **Kelime listesi:** TDK Güncel Türkçe Sözlük kaynaklı, [bilalozdemir/tr-word-list](https://github.com/bilalozdemir/tr-word-list) deposundan alınıp temizlendi (çok sözcüklü, kısaltma, özel isim, harf dışı karakter içerenler çıkarıldı, sapkalı ünlüler düzleştirildi). Kaynak README'si CC BY-SA 4.0 beyan eder; depoda LICENSE dosyası yoktur ve TDK'nın yeniden dağıtım koşulları belirsizdir. Ayrıntı: [`tools/words/SOURCES.md`](tools/words/SOURCES.md). Ticari bir kullanım öncesi hukuki kontrol önerilir.
 - **Ses efektleri:** 20 ses dosyasının tamamı bu projede, harici örnek veya indirme olmadan, `tools/sounds/build_sounds.py` ile prosedürel olarak sentezlenir (marimba/kalimba/ahşap ve hafif çan tınısı; yalnızca numpy). Kendi üretimimiz, CC0. Olay, dosya, kaynak ve lisans tablosu: [`app/src/main/assets/sounds/SOUNDS.md`](app/src/main/assets/sounds/SOUNDS.md).
-- **Seviyeler:** `tools/levels/` altındaki araçla bu sözlükten üretildi (10.000 seviye, hepsi otomatik doğrulandı: çözülebilir, plansız ek kelime yok, benzersiz).
+- **Seviyeler:** `tools/levels/` altındaki araçla bu sözlükten üretildi (10.000 seviye, hepsi otomatik doğrulandı: çözülebilir, plansız ek kelime yok, ızgara en çok 9×9, benzersiz). Zorluk yalnızca artar: harf sayısı seviye numarasıyla hiç düşmez (sırayla 3 harf 110, 4 harf 450, 5 harf 1.600, 6 harf 3.800, 7 harf 4.040 seviye) ve kelime sayısı da küresel olarak düşmez (2 kelimeden 16 kelimeye). Yeniden üretim: `python3 tools/levels/generate_levels.py --count 10000 --seed 1`, denetim: `python3 tools/levels/validate_levels.py`.
 
 ## Geliştirme
 - Native **Kotlin + Jetpack Compose**, MVVM, `minSdk 26`, `targetSdk 35`.

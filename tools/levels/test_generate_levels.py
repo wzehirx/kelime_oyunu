@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from generate_levels import (  # noqa: E402
     Level, Placement, format_level, generate, parse_level, read_levels, write_levels,
 )
-from validate_levels import validate  # noqa: E402
+from validate_levels import check_monotonic, validate  # noqa: E402
 
 WORDS = """kalem elma alem mal kal ala lem ela kale ekle leke kem mek kek
 kelam melek lale ekmek mele ele elem kama mama kamel amel lama
@@ -34,6 +34,13 @@ class GenerateTest(unittest.TestCase):
             keys.add((tuple(sorted(l.letters)), frozenset(p.word for p in l.words)))
         self.assertEqual(len(keys), 12)
 
+    def test_generated_levels_are_monotonic(self):
+        levels = generate(WORDS, 12, 7)
+        letters = [len(l.letters) for l in levels]
+        self.assertEqual(letters, sorted(letters))
+        # küçük sözlükte kelime monotonluğu gevşetilebilir; harf sayısı asla
+        self.assertEqual(check_monotonic(levels)[1]["letter_drops"], 0)
+
     def test_determinism(self):
         a = generate(WORDS, 10, 3)
         b = generate(WORDS, 10, 3)
@@ -56,6 +63,37 @@ class GenerateTest(unittest.TestCase):
         self.assertEqual(l.id, 5)
         self.assertEqual(l.words[1], Placement("elma", 0, 1, "d"))
         self.assertEqual(format_level(l), "5|mlea|kalem,0,0,y;elma,0,1,d")
+
+
+class MonotonicTest(unittest.TestCase):
+    @staticmethod
+    def lv(i, n_letters, n_words):
+        letters = "abcdefg"[:n_letters]
+        return Level(i, letters, tuple(Placement("w%d" % k, 0, 0, "y") for k in range(n_words)))
+
+    def test_ok(self):
+        levels = [self.lv(1, 3, 2), self.lv(2, 3, 3), self.lv(3, 4, 3), self.lv(4, 4, 5)]
+        errs, rep = check_monotonic(levels)
+        self.assertEqual(errs, [])
+        self.assertEqual((rep["letter_drops"], rep["word_drops"]), (0, 0))
+
+    def test_letter_drop_is_error(self):
+        levels = [self.lv(1, 4, 3), self.lv(2, 3, 3)]
+        errs, rep = check_monotonic(levels)
+        self.assertEqual(rep["letter_drops"], 1)
+        self.assertTrue(any("harf sayısı düştü" in e for e in errs), errs)
+
+    def test_word_drop_counted_and_error(self):
+        levels = [self.lv(1, 3, 3), self.lv(2, 4, 2), self.lv(3, 4, 4), self.lv(4, 5, 3)]
+        errs, rep = check_monotonic(levels)
+        self.assertEqual(rep["letter_drops"], 0)
+        self.assertEqual(rep["word_drops"], 2)
+        self.assertEqual(rep["word_drop_places"], [(2, 3, 2), (4, 4, 3)])
+        self.assertEqual(len([e for e in errs if "kelime sayısı düştü" in e]), 2)
+
+    def test_empty_and_single(self):
+        self.assertEqual(check_monotonic([])[0], [])
+        self.assertEqual(check_monotonic([self.lv(1, 3, 2)])[0], [])
 
 
 class ValidateTest(unittest.TestCase):

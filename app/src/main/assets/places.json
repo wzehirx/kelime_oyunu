@@ -1,0 +1,902 @@
+[
+ {
+  "id": "tr",
+  "ad": "Türkiye",
+  "kita": "Asya",
+  "bolge": "ortadogu",
+  "baskent": "Ankara",
+  "bilgi1": "Türkiye'nin büyük bölümü Asya'da, küçük bir bölümü Avrupa'dadır.",
+  "bilgi2": "Kapadokya'daki peri bacaları volkanik kayaların zamanla aşınmasıyla oluşmuştur."
+ },
+ {
+  "id": "gr",
+  "ad": "Yunanistan",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Atina",
+  "bilgi1": "Yunanistan'da çok sayıda ada vardır ve ülke Ege ile İyon denizleri arasında uzanır.",
+  "bilgi2": "Antik çağın ilk olimpiyat oyunları Olimpiya kentinde yapılmıştır."
+ },
+ {
+  "id": "bg",
+  "ad": "Bulgaristan",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Sofya",
+  "bilgi1": "Bulgaristan'da gül yağı üretimi ünlüdür ve Gül Vadisi bu işin merkezidir.",
+  "bilgi2": "Rila Manastırı, Rila Dağları'nın içinde yer alan ünlü bir ortodoks manastırdır."
+ },
+ {
+  "id": "rs",
+  "ad": "Sırbistan",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Belgrad",
+  "bilgi1": "Belgrad, Tuna ile Sava nehirlerinin birleştiği yerde kurulmuştur.",
+  "bilgi2": "Sırbistan'ın kuzeyindeki Voyvodina bölgesi geniş ve düz ovalarıyla bilinir."
+ },
+ {
+  "id": "hu",
+  "ad": "Macaristan",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Budapeşte",
+  "bilgi1": "Budapeşte, Tuna nehrinin iki yakasındaki Buda ve Peşte'nin birleşmesiyle oluşmuştur.",
+  "bilgi2": "Macaristan'daki Balaton, Orta Avrupa'nın en büyük göllerinden biridir."
+ },
+ {
+  "id": "hr",
+  "ad": "Hırvatistan",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Zagreb",
+  "bilgi1": "Hırvatistan'ın Adriyatik kıyısında çok sayıda ada bulunur.",
+  "bilgi2": "Plitvice Gölleri, şelalelerle birbirine bağlanan turkuaz renkli göllerden oluşur."
+ },
+ {
+  "id": "al",
+  "ad": "Arnavutluk",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Tiran",
+  "bilgi1": "Arnavutluk'un kıyıları hem Adriyatik hem de İyon denizine açılır.",
+  "bilgi2": "Berat, beyaz taş evleriyle bilinen tarihî bir kenttir."
+ },
+ {
+  "id": "it",
+  "ad": "İtalya",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Roma",
+  "bilgi1": "İtalya'nın şekli haritada bir çizmeyi andırır.",
+  "bilgi2": "Pizza ve makarna, İtalyan mutfağının dünyaca sevilen yemekleridir."
+ },
+ {
+  "id": "ch",
+  "ad": "İsviçre",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Bern",
+  "bilgi1": "İsviçre'de Alp dağları geniş yer tutar ve kayak merkezleriyle bilinir.",
+  "bilgi2": "İsviçre çikolatası ve peyniri dünyanın pek çok yerinde tanınır."
+ },
+ {
+  "id": "at",
+  "ad": "Avusturya",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Viyana",
+  "bilgi1": "Viyana, klasik müziğin önemli merkezlerinden biri olarak bilinir.",
+  "bilgi2": "Avusturya'da Alp dağlarında kayak yapmak çok yaygındır."
+ },
+ {
+  "id": "cz",
+  "ad": "Çekya",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Prag",
+  "bilgi1": "Prag, kırmızı çatılı evleri ve tarihî köprüleriyle tanınır.",
+  "bilgi2": "Çekya'da bira yapımı çok eski bir gelenektir."
+ },
+ {
+  "id": "pl",
+  "ad": "Polonya",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Varşova",
+  "bilgi1": "Polonya'nın kuzeyinde Baltık Denizi kıyısı uzanır.",
+  "bilgi2": "Ünlü bilim insanı Marie Curie Polonya'da doğmuştur."
+ },
+ {
+  "id": "de",
+  "ad": "Almanya",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Berlin",
+  "bilgi1": "Almanya'da Ren nehri önemli bir ulaşım ve turizm yoludur.",
+  "bilgi2": "Almanya'nın Kara Orman bölgesi yoğun ormanları ve kukulu saatleriyle bilinir."
+ },
+ {
+  "id": "nl",
+  "ad": "Hollanda",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Amsterdam",
+  "bilgi1": "Hollanda'nın topraklarının önemli bir bölümü deniz seviyesine çok yakındır.",
+  "bilgi2": "Hollanda'da bisiklet, günlük ulaşımın çok yaygın bir parçasıdır."
+ },
+ {
+  "id": "fr",
+  "ad": "Fransa",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Paris",
+  "bilgi1": "Eyfel Kulesi, Paris'in en tanınmış yapılarından biridir.",
+  "bilgi2": "Baget, Fransız mutfağının simgesi olmuş uzun bir ekmektir."
+ },
+ {
+  "id": "es",
+  "ad": "İspanya",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Madrid",
+  "bilgi1": "İspanya'da flamenko müziği ve dansı Endülüs bölgesinde gelişmiştir.",
+  "bilgi2": "Barselona'daki Sagrada Familia, mimar Gaudi'nin tasarladığı ünlü bir kilisedir."
+ },
+ {
+  "id": "pt",
+  "ad": "Portekiz",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Lizbon",
+  "bilgi1": "Portekiz, Avrupa kıtasının batı ucunda yer alır.",
+  "bilgi2": "Lizbon'daki sarı tramvaylar kentin dik tepelerinde dolaşır."
+ },
+ {
+  "id": "gb",
+  "ad": "Birleşik Krallık",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Londra",
+  "bilgi1": "Londra'daki Big Ben, aslında saat kulesindeki büyük çanın adıdır.",
+  "bilgi2": "İskoçya'daki Loch Ness gölü, efsanevi canavar hikâyesiyle tanınır."
+ },
+ {
+  "id": "is",
+  "ad": "İzlanda",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Reykjavik",
+  "bilgi1": "İzlanda'da gayzerler ve sıcak su kaynakları çok bulunur.",
+  "bilgi2": "Yaz aylarında İzlanda'da gece uzun süre aydınlık kalır."
+ },
+ {
+  "id": "no",
+  "ad": "Norveç",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Oslo",
+  "bilgi1": "Norveç kıyılarında fiyort denilen derin ve dar deniz kolları bulunur.",
+  "bilgi2": "Kuzey Norveç'te kış aylarında kuzey ışıkları görülebilir."
+ },
+ {
+  "id": "se",
+  "ad": "İsveç",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Stokholm",
+  "bilgi1": "Stokholm, çok sayıda ada üzerine kurulmuş bir kenttir.",
+  "bilgi2": "İsveç'te orta yaz bayramı çiçek çelenkleri ve danslarla kutlanır."
+ },
+ {
+  "id": "fi",
+  "ad": "Finlandiya",
+  "kita": "Avrupa",
+  "bolge": "avrupa",
+  "baskent": "Helsinki",
+  "bilgi1": "Finlandiya'da çok sayıda göl bulunur ve ülke bu yönüyle tanınır.",
+  "bilgi2": "Sauna, Finlandiya kültürünün çok önemli bir parçasıdır."
+ },
+ {
+  "id": "ge",
+  "ad": "Gürcistan",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Tiflis",
+  "bilgi1": "Gürcistan, Kafkas Dağları'nın güneyinde yer alır.",
+  "bilgi2": "Gürcistan'da şarap yapımı çok eski bir geleneğe sahiptir."
+ },
+ {
+  "id": "am",
+  "ad": "Ermenistan",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Erivan",
+  "bilgi1": "Erivan, pembe renkli taşlarla yapılmış binalarıyla tanınır.",
+  "bilgi2": "Ermenistan'daki Sevan, yüksekte yer alan büyük bir göldür."
+ },
+ {
+  "id": "az",
+  "ad": "Azerbaycan",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Bakü",
+  "bilgi1": "Bakü, Hazar Denizi kıyısında kurulmuş büyük bir kenttir.",
+  "bilgi2": "Azerbaycan'daki Gobustan'da kayalara oyulmuş çok eski resimler bulunur."
+ },
+ {
+  "id": "ir",
+  "ad": "İran",
+  "kita": "Asya",
+  "bolge": "ortadogu",
+  "baskent": "Tahran",
+  "bilgi1": "İran'ın kuzeyinde yüksek Elburz Dağları uzanır.",
+  "bilgi2": "İsfahan, güzel camileri ve geniş meydanıyla tanınan tarihî bir kenttir."
+ },
+ {
+  "id": "iq",
+  "ad": "Irak",
+  "kita": "Asya",
+  "bolge": "ortadogu",
+  "baskent": "Bağdat",
+  "bilgi1": "Dicle ve Fırat nehirleri Irak topraklarından geçer.",
+  "bilgi2": "Irak topraklarında yazının ilk kullanıldığı eski Sümer kentleri bulunur."
+ },
+ {
+  "id": "jo",
+  "ad": "Ürdün",
+  "kita": "Asya",
+  "bolge": "ortadogu",
+  "baskent": "Amman",
+  "bilgi1": "Ürdün'deki Petra, kayalara oyulmuş yapılarıyla ünlüdür.",
+  "bilgi2": "Ölü Deniz'in tuzlu suyunda insan kolayca su üstünde kalır."
+ },
+ {
+  "id": "lb",
+  "ad": "Lübnan",
+  "kita": "Asya",
+  "bolge": "ortadogu",
+  "baskent": "Beyrut",
+  "bilgi1": "Lübnan'ın bayrağında bir sedir ağacı bulunur.",
+  "bilgi2": "Lübnan'da Akdeniz kıyısı ile yüksek dağlar birbirine çok yakındır."
+ },
+ {
+  "id": "sa",
+  "ad": "Suudi Arabistan",
+  "kita": "Asya",
+  "bolge": "ortadogu",
+  "baskent": "Riyad",
+  "bilgi1": "Suudi Arabistan'ın büyük bölümü çöllerle kaplıdır.",
+  "bilgi2": "Mekke ve Medine, Müslümanlar için kutsal kabul edilen kentlerdir."
+ },
+ {
+  "id": "kw",
+  "ad": "Kuveyt",
+  "kita": "Asya",
+  "bolge": "ortadogu",
+  "baskent": "Kuveyt",
+  "bilgi1": "Kuveyt, Basra Körfezi'nin kuzeyinde yer alan küçük bir ülkedir.",
+  "bilgi2": "Kuveyt Kuleleri, ülkenin tanınmış simgelerinden biridir."
+ },
+ {
+  "id": "qa",
+  "ad": "Katar",
+  "kita": "Asya",
+  "bolge": "ortadogu",
+  "baskent": "Doha",
+  "bilgi1": "Katar, Basra Körfezi'ne uzanan bir yarımada üzerindedir.",
+  "bilgi2": "Doha'daki İslam Sanatları Müzesi deniz kıyısında yer alır."
+ },
+ {
+  "id": "ae",
+  "ad": "Birleşik Arap Emirlikleri",
+  "kita": "Asya",
+  "bolge": "ortadogu",
+  "baskent": "Abu Dabi",
+  "bilgi1": "Birleşik Arap Emirlikleri yedi emirlikten oluşur.",
+  "bilgi2": "Dubai, gökdelenleriyle tanınan modern bir kenttir."
+ },
+ {
+  "id": "om",
+  "ad": "Umman",
+  "kita": "Asya",
+  "bolge": "ortadogu",
+  "baskent": "Maskat",
+  "bilgi1": "Maskat, dağlarla deniz arasında kurulmuş bir kenttir.",
+  "bilgi2": "Umman'ın güneyinde ağaç reçinesinden yapılan tütsü eskiden beri bilinir."
+ },
+ {
+  "id": "pk",
+  "ad": "Pakistan",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "İslamabad",
+  "bilgi1": "Pakistan'ın kuzeyinde Karakurum Dağları uzanır.",
+  "bilgi2": "İndus nehri Pakistan'ı kuzeyden güneye boydan boya geçer."
+ },
+ {
+  "id": "uz",
+  "ad": "Özbekistan",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Taşkent",
+  "bilgi1": "Özbekistan'daki Semerkant, İpek Yolu'nun ünlü kentlerindendir.",
+  "bilgi2": "Buhara'nın eski kent bölümü çok sayıda tarihî medrese ve cami barındırır."
+ },
+ {
+  "id": "kz",
+  "ad": "Kazakistan",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Astana",
+  "bilgi1": "Kazakistan, çok geniş bozkırlarıyla tanınır.",
+  "bilgi2": "Kazakistan, denize kıyısı olmayan ülkeler arasında yüzölçümü en büyük olandır."
+ },
+ {
+  "id": "mn",
+  "ad": "Moğolistan",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Ulan Batur",
+  "bilgi1": "Yurt adı verilen geleneksel çadır ev Moğolistan'da hâlâ yaygın olarak kullanılır.",
+  "bilgi2": "Gobi Çölü, Moğolistan'ın güneyinde yer alır."
+ },
+ {
+  "id": "cn",
+  "ad": "Çin",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Pekin",
+  "bilgi1": "Çin Seddi, tarih boyunca uzun sınırları korumak için inşa edilmiştir.",
+  "bilgi2": "Dev panda, Çin'in dağlık ormanlarında yaşayan sevilen bir hayvandır."
+ },
+ {
+  "id": "in",
+  "ad": "Hindistan",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Yeni Delhi",
+  "bilgi1": "Hindistan'daki Tac Mahal, beyaz mermerden yapılmış ünlü bir anıt mezardır.",
+  "bilgi2": "Hindistan'da kriket çok sevilen bir spordur."
+ },
+ {
+  "id": "np",
+  "ad": "Nepal",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Katmandu",
+  "bilgi1": "Dünyanın en yüksek dağı Everest, Nepal ile Çin sınırında yer alır.",
+  "bilgi2": "Nepal bayrağı dikdörtgen değil, iki üçgenden oluşan özel bir şekle sahiptir."
+ },
+ {
+  "id": "bd",
+  "ad": "Bangladeş",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Dakka",
+  "bilgi1": "Bangladeş'te Ganj ve Brahmaputra nehirleri geniş bir delta oluşturur.",
+  "bilgi2": "Bangladeş'teki Sundarbans ormanı Bengal kaplanına ev sahipliği yapar."
+ },
+ {
+  "id": "mv",
+  "ad": "Maldivler",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Male",
+  "bilgi1": "Maldivler, çok sayıda mercan adasından oluşur.",
+  "bilgi2": "Maldivler'in çevresindeki resifler renkli balıklara ev sahipliği yapar."
+ },
+ {
+  "id": "mm",
+  "ad": "Myanmar",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Naypyidaw",
+  "bilgi1": "Yangon'daki Şvedagon Pagodası altın kaplamasıyla tanınır.",
+  "bilgi2": "Myanmar'ın içinden İravadi nehri kuzeyden güneye doğru akar."
+ },
+ {
+  "id": "th",
+  "ad": "Tayland",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Bangkok",
+  "bilgi1": "Tayland'da filler ülkenin sevilen ve saygı gören hayvanlarıdır.",
+  "bilgi2": "Bangkok'ta sokak yemekleri ve yüzen pazarlar çok bilinir."
+ },
+ {
+  "id": "kh",
+  "ad": "Kamboçya",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Phnom Penh",
+  "bilgi1": "Angkor Wat, dünyanın en büyük dinî yapılarından biridir.",
+  "bilgi2": "Kamboçya'daki Tonle Sap, mevsime göre büyüyüp küçülen bir göldür."
+ },
+ {
+  "id": "vn",
+  "ad": "Vietnam",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Hanoi",
+  "bilgi1": "Vietnam'daki Ha Long Körfezi kireçtaşı adalarıyla ünlüdür.",
+  "bilgi2": "Vietnam mutfağında pho adlı çorba çok sevilir."
+ },
+ {
+  "id": "my",
+  "ad": "Malezya",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Kuala Lumpur",
+  "bilgi1": "Kuala Lumpur'daki Petronas Kuleleri ikiz yapılarıyla bilinir.",
+  "bilgi2": "Malezya'nın Borneo kısmında orangutanlar yaşar."
+ },
+ {
+  "id": "sg",
+  "ad": "Singapur",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Singapur",
+  "bilgi1": "Singapur hem bir şehir hem de bir ülkedir.",
+  "bilgi2": "Singapur'da dev yapay ağaçlarla dolu bir bahçe vardır."
+ },
+ {
+  "id": "id",
+  "ad": "Endonezya",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Cakarta",
+  "bilgi1": "Endonezya, çok sayıda adadan oluşan bir ülkedir.",
+  "bilgi2": "Komodo ejderi yalnızca Endonezya'daki birkaç adada yaşar."
+ },
+ {
+  "id": "ph",
+  "ad": "Filipinler",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Manila",
+  "bilgi1": "Filipinler'deki Palawan, gizli plajları ve berrak denizleriyle tanınır.",
+  "bilgi2": "Filipinler'de tarsier denilen çok küçük ve iri gözlü bir primat yaşar."
+ },
+ {
+  "id": "kr",
+  "ad": "Güney Kore",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Seul",
+  "bilgi1": "Güney Kore'de kimçi adı verilen fermente sebze yemeği sofraların vazgeçilmezidir.",
+  "bilgi2": "Seul, modern gökdelenler ile eski sarayları bir arada barındırır."
+ },
+ {
+  "id": "jp",
+  "ad": "Japonya",
+  "kita": "Asya",
+  "bolge": "asya",
+  "baskent": "Tokyo",
+  "bilgi1": "Fuji Dağı, Japonya'nın en yüksek ve en tanınmış dağıdır.",
+  "bilgi2": "Japonya'da hızlı trenler Şinkansen adıyla bilinir."
+ },
+ {
+  "id": "pg",
+  "ad": "Papua Yeni Gine",
+  "kita": "Okyanusya",
+  "bolge": "okyanusya",
+  "baskent": "Port Moresby",
+  "bilgi1": "Papua Yeni Gine'de yüzlerce farklı dil konuşulur.",
+  "bilgi2": "Cennet kuşları Papua Yeni Gine ormanlarında yaşar."
+ },
+ {
+  "id": "sb",
+  "ad": "Solomon Adaları",
+  "kita": "Okyanusya",
+  "bolge": "okyanusya",
+  "baskent": "Honiara",
+  "bilgi1": "Solomon Adaları, Pasifik'te çok sayıda adadan oluşur.",
+  "bilgi2": "Solomon Adaları çevresinde mercan resifleri ve dalış noktaları bulunur."
+ },
+ {
+  "id": "vu",
+  "ad": "Vanuatu",
+  "kita": "Okyanusya",
+  "bolge": "okyanusya",
+  "baskent": "Port Vila",
+  "bilgi1": "Vanuatu'daki Tanna Adası'nda Yasur gibi etkin yanardağlar vardır.",
+  "bilgi2": "Pentekost Adası'nda ayaklara sarmaşık bağlanarak yapılan geleneksel kule atlayışı vardır."
+ },
+ {
+  "id": "au",
+  "ad": "Avustralya",
+  "kita": "Okyanusya",
+  "bolge": "okyanusya",
+  "baskent": "Canberra",
+  "bilgi1": "Avustralya'nın başkenti Sidney değil, Canberra'dır.",
+  "bilgi2": "Kanguru ve koala, Avustralya'ya özgü hayvanlardır."
+ },
+ {
+  "id": "nz",
+  "ad": "Yeni Zelanda",
+  "kita": "Okyanusya",
+  "bolge": "okyanusya",
+  "baskent": "Wellington",
+  "bilgi1": "Yeni Zelanda'da kivi hem bir kuş hem de ulusal bir simgedir.",
+  "bilgi2": "Maori halkı, Yeni Zelanda'nın yerli halkıdır."
+ },
+ {
+  "id": "fj",
+  "ad": "Fiji",
+  "kita": "Okyanusya",
+  "bolge": "okyanusya",
+  "baskent": "Suva",
+  "bilgi1": "Fiji'nin çevresinde mercan resifleri ve turkuaz lagünler yer alır.",
+  "bilgi2": "Fiji'de kava adı verilen geleneksel bir içecek törenlerde sunulur."
+ },
+ {
+  "id": "to",
+  "ad": "Tonga",
+  "kita": "Okyanusya",
+  "bolge": "okyanusya",
+  "baskent": "Nukualofa",
+  "bilgi1": "Tonga, bugün de bir kralın başında olduğu ender ülkelerden biridir.",
+  "bilgi2": "Tonga açıklarında yılın belli aylarında kambur balinalar görülür."
+ },
+ {
+  "id": "ws",
+  "ad": "Samoa",
+  "kita": "Okyanusya",
+  "bolge": "okyanusya",
+  "baskent": "Apia",
+  "bilgi1": "Samoa'nın geleneksel evleri, duvarsız ve çatılı fale denilen yapılardır.",
+  "bilgi2": "Samoa'daki To Sua, doğal bir yüzme havuzunu andıran derin bir okyanus çukurudur."
+ },
+ {
+  "id": "ca",
+  "ad": "Kanada",
+  "kita": "Kuzey Amerika",
+  "bolge": "amerika",
+  "baskent": "Ottawa",
+  "bilgi1": "Kanada'nın bayrağında akçaağaç yaprağı bulunur.",
+  "bilgi2": "Niagara Şelalesi, Kanada ile Amerika Birleşik Devletleri sınırında yer alır."
+ },
+ {
+  "id": "us",
+  "ad": "Amerika Birleşik Devletleri",
+  "kita": "Kuzey Amerika",
+  "bolge": "amerika",
+  "baskent": "Washington",
+  "bilgi1": "Büyük Kanyon, Colorado Nehri'nin yıllar içinde kayaları yarmasıyla oluşmuştur.",
+  "bilgi2": "Özgürlük Heykeli, New York limanında yer alan ünlü bir anıttır."
+ },
+ {
+  "id": "bs",
+  "ad": "Bahamalar",
+  "kita": "Kuzey Amerika",
+  "bolge": "amerika",
+  "baskent": "Nassau",
+  "bilgi1": "Bahamalar'da turkuaz denizler ve pembe kumlu plajlar vardır.",
+  "bilgi2": "Bahamalar'daki bazı sahillerde domuzlar denizde yüzer."
+ },
+ {
+  "id": "cu",
+  "ad": "Küba",
+  "kita": "Kuzey Amerika",
+  "bolge": "amerika",
+  "baskent": "Havana",
+  "bilgi1": "Havana sokaklarında eski model renkli Amerikan arabaları görülür.",
+  "bilgi2": "Küba, puro üretimiyle ünlüdür."
+ },
+ {
+  "id": "jm",
+  "ad": "Jamaika",
+  "kita": "Kuzey Amerika",
+  "bolge": "amerika",
+  "baskent": "Kingston",
+  "bilgi1": "Jamaika, reggae müziğinin doğduğu ülkedir.",
+  "bilgi2": "Jamaika'daki Mavi Dağlar, kahvesiyle tanınır."
+ },
+ {
+  "id": "do",
+  "ad": "Dominik Cumhuriyeti",
+  "kita": "Kuzey Amerika",
+  "bolge": "amerika",
+  "baskent": "Santo Domingo",
+  "bilgi1": "Dominik Cumhuriyeti, Karayipler'de Haiti ile aynı adayı paylaşır.",
+  "bilgi2": "Santo Domingo, Amerika kıtasının en eski Avrupa kökenli kentlerinden biridir."
+ },
+ {
+  "id": "mx",
+  "ad": "Meksika",
+  "kita": "Kuzey Amerika",
+  "bolge": "amerika",
+  "baskent": "Meksiko",
+  "bilgi1": "Meksika mutfağında mısır ve biber çok önemli yer tutar.",
+  "bilgi2": "Maya uygarlığının basamaklı piramitleri Meksika'da hâlâ görülebilir."
+ },
+ {
+  "id": "gt",
+  "ad": "Guatemala",
+  "kita": "Kuzey Amerika",
+  "bolge": "amerika",
+  "baskent": "Guatemala",
+  "bilgi1": "Guatemala'da Maya halkının renkli el dokumaları canlı bir gelenektir.",
+  "bilgi2": "Tikal, ormanın içinde yükselen eski Maya piramitleriyle ünlüdür."
+ },
+ {
+  "id": "cr",
+  "ad": "Kosta Rika",
+  "kita": "Kuzey Amerika",
+  "bolge": "amerika",
+  "baskent": "San Jose",
+  "bilgi1": "Kosta Rika'da yağmur ormanları ve çok çeşitli kuşlar bulunur.",
+  "bilgi2": "Kosta Rika, orduyu kaldırmış ender ülkelerden biridir."
+ },
+ {
+  "id": "pa",
+  "ad": "Panama",
+  "kita": "Kuzey Amerika",
+  "bolge": "amerika",
+  "baskent": "Panama",
+  "bilgi1": "Panama Kanalı, Atlas ve Pasifik okyanuslarını birbirine bağlar.",
+  "bilgi2": "Panama'daki yağmur ormanlarında tembel hayvanlar ve renkli kurbağalar yaşar."
+ },
+ {
+  "id": "co",
+  "ad": "Kolombiya",
+  "kita": "Güney Amerika",
+  "bolge": "amerika",
+  "baskent": "Bogota",
+  "bilgi1": "Kolombiya, kahve üretimiyle dünyada tanınır.",
+  "bilgi2": "Kolombiya'da Amazon ormanları, Karayip kıyıları ve And Dağları birlikte bulunur."
+ },
+ {
+  "id": "ve",
+  "ad": "Venezuela",
+  "kita": "Güney Amerika",
+  "bolge": "amerika",
+  "baskent": "Karakas",
+  "bilgi1": "Venezuela'daki Melek Şelalesi, dünyanın en yüksek kesintisiz şelalesi olarak bilinir.",
+  "bilgi2": "Maracaibo Gölü, Venezuela'nın kuzeybatısında yer alan büyük bir göldür."
+ },
+ {
+  "id": "ec",
+  "ad": "Ekvador",
+  "kita": "Güney Amerika",
+  "bolge": "amerika",
+  "baskent": "Quito",
+  "bilgi1": "Ekvador adını ekvator çizgisinden alır.",
+  "bilgi2": "Galapagos Adaları Ekvador'a aittir ve eşsiz hayvanlarıyla bilinir."
+ },
+ {
+  "id": "pe",
+  "ad": "Peru",
+  "kita": "Güney Amerika",
+  "bolge": "amerika",
+  "baskent": "Lima",
+  "bilgi1": "Peru'daki Machu Picchu, dağların tepesinde kurulmuş eski bir İnka kentidir.",
+  "bilgi2": "Peru'da lamalar ve alpakalar And Dağları'nda yetiştirilir."
+ },
+ {
+  "id": "bo",
+  "ad": "Bolivya",
+  "kita": "Güney Amerika",
+  "bolge": "amerika",
+  "baskent": "Sucre",
+  "bilgi1": "Bolivya'daki Uyuni Tuz Gölü, yağmurdan sonra dev bir ayna gibi görünür.",
+  "bilgi2": "Titikaka Gölü, Bolivya ile Peru arasında yer alır."
+ },
+ {
+  "id": "cl",
+  "ad": "Şili",
+  "kita": "Güney Amerika",
+  "bolge": "amerika",
+  "baskent": "Santiago",
+  "bilgi1": "Şili, çok uzun ve dar bir ülkedir.",
+  "bilgi2": "Atacama Çölü, dünyanın en kurak yerlerinden biridir."
+ },
+ {
+  "id": "ar",
+  "ad": "Arjantin",
+  "kita": "Güney Amerika",
+  "bolge": "amerika",
+  "baskent": "Buenos Aires",
+  "bilgi1": "Tango, Buenos Aires çevresinde gelişmiş bir müzik ve danstır.",
+  "bilgi2": "Iguazu Şelaleleri, Arjantin ile Brezilya sınırında yer alır."
+ },
+ {
+  "id": "uy",
+  "ad": "Uruguay",
+  "kita": "Güney Amerika",
+  "bolge": "amerika",
+  "baskent": "Montevideo",
+  "bilgi1": "Uruguay'da mate denilen otlu içecek yaygın olarak içilir.",
+  "bilgi2": "Uruguay'ın kumsalları Atlas Okyanusu kıyısında uzanır."
+ },
+ {
+  "id": "py",
+  "ad": "Paraguay",
+  "kita": "Güney Amerika",
+  "bolge": "amerika",
+  "baskent": "Asuncion",
+  "bilgi1": "Paraguay'da Guarani dili İspanyolca ile birlikte resmî dildir.",
+  "bilgi2": "Paraguay, deniz kıyısı olmayan bir ülkedir."
+ },
+ {
+  "id": "br",
+  "ad": "Brezilya",
+  "kita": "Güney Amerika",
+  "bolge": "amerika",
+  "baskent": "Brasilia",
+  "bilgi1": "Amazon yağmur ormanları dünyanın en büyük yağmur ormanıdır ve büyük bölümü Brezilya'dadır.",
+  "bilgi2": "Rio de Janeiro'daki İsa Heykeli, kentin simgelerinden biridir."
+ },
+ {
+  "id": "ma",
+  "ad": "Fas",
+  "kita": "Afrika",
+  "bolge": "afrika",
+  "baskent": "Rabat",
+  "bilgi1": "Fas'ta Fes, dar sokakları ve eski çarşılarıyla bilinen tarihî bir kenttir.",
+  "bilgi2": "Fas'ta tajin adı verilen koni kapaklı kaplarda yemek pişirilir."
+ },
+ {
+  "id": "dz",
+  "ad": "Cezayir",
+  "kita": "Afrika",
+  "bolge": "afrika",
+  "baskent": "Cezayir",
+  "bilgi1": "Cezayir, yüzölçümü bakımından Afrika'nın en büyük ülkesidir.",
+  "bilgi2": "Sahra Çölü, Cezayir'in büyük bölümünü kaplar."
+ },
+ {
+  "id": "tn",
+  "ad": "Tunus",
+  "kita": "Afrika",
+  "bolge": "afrika",
+  "baskent": "Tunus",
+  "bilgi1": "Tunus'ta antik Kartaca kentinin kalıntıları bulunur.",
+  "bilgi2": "Sidi Bu Said köyü, mavi ve beyaza boyalı kapı ve pencereleriyle ünlüdür."
+ },
+ {
+  "id": "sn",
+  "ad": "Senegal",
+  "kita": "Afrika",
+  "bolge": "afrika",
+  "baskent": "Dakar",
+  "bilgi1": "Dakar, Afrika anakarasının en batı ucuna yakın bir kenttir.",
+  "bilgi2": "Senegal'deki Retba Gölü, pembe renkli suyuyla tanınır."
+ },
+ {
+  "id": "gh",
+  "ad": "Gana",
+  "kita": "Afrika",
+  "bolge": "afrika",
+  "baskent": "Akra",
+  "bilgi1": "Gana'da kakao yetiştirilir ve çikolata üretiminde önemlidir.",
+  "bilgi2": "Gana'daki Volta Gölü, dünyanın en büyük yapay göllerinden biridir."
+ },
+ {
+  "id": "ng",
+  "ad": "Nijerya",
+  "kita": "Afrika",
+  "bolge": "afrika",
+  "baskent": "Abuja",
+  "bilgi1": "Nijerya, Afrika'nın en kalabalık ülkesidir.",
+  "bilgi2": "Nijerya'da film endüstrisi Nollywood adıyla bilinir."
+ },
+ {
+  "id": "cm",
+  "ad": "Kamerun",
+  "kita": "Afrika",
+  "bolge": "afrika",
+  "baskent": "Yaounde",
+  "bilgi1": "Kamerun Dağı, Kamerun'daki etkin bir yanardağdır.",
+  "bilgi2": "Kamerun'da hem Fransızca hem de İngilizce resmî dildir."
+ },
+ {
+  "id": "cd",
+  "ad": "Demokratik Kongo Cumhuriyeti",
+  "kita": "Afrika",
+  "bolge": "afrika",
+  "baskent": "Kinşasa",
+  "bilgi1": "Kongo Nehri, ülke topraklarından geçen güçlü ve çok uzun bir nehirdir.",
+  "bilgi2": "Dağ gorilleri ülkenin doğusundaki ormanlarda yaşar."
+ },
+ {
+  "id": "ao",
+  "ad": "Angola",
+  "kita": "Afrika",
+  "bolge": "afrika",
+  "baskent": "Luanda",
+  "bilgi1": "Angola, Portekizce konuşulan bir ülkedir.",
+  "bilgi2": "Angola'daki Kalandula Şelalesi geniş ve görkemli bir şelaledir."
+ },
+ {
+  "id": "na",
+  "ad": "Namibya",
+  "kita": "Afrika",
+  "bolge": "afrika",
+  "baskent": "Windhoek",
+  "bilgi1": "Namibya'daki Namib Çölü, devasa kum tepeleriyle tanınır.",
+  "bilgi2": "Etoşa Ulusal Parkı, fillerin ve zürafaların yaşadığı geniş bir koruma alanıdır."
+ },
+ {
+  "id": "za",
+  "ad": "Güney Afrika",
+  "kita": "Afrika",
+  "bolge": "afrika",
+  "baskent": "Pretoria",
+  "bilgi1": "Güney Afrika'nın üç başkenti vardır.",
+  "bilgi2": "Masa Dağı, Cape Town kentinin üzerinde yükselen düz tepeli ünlü bir dağdır."
+ },
+ {
+  "id": "mg",
+  "ad": "Madagaskar",
+  "kita": "Afrika",
+  "bolge": "afrika",
+  "baskent": "Antananarivo",
+  "bilgi1": "Madagaskar'da dünyanın başka yerinde yaşamayan lemurlar bulunur.",
+  "bilgi2": "Madagaskar'daki Baobab Yolu, dev baobab ağaçlarının sıralandığı bir yoldur."
+ },
+ {
+  "id": "zw",
+  "ad": "Zimbabve",
+  "kita": "Afrika",
+  "bolge": "afrika",
+  "baskent": "Harare",
+  "bilgi1": "Victoria Şelalesi, Zimbabve ile Zambiya sınırında yer alır.",
+  "bilgi2": "Büyük Zimbabve adlı antik taş kalıntılar ülkeye adını vermiştir."
+ },
+ {
+  "id": "tz",
+  "ad": "Tanzanya",
+  "kita": "Afrika",
+  "bolge": "afrika",
+  "baskent": "Dodoma",
+  "bilgi1": "Kilimanjaro, Afrika'nın en yüksek dağıdır ve Tanzanya'dadır.",
+  "bilgi2": "Serengeti'de her yıl gnu sürüleri uzun bir göç yapar."
+ },
+ {
+  "id": "ke",
+  "ad": "Kenya",
+  "kita": "Afrika",
+  "bolge": "afrika",
+  "baskent": "Nairobi",
+  "bilgi1": "Kenya'da Masai Mara bölgesinde safari yapılır.",
+  "bilgi2": "Büyük Rift Vadisi, Kenya'dan geçen uzun bir çöküntü hattıdır."
+ },
+ {
+  "id": "ug",
+  "ad": "Uganda",
+  "kita": "Afrika",
+  "bolge": "afrika",
+  "baskent": "Kampala",
+  "bilgi1": "Viktorya Gölü, Uganda, Kenya ve Tanzanya tarafından paylaşılır.",
+  "bilgi2": "Uganda'da dağ gorillerini doğal ortamlarında görmek mümkündür."
+ },
+ {
+  "id": "rw",
+  "ad": "Ruanda",
+  "kita": "Afrika",
+  "bolge": "afrika",
+  "baskent": "Kigali",
+  "bilgi1": "Ruanda, bin tepe ülkesi olarak anılır.",
+  "bilgi2": "Kivu Gölü, Ruanda'nın batısında yer alır."
+ },
+ {
+  "id": "et",
+  "ad": "Etiyopya",
+  "kita": "Afrika",
+  "bolge": "afrika",
+  "baskent": "Addis Ababa",
+  "bilgi1": "Etiyopya, kahvenin anavatanı olarak kabul edilir.",
+  "bilgi2": "Lalibela'da kayalara oyulmuş kiliseler bulunur."
+ },
+ {
+  "id": "eg",
+  "ad": "Mısır",
+  "kita": "Afrika",
+  "bolge": "afrika",
+  "baskent": "Kahire",
+  "bilgi1": "Giza Piramitleri, Mısır'ın en ünlü tarihî yapılarındandır.",
+  "bilgi2": "Nil nehri Mısır topraklarından geçerek Akdeniz'e ulaşır."
+ }
+]

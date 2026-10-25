@@ -141,4 +141,30 @@ class LevelRepositoryTest {
         for (i in 0 until real.count step 97) assertEquals(i + 1, real.get(i)!!.id)
     }
 
+    // --- zorluk sırası (v1.2): seviye numarası arttıkça zorluk yalnızca artar ---
+
+    @Test
+    fun realLettersAndWordCountsNeverDecrease() {
+        var prevLetters = 0
+        var prevWords = 0
+        for (i in 0 until real.count) {
+            val l = real.get(i)!!
+            assertTrue("seviye ${l.id}: harf sayısı düştü ($prevLetters -> ${l.letters.size})", l.letters.size >= prevLetters)
+            // Küresel kelime monotonluğu bu veri setinde sağlanıyor (validate_levels.py: kelime düşüşü 0).
+            assertTrue("seviye ${l.id}: kelime sayısı düştü ($prevWords -> ${l.words.size})", l.words.size >= prevWords)
+            prevLetters = l.letters.size
+            prevWords = l.words.size
+        }
+    }
+
+    @Test
+    fun realDifficultyRampsFromThreeToSevenLetters() {
+        assertEquals(3, real.get(0)!!.letters.size)
+        assertEquals(7, real.get(9999)!!.letters.size)
+        val sizes = (0 until real.count).map { real.get(it)!!.letters.size }.groupingBy { it }.eachCount()
+        assertTrue("3 harfli seviye az", (sizes[3] ?: 0) >= 41)
+        assertTrue("4 harfli seviye az", (sizes[4] ?: 0) >= 400)
+        assertTrue("5 harfli seviye az", (sizes[5] ?: 0) >= 1500)
+        assertTrue("hiçbir grup %60'tan fazla olmamalı", sizes.values.all { it <= 6000 })
+    }
 }
