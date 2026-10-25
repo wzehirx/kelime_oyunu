@@ -192,7 +192,7 @@ class GameViewModel(
         if (coins < HINT_LETTER_COST) return@act emit(GameEvent.NotEnoughCoins)
         e.revealLetter() ?: return@act emit(GameEvent.NoHintAvailable)
         coins -= HINT_LETTER_COST
-        emit(GameEvent.HintUsed)
+        emit(GameEvent.HintUsed(coins))
         commit()
     }
 
@@ -201,7 +201,7 @@ class GameViewModel(
         if (coins < HINT_WORD_COST) return@act emit(GameEvent.NotEnoughCoins)
         e.revealWord() ?: return@act emit(GameEvent.NoHintAvailable)
         coins -= HINT_WORD_COST
-        emit(GameEvent.HintUsed)
+        emit(GameEvent.HintUsed(coins))
         completeIfDone()
         commit()
     }
@@ -232,6 +232,9 @@ class GameViewModel(
             block(lv, e)
         }
     }
+
+    /** Seviye sayısı; yalnızca yükleme bittikten sonra (AllDone/Ready) çağrılmalıdır. */
+    val levelCount: Int get() = levels.count
 
     private fun emit(event: GameEvent) {
         _events.tryEmit(event)

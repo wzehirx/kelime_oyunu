@@ -79,7 +79,7 @@ class AnnouncingFeedbackSinkTest {
         state = ready(word = "ka")
         s.onEvent(GameEvent.Deleted); flush()
         s.onEvent(GameEvent.Shuffled); flush()
-        s.onEvent(GameEvent.HintUsed); flush()
+        s.onEvent(GameEvent.HintUsed(40)); flush()
         assertEquals(
             listOf("Silindi, kalan: KA", "Harfler karıştırıldı: K, A, L, E, M", "İpucu kullanıldı, kalan jeton: 40"),
             spoken,

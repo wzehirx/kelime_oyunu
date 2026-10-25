@@ -31,7 +31,8 @@ sealed interface GameEvent {
     data object Cleared : GameEvent
     data class Submitted(val result: SubmitResult) : GameEvent
     data object Shuffled : GameEvent
-    data object HintUsed : GameEvent
+    /** [coinsLeft]: ipucu bedeli düşüldükten sonraki bakiye (sonradan gelen ödüller dahil değil). */
+    data class HintUsed(val coinsLeft: Int) : GameEvent
     data object NotEnoughCoins : GameEvent
     data object NoHintAvailable : GameEvent
     data class CoinsEarned(val amount: Int) : GameEvent

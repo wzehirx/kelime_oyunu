@@ -4,7 +4,8 @@ import android.os.SystemClock
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,6 +21,7 @@ import com.kelimeoyunu.AppContainer
 import com.kelimeoyunu.a11y.AnnouncingFeedbackSink
 import com.kelimeoyunu.a11y.Announcements
 import com.kelimeoyunu.a11y.Announcer
+import com.kelimeoyunu.audio.Sfx
 import com.kelimeoyunu.data.Progress
 import com.kelimeoyunu.ui.game.CompositeFeedbackSink
 import com.kelimeoyunu.ui.game.GameScreen
@@ -29,36 +31,61 @@ import com.kelimeoyunu.ui.game.SoundFeedbackSink
 import com.kelimeoyunu.ui.menu.HowToPlayScreen
 import com.kelimeoyunu.ui.menu.MainMenuScreen
 import com.kelimeoyunu.ui.settings.SettingsScreen
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 enum class Screen { Menu, Game, HowToPlay, Settings }
 
-/** Basit durum tabanlı gezinme. Menü dışındaki ekranlardan geri tuşu menüye döner. */
+/**
+ * Basit durum tabanlı gezinme. Menü dışındaki ekranlardan geri tuşu menüye döner. Ses ayarı akışı ve
+ * [AppContainer.soundManager] uygulama düzeyindedir: menüdeyken ayar değişimi hemen etki eder, oyun
+ * ekranı aynı SoundManager'ı kullanır. Her ekran geçişinde (ses açıksa) [Sfx.NAV] çalar.
+ */
 @Composable
 fun AppRoot(container: AppContainer, modifier: Modifier = Modifier) {
     var screen by rememberSaveable { mutableStateOf(Screen.Menu) }
+    var previous by rememberSaveable { mutableStateOf<Screen?>(null) }
     val view = LocalView.current
     val scope = rememberCoroutineScope()
     val announcer = remember { Announcer({ view.announceForAccessibility(it) }, scope) }
-    BackHandler(enabled = screen != Screen.Menu) { screen = Screen.Menu }
+
+    // İlk değer gelene kadar SoundManager.enabled = false (sessiz).
+    val soundSetting by container.settingsRepository.soundEnabled.collectAsState(initial = null)
+    SideEffect { container.soundManager.enabled = soundSetting == true }
+
+    fun go(next: Screen) {
+        container.soundManager.play(Sfx.NAV)
+        previous = screen
+        screen = next
+    }
+    BackHandler(enabled = screen != Screen.Menu) { go(Screen.Menu) }
 
     when (screen) {
         Screen.Menu -> {
             val progress by container.progressRepository.progress.collectAsState(initial = null)
+            val levelCount by produceState<Int?>(null, container) {
+                value = withContext(Dispatchers.Default) { container.levelRepository.count }
+            }
+            val p = progress
+            val count = levelCount
+            // İkisi de okunana kadar seviye numarası verilmez (10001 gibi yanlış etiket görünmesin).
+            val ready = p != null && count != null
             MainMenuScreen(
-                levelNumber = progress?.let { it.levelIndex + 1 },
-                onContinue = { screen = Screen.Game },
-                onHowToPlay = { screen = Screen.HowToPlay },
-                onSettings = { screen = Screen.Settings },
+                levelNumber = if (ready) p!!.levelIndex + 1 else null,
+                onContinue = { go(Screen.Game) },
+                onHowToPlay = { go(Screen.HowToPlay) },
+                onSettings = { go(Screen.Settings) },
                 modifier = modifier,
+                allDone = ready && count!! > 0 && p!!.levelIndex >= count,
+                focusSettings = previous == Screen.Settings,
             )
         }
-        Screen.Game -> GameRoute(container, announcer, { screen = Screen.Menu }, modifier)
-        Screen.HowToPlay -> HowToPlayScreen({ screen = Screen.Menu }, modifier)
+        Screen.Game -> GameRoute(container, announcer, { go(Screen.Menu) }, modifier)
+        Screen.HowToPlay -> HowToPlayScreen({ go(Screen.Menu) }, modifier)
         Screen.Settings -> {
-            val sound by container.settingsRepository.soundEnabled.collectAsState(initial = true)
             SettingsScreen(
-                soundEnabled = sound,
+                soundEnabled = soundSetting ?: true,
                 onSoundChange = { scope.launch { container.settingsRepository.setSoundEnabled(it) } },
                 onResetConfirmed = {
                     scope.launch {
@@ -66,7 +93,7 @@ fun AppRoot(container: AppContainer, modifier: Modifier = Modifier) {
                         announcer.say(Announcements.progressReset())
                     }
                 },
-                onBack = { screen = Screen.Menu },
+                onBack = { go(Screen.Menu) },
                 modifier = modifier,
             )
         }
@@ -85,10 +112,6 @@ private fun GameRoute(container: AppContainer, announcer: Announcer, onExit: () 
         ViewModelProvider(store, container.gameViewModelFactory())[GameViewModel::class.java]
     }
     DisposableEffect(store) { onDispose { store.clear() } }
-    // Ses ayarı akışı; ilk değer gelene kadar SoundManager.enabled = false (sessiz).
-    LaunchedEffect(container) {
-        container.settingsRepository.soundEnabled.collect { container.soundManager.enabled = it }
-    }
     val feedback = remember(viewModel, announcer) {
         CompositeFeedbackSink(
             AnnouncingFeedbackSink(announcer, { viewModel.state.value }, { SystemClock.elapsedRealtime() }),

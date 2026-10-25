@@ -225,7 +225,7 @@ class GameViewModelAdversarialTest {
         assertEquals(0, v.ready().coins)
         v.onHintLetter(); v.onHintWord()
         assertEquals(0, v.ready().coins)
-        assertEquals(listOf(GameEvent.HintUsed, GameEvent.NotEnoughCoins, GameEvent.NotEnoughCoins), h.events)
+        assertEquals(listOf(GameEvent.HintUsed(0), GameEvent.NotEnoughCoins, GameEvent.NotEnoughCoins), h.events)
     }
 
     @Test
@@ -515,7 +515,7 @@ class GameViewModelAdversarialTest {
                 if (after is GameUiState.Ready) {
                     checkReady(after)
                     val earned = new.filterIsInstance<GameEvent.CoinsEarned>().sumOf { it.amount }
-                    val spent = if (GameEvent.HintUsed in new) cost else 0
+                    val spent = if (new.any { it is GameEvent.HintUsed }) cost else 0
                     if (after.levelNumber == before.levelNumber) {
                         assertEquals("seed $seed adım $steps $new", before.coins + earned - spent, after.coins)
                     }

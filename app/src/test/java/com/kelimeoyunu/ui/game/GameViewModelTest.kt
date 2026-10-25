@@ -264,7 +264,7 @@ class GameViewModelTest {
         v.onHintLetter()
         assertEquals(40, v.ready().coins)
         assertEquals(1, v.ready().wordRows.sumOf { r -> r.cells.count { it != null } })
-        assertTrue(GameEvent.HintUsed in ev)
+        assertTrue(GameEvent.HintUsed(40) in ev)
         v.onHintWord()
         assertEquals(10, v.ready().coins)
         assertEquals(1, v.ready().remainingWords)

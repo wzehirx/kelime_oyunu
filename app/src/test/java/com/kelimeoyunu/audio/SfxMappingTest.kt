@@ -17,7 +17,7 @@ class SfxMappingTest {
         GameEvent.Submitted(SubmitResult.Invalid("xx")) to listOf(Sfx.INVALID),
         GameEvent.Submitted(SubmitResult.Empty) to listOf(Sfx.ERROR),
         GameEvent.Shuffled to listOf(Sfx.SHUFFLE),
-        GameEvent.HintUsed to listOf(Sfx.HINT),
+        GameEvent.HintUsed(0) to listOf(Sfx.HINT),
         GameEvent.NotEnoughCoins to listOf(Sfx.ERROR),
         GameEvent.NoHintAvailable to listOf(Sfx.ERROR),
         GameEvent.CoinsEarned(3) to listOf(Sfx.COIN),

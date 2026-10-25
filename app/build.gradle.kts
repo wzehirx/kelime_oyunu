@@ -12,13 +12,37 @@ android {
         applicationId = "com.kelimeoyunu"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "0.4"
+        versionCode = 5
+        versionName = "0.5"
+    }
+
+    // Depodaki paylaşılan debug anahtarı: her derleme/CI aynı imzayı üretir, sürümler birbirinin üstüne kurulur.
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+        // Release anahtarı yalnızca ortam değişkenlerinden okunur; depoda sır yoktur.
+        // KELIME_KEYSTORE yoksa release imzası tanımlanmaz ve assembleRelease imzasız APK üretir.
+        val releaseKeystore = System.getenv("KELIME_KEYSTORE")
+        if (!releaseKeystore.isNullOrBlank()) {
+            create("release") {
+                storeFile = file(releaseKeystore)
+                storePassword = System.getenv("KELIME_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KELIME_KEY_ALIAS")
+                keyPassword = System.getenv("KELIME_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfigs.findByName("release")?.let { signingConfig = it }
         }
     }
     compileOptions {

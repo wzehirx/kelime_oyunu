@@ -15,9 +15,14 @@ import androidx.compose.ui.unit.dp
  * oluşturulan kelime, harfler, eylem düğmeleri. Kaydırılabilir; büyük yazıda taşmaz.
  */
 @Composable
-fun GameContent(state: GameUiState.Ready, callbacks: GameCallbacks, modifier: Modifier = Modifier) {
+fun GameContent(
+    state: GameUiState.Ready,
+    callbacks: GameCallbacks,
+    modifier: Modifier = Modifier,
+    levelCompleteHeadingFirst: Boolean = false,
+) {
     if (state.levelComplete) {
-        LevelCompleteContent(state, callbacks.onNextLevel, modifier)
+        LevelCompleteContent(state, callbacks.onNextLevel, modifier, levelCompleteHeadingFirst)
         return
     }
     Column(

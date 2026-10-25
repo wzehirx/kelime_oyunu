@@ -18,7 +18,10 @@ import com.kelimeoyunu.a11y.initialFocus
 import com.kelimeoyunu.ui.common.A11yButton
 import com.kelimeoyunu.ui.common.MinLetterHeight
 
-/** Ana menü. Başlangıç odağı "Devam et" düğmesindedir. [levelNumber] null ise ilerleme henüz okunmadı. */
+/**
+ * Ana menü. Başlangıç odağı "Devam et" düğmesindedir ([focusSettings] ise ayarlardan dönüldüğü için
+ * "Ayarlar"da). [levelNumber] null ise ilerleme henüz okunmadı; [allDone] ise tüm seviyeler bitmiştir.
+ */
 @Composable
 fun MainMenuScreen(
     levelNumber: Int?,
@@ -26,8 +29,14 @@ fun MainMenuScreen(
     onHowToPlay: () -> Unit,
     onSettings: () -> Unit,
     modifier: Modifier = Modifier,
+    allDone: Boolean = false,
+    focusSettings: Boolean = false,
 ) {
-    val continueLabel = if (levelNumber == null) "Devam et" else "Devam et, Seviye $levelNumber"
+    val continueLabel = when {
+        allDone -> "Devam et, tüm seviyeler tamamlandı"
+        levelNumber == null -> "Devam et"
+        else -> "Devam et, Seviye $levelNumber"
+    }
     Column(
         modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -35,9 +44,13 @@ fun MainMenuScreen(
         Text("Kelime Oyunu", Modifier.semantics { heading() }, style = MaterialTheme.typography.headlineLarge)
         A11yButton(
             continueLabel, continueLabel, onContinue,
-            Modifier.fillMaxWidth().initialFocus(), minHeight = MinLetterHeight,
+            Modifier.fillMaxWidth().then(if (focusSettings) Modifier else Modifier.initialFocus()), minHeight = MinLetterHeight,
         )
         A11yButton("Nasıl oynanır", "Nasıl oynanır", onHowToPlay, Modifier.fillMaxWidth(), minHeight = MinLetterHeight)
-        A11yButton("Ayarlar", "Ayarlar", onSettings, Modifier.fillMaxWidth(), minHeight = MinLetterHeight)
+        A11yButton(
+            "Ayarlar", "Ayarlar", onSettings,
+            Modifier.fillMaxWidth().then(if (focusSettings) Modifier.initialFocus() else Modifier),
+            minHeight = MinLetterHeight,
+        )
     }
 }

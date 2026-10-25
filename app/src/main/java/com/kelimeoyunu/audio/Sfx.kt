@@ -25,7 +25,7 @@ fun sfxFor(event: GameEvent): List<Sfx> = listOf(
             SubmitResult.Empty -> Sfx.ERROR
         }
         GameEvent.Shuffled -> Sfx.SHUFFLE
-        GameEvent.HintUsed -> Sfx.HINT
+        is GameEvent.HintUsed -> Sfx.HINT
         GameEvent.NotEnoughCoins, GameEvent.NoHintAvailable -> Sfx.ERROR
         is GameEvent.CoinsEarned -> Sfx.COIN
         GameEvent.BonusMeterFull -> Sfx.BONUS_FULL

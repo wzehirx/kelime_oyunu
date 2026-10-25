@@ -30,11 +30,21 @@ fun GameScreen(
     val state by viewModel.state.collectAsState()
     LaunchedEffect(viewModel, feedback) { viewModel.events.collect { feedback.onEvent(it) } }
     val callbacks = remember(viewModel) { GameCallbacks.of(viewModel) }
+    // Ekrana ilk girişte son durumda mıyız? Öyleyse hiçbir olay duyurusu gelmez; bağlamı odak taşır.
+    val enteredAtEnd = remember { arrayOfNulls<Boolean>(1) }
     when (val s = state) {
         GameUiState.Loading -> MessageScreen("Yükleniyor", null, null, modifier)
         is GameUiState.Error -> MessageScreen("Hata: ${s.message}", "Ana menü", onExitToMenu, modifier)
-        GameUiState.AllDone -> AllDoneContent(onExitToMenu, modifier)
-        is GameUiState.Ready -> GameContent(s, callbacks, modifier)
+        GameUiState.AllDone -> {
+            if (enteredAtEnd[0] == null) enteredAtEnd[0] = true
+            AllDoneContent(onExitToMenu, modifier, levelCount = viewModel.levelCount, headingFirst = enteredAtEnd[0] == true)
+        }
+        is GameUiState.Ready -> {
+            if (enteredAtEnd[0] == null) enteredAtEnd[0] = false
+            // Seviye başına: bu seviye ekrana zaten bitmiş olarak mı geldi (kayıttan yeniden açıldı)?
+            val reopenedComplete = remember(s.levelNumber) { s.levelComplete }
+            GameContent(s, callbacks, modifier, levelCompleteHeadingFirst = reopenedComplete)
+        }
     }
 }
 
