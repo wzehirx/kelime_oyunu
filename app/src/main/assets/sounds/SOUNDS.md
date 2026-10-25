@@ -8,6 +8,9 @@ Aile: marimba / kalimba / ahşap vuruş + hafif çan (glockenspiel) tınısı; m
 alçak geçiren filtre, sabit seed'li mikro sapma, hafif yankı. Olumlu sesler yükselen, olumsuzlar
 alçalan perde konturu taşır. Harf sesi kelimedeki sıraya göredir (1. harf en kalın, 7. en ince;
 A majör pentatonik A3 B3 C#4 E4 F#4 A4 B4). Dosyalar kulakla doğrulanmadı, nicel analizle denetlendi.
+Dünya turu: `place_*` 7 ses (6 bölge giriş melodisi + ülke tamamlama), ekran okuyucu konuşmasından önce
+çalar; 1,2-2,0 sn (tamamlama ~2 sn). Bölgeler ritim, dizi ve tınıyla ayrışır; ud için Karplus-Strong,
+gong için inharmonik modal sentez kullanılır. Toplam 27 dosya.
 
 | Olay | Dosya | Kaynak | Lisans |
 |---|---|---|---|
@@ -31,5 +34,12 @@ A majör pentatonik A3 B3 C#4 E4 F#4 A4 B4). Dosyalar kulakla doğrulanmadı, ni
 | level_complete | `level_complete.wav` | prosedürel sentez, build_sounds.py (marimba arpej + çan akoru (A majör), yankılı) | CC0 (kendi üretimimiz) |
 | nav | `nav.wav` | prosedürel sentez, build_sounds.py (çok yumuşak kısa ahşap tık) | CC0 (kendi üretimimiz) |
 | error | `error.wav` | prosedürel sentez, build_sounds.py (alçak yumuşak 'tok' (aşağı eğimli)) | CC0 (kendi üretimimiz) |
+| place_avrupa | `place_avrupa.wav` | prosedürel sentez, build_sounds.py (Avrupa: D majör 3/4 vals, marimba bas-akor-akor + hafif çan melodisi) | CC0 (kendi üretimimiz) |
+| place_asya | `place_asya.wav` | prosedürel sentez, build_sounds.py (Asya: pelog benzeri pentatonik (E F A B C), gong + seyrek kalimba/marimba melodisi) | CC0 (kendi üretimimiz) |
+| place_ortadogu | `place_ortadogu.wav` | prosedürel sentez, build_sounds.py (Orta Doğu: hicaz dizisi (D Eb F# G A Bb C D), Karplus-Strong ud pluck taksimi) | CC0 (kendi üretimimiz) |
+| place_afrika | `place_afrika.wav` | prosedürel sentez, build_sounds.py (Afrika: mbira/kalimba, G pentatonik, 3'e 2 çapraz ritim) | CC0 (kendi üretimimiz) |
+| place_amerika | `place_amerika.wav` | prosedürel sentez, build_sounds.py (Amerika: C majör, son klave sinkoplu Latin marimba motifi + ahşap klave) | CC0 (kendi üretimimiz) |
+| place_okyanusya | `place_okyanusya.wav` | prosedürel sentez, build_sounds.py (Okyanusya: D pentatonik, dalga konturlu parıltılı vibrafon/çan arpı) | CC0 (kendi üretimimiz) |
+| place_complete | `place_complete.wav` | prosedürel sentez, build_sounds.py (Ülke tamamlama: pasaport damgası 'tok' vuruş + yükselen 4 notalık A majör motif ve çan) | CC0 (kendi üretimimiz) |
 
 Yeniden üretim: `python3 tools/sounds/build_sounds.py` (sabit seed, aynı numpy sürümüyle bire bir aynı çıktı).

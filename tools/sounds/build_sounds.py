@@ -357,7 +357,7 @@ def design_place_asya(rng):
         _note(buf, rng, nm, t, 0.7, inst, tau, vel=v, strike=0.10)
     _note(buf, rng, "B4", 1.52, 1.0, MARIMBA, 0.30, vel=0.9)
     _note(buf, rng, "E2", 1.52, 0.9, GONG, 0.40, vel=0.45, strike=0.1, strike_fc=1500, attack=0.006)
-    return buf, dict(fc=8500, rev=(0.55, 0.20), max_dur=1.95, trim=0.0)
+    return buf, dict(fc=5500, rev=(0.55, 0.20), max_dur=1.95, trim=0.0)
 
 
 def design_place_ortadogu(rng):
@@ -394,7 +394,8 @@ def design_place_amerika(rng):
     buf = _buf(2.2)
     g = 0.105
     mel = ((0, "E6", 0.9), (1, "C6", 0.5), (3, "G6", 0.95), (6, "E6", 0.85), (7, "D6", 0.5), (8, "D6", 0.8),
-           (10, "E6", 0.85), (11, "D6", 0.75))
+           (10, "E6", 0.85), (11, "D6", 0.75),
+           (4, "G6", 0.45), (5, "E6", 0.40), (9, "C6", 0.45))
     for step, nm, v in mel:
         _note(buf, rng, nm, step * g, 0.4, MARIMBA, 0.11, vel=v, strike=0.12)
     for step, nm, v in ((0, "C3", 1.0), (3, "G3", 0.7), (8, "C3", 0.9), (11, "G3", 0.7)):   # tumbao
@@ -420,7 +421,7 @@ def design_place_okyanusya(rng):
         x = modal_note(rng, hz(scale[idx]), 0.8, VIBES, 0.40, vel=v, strike=0.04, strike_fc=7000, beat=0.0)
         place(buf, tremolo(x, 5.5, 0.30, np.pi / 2 + rng.uniform(-0.5, 0.5)), k * step + rng.normal(0, 0.002))
         if k % 4 == 0:   # ikinci ses: besli yukarıda, hafif çan
-            _note(buf, rng, scale[min(8, idx + 2)], k * step + 0.04, 1.0, BELL, 0.50, vel=0.22, strike=0.02,
+            _note(buf, rng, scale[min(8, idx + 2)], k * step + 0.003, 1.0, BELL, 0.50, vel=0.22, strike=0.02,
                strike_fc=8000, beat=0.0)
     t0 = K * step + 0.03
     for nm, v in (("D6", 0.8), ("A6", 0.6), ("F#7", 0.4)):

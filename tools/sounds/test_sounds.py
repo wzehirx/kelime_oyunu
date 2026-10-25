@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Ses seti testleri (20 prosedurel WAV). Calistirma:  python3 tools/sounds/test_sounds.py
+"""Ses seti testleri (27 prosedurel WAV: 20 oyun sesi + 7 dunya turu place_*). Calistirma:  python3 tools/sounds/test_sounds.py
 (analiz tablosunu basar + unittest)."""
 import itertools
 import re
@@ -17,10 +17,14 @@ LETTERS = [f"letter_{i}" for i in range(1, 8)]
 LETTER_HZ = [220.00, 246.94, 277.18, 329.63, 369.99, 440.00, 493.88]   # A3 B3 C#4 E4 F#4 A4 B4
 EVENTS = LETTERS + ["delete", "clear", "correct", "bonus", "duplicate", "invalid",
                     "shuffle", "hint", "coin", "bonus_full", "level_complete", "nav", "error"]
+PLACES = ["place_avrupa", "place_asya", "place_ortadogu", "place_afrika", "place_amerika",
+          "place_okyanusya", "place_complete"]
+REGIONS = PLACES[:6]                                # 6 bolge giris melodisi (place_complete haric)
+ALL = EVENTS + PLACES
 POSITIVE = ["correct", "bonus", "bonus_full", "hint", "coin", "level_complete"]
 NEGATIVE_DOWN = ["invalid", "error", "delete"]     # net alcalan kontur
 NOISE_LIKE = ["clear", "shuffle"]                  # perdesiz (gurultu) sesler
-TONAL = [n for n in EVENTS if n not in NOISE_LIKE]
+TONAL = [n for n in ALL if n not in NOISE_LIKE]
 SR = 44100
 
 
@@ -143,13 +147,42 @@ def centroid_track(x, parts=3):
     return [centroid(x[i * k:(i + 1) * k]) for i in range(parts)]
 
 
+def onset_times(x, win=1024, hop=256, min_gap=0.05, rel=0.12):
+    """Spektral akis (log-genlik spektrum artislari) tepe secimiyle vurus (onset) zamanlari, sn.
+    Cok sesli / yankili sinyalde de calisir; min_gap'ten yakin tepeler tek sayilir."""
+    w = np.hanning(win)
+    mag = np.array([np.abs(np.fft.rfft(x[i:i + win] * w)) for i in range(0, len(x) - win, hop)])
+    flux = np.maximum(np.diff(np.log1p(200.0 * mag), axis=0), 0).sum(axis=1)
+    flux = flux / flux.max()
+    gap = int(min_gap * SR / hop)
+    out = []
+    for i in range(1, len(flux) - 1):
+        if flux[i] >= rel and flux[i] >= flux[i - 1] and flux[i] > flux[i + 1] and (not out or i - out[-1] >= gap):
+            out.append(i)
+    return np.array(out) * hop / SR
+
+
+def rhythm_features(x):
+    """(onset sayisi, onset/sn, IOI degisim katsayisi). Duzenli vals/arp -> dusuk, sinkoplu -> yuksek."""
+    o = onset_times(x)
+    ioi = np.diff(o)
+    cv = float(ioi.std() / ioi.mean()) if len(ioi) > 1 else 0.0
+    return len(o), len(o) / (len(x) / SR), cv
+
+
+def region_vec(a):
+    """Bolge imza uzayi: (log2 centroid, log2 onset/sn, 2*IOI degisim katsayisi)."""
+    return np.array([np.log2(a["centroid"]), np.log2(a["rate"]), 2.0 * a["ioicv"]])
+
+
 def analyze(name):
     x, ch, sr, bits = load(name)
     head = x[:int(0.12 * SR)]   # ilk 120 ms: vurus + ust kismilar (tinin karakteri)
     d = dict(name=name, dur=len(x) / sr, peak=peak_db(x), rms=rms_db(x), centroid=centroid(x),
              attack=attack_ms(x), partials=partial_count(head), f0=dominant_hz(x, 100.0, 3500.0),
              nonfund=nonfundamental_ratio(head))
-    if name in NOISE_LIKE:
+    d["onsets"], d["rate"], d["ioicv"] = rhythm_features(x)
+    if name in NOISE_LIKE or name in PLACES:   # place_*: cok perdeli melodi, tek f0 konturu anlamsiz
         d.update(slope=None, net=None, ctrack=centroid_track(x))
     else:
         d.update(slope=f0_slope(x), net=f0_net_semitones(x))
@@ -159,47 +192,58 @@ def analyze(name):
 class SoundSetTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.A = {n: analyze(n) for n in EVENTS}
+        cls.A = {n: analyze(n) for n in ALL}
 
-    def test_twenty_files_exist_and_format(self):
+    def test_all_files_exist_and_format(self):
         self.assertEqual(len(EVENTS), 20)
-        for n in EVENTS:
+        self.assertEqual(len(PLACES), 7)
+        self.assertEqual(len(ALL), 27)
+        self.assertEqual(len(set(ALL)), 27)
+        for n in ALL:
             with self.subTest(n):
                 self.assertTrue((SOUNDS / f"{n}.wav").is_file(), f"{n}.wav yok")
                 x, ch, sr, bits = load(n)
                 self.assertEqual((ch, sr, bits), (1, 44100, 16))
 
     def test_no_extra_wavs(self):
-        self.assertEqual({p.stem for p in SOUNDS.glob("*.wav")}, set(EVENTS))
+        self.assertEqual({p.stem for p in SOUNDS.glob("*.wav")}, set(ALL))   # tam 27 dosya, fazladan yok
         self.assertFalse((SOUNDS / "letter.wav").exists())
 
     def test_total_size(self):
         self.assertLess(sum(p.stat().st_size for p in SOUNDS.iterdir()), 3 * 1024 * 1024)
 
     def test_duration(self):
-        for n in EVENTS:
+        for n in ALL:
             with self.subTest(n):
                 self.assertTrue(0.05 <= self.A[n]["dur"] <= 2.5, self.A[n]["dur"])
         for n in LETTERS:
             self.assertTrue(0.25 <= self.A[n]["dur"] <= 0.45, (n, self.A[n]["dur"]))
+        for n in PLACES:
+            self.assertTrue(1.0 <= self.A[n]["dur"] <= 2.5, (n, self.A[n]["dur"]))
+        for n in REGIONS:   # konusmadan once calan giris melodisi: kisa ve yorucu degil
+            self.assertTrue(1.2 <= self.A[n]["dur"] <= 2.0, (n, self.A[n]["dur"]))
+        self.assertTrue(1.8 <= self.A["place_complete"]["dur"] <= 2.3, self.A["place_complete"]["dur"])
 
     def test_peak(self):
-        for n in EVENTS:
+        for n in ALL:
             with self.subTest(n):
                 self.assertLessEqual(self.A[n]["peak"], -1.0)
                 self.assertGreater(self.A[n]["peak"], -8.0, "cok kisik")
 
     def test_rms_consistency(self):
-        r = [self.A[n]["rms"] for n in EVENTS]
-        self.assertLessEqual(max(r) - min(r), 6.0, {n: round(self.A[n]["rms"], 1) for n in EVENTS})
+        r = [self.A[n]["rms"] for n in ALL]
+        self.assertLessEqual(max(r) - min(r), 6.0, {n: round(self.A[n]["rms"], 1) for n in ALL})
 
     def test_no_dc_or_clicks(self):
-        for n in EVENTS:
+        for n in ALL:
             with self.subTest(n):
                 x = load(n)[0]
                 self.assertLess(abs(x.mean()), 0.01)
                 self.assertLess(abs(x[0]), 0.05)
                 self.assertLess(abs(x[-1]), 0.01)
+                tail = x[-int(0.005 * SR):]      # son 5 ms: tik yok (sessize yumusak iner)
+                self.assertLess(np.max(np.abs(tail)), 0.01, "son 5 ms'de tik")
+                self.assertLess(np.max(np.abs(np.diff(tail))), 0.005, "son 5 ms'de ani sicrama")
                 self.assertGreater(np.max(np.abs(x)), 0.1)
 
     def test_letters_fundamentals_match_notes_and_strictly_rise(self):
@@ -213,6 +257,14 @@ class SoundSetTest(unittest.TestCase):
                 self.assertAlmostEqual(f_ac / target, 1.0, delta=0.02, msg=f"{n}: otokorelasyon {f_ac:.1f} Hz != {target}")
                 fs.append(f_fft)
         self.assertTrue(all(b > a for a, b in zip(fs, fs[1:])), fs)
+
+    def test_no_clipping(self):
+        for n in ALL:
+            with self.subTest(n):
+                with wave.open(str(SOUNDS / f"{n}.wav"), "rb") as w:
+                    pcm = np.frombuffer(w.readframes(w.getnframes()), dtype="<i2").astype(int)
+                self.assertLess(int(np.max(np.abs(pcm))), 32767 * 10 ** (-1.0 / 20), "tam olcek / kirpma")
+                self.assertEqual(int(np.sum(np.abs(pcm) >= 32767)), 0)
 
     def test_spectral_richness_not_plain_sine(self):
         # metrik duz sinusu reddetmeli (ozdenetim)
@@ -254,6 +306,29 @@ class SoundSetTest(unittest.TestCase):
         neg = np.mean([self.A[n]["centroid"] for n in ("invalid", "error", "duplicate")])
         self.assertGreater(pos, 1.3 * neg)
 
+    def test_regions_pairwise_distinguishable(self):
+        """6 bolge sesi (place_complete haric) ikili olarak ayirt edilebilir: (log2 centroid, log2 onset/sn,
+        2*IOI degisim katsayisi) uzayinda en az 0,45 uzakta (olculen en yakin cift ~0,56; en uzak > 2)."""
+        for p, q in itertools.combinations(REGIONS, 2):
+            with self.subTest(f"{p}-{q}"):
+                d = float(np.linalg.norm(region_vec(self.A[p]) - region_vec(self.A[q])))
+                self.assertGreater(d, 0.45, f"{p} ve {q} cok benzer (d={d:.2f})")
+        # ritim imzasi: tek basina onset yogunlugu da bolgeleri ayirmali (en az 3 farkli yogunluk sinifi)
+        self.assertGreaterEqual(len({round(self.A[n]["rate"] / 2.0) for n in REGIONS}), 3)
+        # bolge sesleri tamamlama sesinden de farkli
+        for n in REGIONS:
+            with self.subTest(n):
+                d = float(np.linalg.norm(region_vec(self.A[n]) - region_vec(self.A["place_complete"])))
+                self.assertGreater(d, 0.3, f"{n} place_complete'e cok benzer (d={d:.2f})")
+
+    def test_region_rhythm_character(self):
+        r = {n: self.A[n] for n in REGIONS}
+        self.assertEqual(max(REGIONS, key=lambda n: r[n]["rate"]), "place_okyanusya")      # sik arp
+        self.assertEqual(max(REGIONS, key=lambda n: r[n]["centroid"]), "place_okyanusya")  # en parlak
+        self.assertLess(r["place_asya"]["rate"], r["place_afrika"]["rate"])                # seyrek gong < polirtim
+        self.assertGreater(r["place_ortadogu"]["partials"], r["place_afrika"]["partials"])  # ud: zengin kismi
+        self.assertGreaterEqual(self.A["place_afrika"]["onsets"], 10)                      # polirtim: yogun vuruslar
+
     def test_every_pair_distinguishable(self):
         """Olay ciftleri (log centroid, log sure, log temel frekans) uzayinda ayrik olmali.
         Harf sesleri kendi aralarinda yalnizca perdeyle ayrilir (ayri test)."""
@@ -279,7 +354,7 @@ class SoundSetTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as a, tempfile.TemporaryDirectory() as b:
             for d in (a, b):
                 subprocess.run([sys.executable, str(script), "--out", d], check=True, capture_output=True)
-            for n in EVENTS:
+            for n in ALL:
                 with self.subTest(n):
                     self.assertEqual((Path(a) / f"{n}.wav").read_bytes(), (Path(b) / f"{n}.wav").read_bytes())
                     ref = np.frombuffer(wave.open(str(Path(a) / f"{n}.wav")).readframes(10 ** 7), dtype="<i2").astype(int)
@@ -295,7 +370,8 @@ class SoundSetTest(unittest.TestCase):
     def test_sounds_md_has_a_row_per_file(self):
         md = (SOUNDS / "SOUNDS.md").read_text(encoding="utf-8")
         self.assertNotIn("Kenney", md)
-        for n in EVENTS:
+        self.assertEqual(len([l for l in md.splitlines() if re.match(r"\|\s*[a-z_0-9]+\s*\|\s*`", l)]), 27)
+        for n in ALL:
             with self.subTest(n):
                 rows = [l for l in md.splitlines() if re.match(rf"\|\s*{n}\s*\|", l)]
                 self.assertEqual(len(rows), 1, f"{n} icin tek satir olmali")
@@ -306,13 +382,13 @@ class SoundSetTest(unittest.TestCase):
 
 
 def print_table():
-    print(f"{'olay':15} {'sure':>5} {'RMS':>6} {'tepe':>6} {'centroid':>8} {'f0 Hz':>7} {'atak ms':>7} {'kismi':>5} {'nonfund':>7} {'net st':>7} {'egim':>6}")
-    for n in EVENTS:
+    print(f"{'olay':15} {'sure':>5} {'RMS':>6} {'tepe':>6} {'centroid':>8} {'f0 Hz':>7} {'atak ms':>7} {'kismi':>5} {'nonfund':>7} {'net st':>7} {'egim':>6} {'onset':>5} {'on/sn':>5} {'ioicv':>5}")
+    for n in ALL:
         a = analyze(n)
         s = "-" if a["slope"] is None else f"{a['slope']:+.1f}"
         nt = "-" if a["net"] is None else f"{a['net']:+.1f}"
         print(f"{n:15} {a['dur']:5.2f} {a['rms']:6.1f} {a['peak']:6.1f} {a['centroid']:8.0f} {a['f0']:7.1f} "
-              f"{a['attack']:7.1f} {a['partials']:5d} {a['nonfund']:7.2f} {nt:>7} {s:>6}")
+              f"{a['attack']:7.1f} {a['partials']:5d} {a['nonfund']:7.2f} {nt:>7} {s:>6} {a['onsets']:5d} {a['rate']:5.1f} {a['ioicv']:5.2f}")
 
 
 if __name__ == "__main__":

@@ -10,9 +10,18 @@ import org.junit.Test
 class SoundAssetsTest {
     private val dir = listOf("src/main/assets/sounds", "app/src/main/assets/sounds").map(::File).first { it.isDirectory }
 
-    @Test fun exactlyTwentyWavsMatchSfx() {
+    // place_*.wav (Dünya turu bölge melodileri) v1.3'te Sfx'e bağlanacak; o zamana kadar rezerve sayılır.
+    private val reservedPlaceSounds = setOf(
+        "place_avrupa.wav", "place_asya.wav", "place_ortadogu.wav", "place_afrika.wav",
+        "place_amerika.wav", "place_okyanusya.wav", "place_complete.wav",
+    )
+
+    @Test fun everyWavIsMappedToSfxOrReserved() {
         assertEquals(20, Sfx.entries.size)
-        assertEquals(Sfx.entries.map { it.fileName }.toSet(), dir.listFiles { f -> f.extension == "wav" }!!.map { it.name }.toSet())
+        val onDisk = dir.listFiles { f -> f.extension == "wav" }!!.map { it.name }.toSet()
+        val mapped = Sfx.entries.map { it.fileName }.toSet()
+        assertEquals("Sfx'in dosyası eksik", emptySet<String>(), mapped - onDisk)
+        assertEquals("Sfx'e bağlı olmayan ve rezerve olmayan dosya var", emptySet<String>(), onDisk - mapped - reservedPlaceSounds)
     }
 
     @Test fun everySfxHasValidMono44kWav() {
