@@ -1,5 +1,7 @@
 package com.kelimeoyunu.a11y
 
+import com.kelimeoyunu.TestPlaces
+import com.kelimeoyunu.domain.PlacePosition
 import com.kelimeoyunu.domain.SubmitResult
 import com.kelimeoyunu.ui.game.WordRow
 import org.junit.Assert.assertEquals
@@ -78,5 +80,50 @@ class AnnouncementsTest {
             "Seviye 3. 50 jeton. Kalan kelime: 4. Bonus sayacı: 2 / 5",
             Announcements.headerDescription(3, 50, 2, 5, 4),
         )
+    }
+
+    private val tr = TestPlaces.turkey
+    private val pos = PlacePosition(tr, 0, 3, 20)
+
+    @Test fun headerWithPlaceKeepsAllOldInfo() {
+        assertEquals(
+            "Seviye 3, Türkiye 3 / 20. 50 jeton. Kalan kelime: 4. Bonus sayacı: 2 / 5",
+            Announcements.headerDescription(3, 50, 2, 5, 4, pos),
+        )
+        assertEquals("Türkiye 3 / 20", Announcements.placeProgress(pos))
+    }
+
+    @Test fun continueLabelNamesPlace() {
+        assertEquals("Devam et, Türkiye, 3 / 20", Announcements.continueLabel(pos))
+    }
+
+    @Test fun placeEntered() {
+        assertEquals(
+            "Yeni ülke: Türkiye, Asya. Başkenti Ankara. 20 seviyelik yolculuk başlıyor. " +
+                "Biliyor muydun? Türkiye iki kıtada yer alır.",
+            Announcements.placeEntered(tr, 20),
+        )
+    }
+
+    @Test fun placeCompletedWithAndWithoutNext() {
+        assertEquals(
+            "Türkiye tamamlandı! 25 jeton kazandın. Biliyor muydun? Kapadokya'da peri bacaları vardır. Sıradaki ülke: Yunanistan.",
+            Announcements.placeCompleted(tr, 25, "Yunanistan"),
+        )
+        assertEquals(
+            "Türkiye tamamlandı! 25 jeton kazandın. Biliyor muydun? Kapadokya'da peri bacaları vardır.",
+            Announcements.placeCompleted(tr, 25, null),
+        )
+    }
+
+    @Test fun worldTourTexts() {
+        assertEquals("Dünya turu, 3 / 100 ülke tamamlandı", Announcements.placesTitle(3, 100))
+        assertEquals("Türkiye, kilitli", Announcements.placeLocked(tr))
+        assertEquals("Türkiye, 4 / 20 seviye, şu an buradasın", Announcements.placeInProgress(tr, 4, 20))
+        assertEquals(
+            "Türkiye, tamamlandı. Başkenti Ankara. Türkiye iki kıtada yer alır. Kapadokya'da peri bacaları vardır.",
+            Announcements.placeCompletedRow(tr),
+        )
+        assertEquals("Henüz bu ülkeye ulaşmadın", Announcements.placeNotReached())
     }
 }

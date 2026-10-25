@@ -1,5 +1,7 @@
 package com.kelimeoyunu.a11y
 
+import com.kelimeoyunu.domain.Place
+import com.kelimeoyunu.domain.PlacePosition
 import com.kelimeoyunu.domain.SubmitResult
 import com.kelimeoyunu.domain.TurkishText
 import com.kelimeoyunu.ui.game.WordRow
@@ -50,6 +52,33 @@ object Announcements {
     fun letterButton(c: Char, selected: Boolean): String =
         "Harf ${up(c.toString())}" + if (selected) ", seçildi" else ""
 
-    fun headerDescription(levelNumber: Int, coins: Int, bonusMeter: Int, target: Int, remainingWords: Int): String =
-        "Seviye $levelNumber. $coins jeton. Kalan kelime: $remainingWords. Bonus sayacı: $bonusMeter / $target"
+    fun headerDescription(
+        levelNumber: Int, coins: Int, bonusMeter: Int, target: Int, remainingWords: Int,
+        place: PlacePosition? = null,
+    ): String {
+        val head = if (place == null) "Seviye $levelNumber" else "Seviye $levelNumber, ${placeProgress(place)}"
+        return "$head. $coins jeton. Kalan kelime: $remainingWords. Bonus sayacı: $bonusMeter / $target"
+    }
+
+    /** "Türkiye 3 / 20" */
+    fun placeProgress(p: PlacePosition): String = "${p.place.ad} ${p.levelInPlace} / ${p.placeLevelCount}"
+
+    fun continueLabel(place: PlacePosition): String =
+        "Devam et, ${place.place.ad}, ${place.levelInPlace} / ${place.placeLevelCount}"
+
+    fun placeEntered(place: Place, levelCount: Int): String =
+        "Yeni ülke: ${place.ad}, ${place.kita}. Başkenti ${place.baskent}. " +
+            "$levelCount seviyelik yolculuk başlıyor. Biliyor muydun? ${place.bilgi1}"
+
+    fun placeCompleted(place: Place, bonus: Int, next: String?): String =
+        "${place.ad} tamamlandı! $bonus jeton kazandın. Biliyor muydun? ${place.bilgi2}" +
+            if (next != null) " Sıradaki ülke: $next." else ""
+
+    fun placesTitle(completed: Int, total: Int): String = "Dünya turu, $completed / $total ülke tamamlandı"
+    fun placeLocked(place: Place): String = "${place.ad}, kilitli"
+    fun placeInProgress(place: Place, done: Int, total: Int): String =
+        "${place.ad}, $done / $total seviye, şu an buradasın"
+    fun placeCompletedRow(place: Place): String =
+        "${place.ad}, tamamlandı. Başkenti ${place.baskent}. ${place.bilgi1} ${place.bilgi2}"
+    fun placeNotReached(): String = "Henüz bu ülkeye ulaşmadın"
 }

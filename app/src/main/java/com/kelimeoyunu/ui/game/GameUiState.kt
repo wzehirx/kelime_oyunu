@@ -1,5 +1,7 @@
 package com.kelimeoyunu.ui.game
 
+import com.kelimeoyunu.domain.Place
+import com.kelimeoyunu.domain.PlacePosition
 import com.kelimeoyunu.domain.SubmitResult
 
 /** [index] harf havuzundaki kimliktir (karıştırınca değişmez); [tiles] listesi gösterim sırasındadır. */
@@ -22,6 +24,8 @@ sealed interface GameUiState {
         val bonusTarget: Int,
         val wordRows: List<WordRow>,
         val levelComplete: Boolean,
+        /** Dünya turu konumu; tur kapalıysa null. */
+        val place: PlacePosition? = null,
     ) : GameUiState
 }
 
@@ -38,5 +42,9 @@ sealed interface GameEvent {
     data class CoinsEarned(val amount: Int) : GameEvent
     data object BonusMeterFull : GameEvent
     data object LevelCompleted : GameEvent
+    /** Bir ülkenin ilk seviyesi açıldı (ViewModel ömründe ülke başına bir kez). */
+    data class PlaceEntered(val place: Place, val placeLevelCount: Int) : GameEvent
+    /** Ülkenin son seviyesi bitti; [LevelCompleted]'dan hemen sonra gelir. [bonusCoins] zaten bakiyeye eklenmiştir. */
+    data class PlaceCompleted(val place: Place, val bonusCoins: Int, val nextPlaceName: String?) : GameEvent
     data object AllLevelsDone : GameEvent
 }

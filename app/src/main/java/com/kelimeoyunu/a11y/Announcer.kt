@@ -23,8 +23,13 @@ class Announcer(
     private val pending = ArrayList<Item>()
     private var flushJob: Job? = null
 
-    fun say(text: String, interrupt: Boolean = false) {
+    /** [delayMs] > 0: duyuru o kadar sonra, normal toplu akışla verilir (örn. önce melodi çalsın). */
+    fun say(text: String, interrupt: Boolean = false, delayMs: Long = 0) {
         if (text.isBlank()) return
+        if (delayMs > 0) {
+            scope.launch { delay(delayMs); say(text, interrupt) }
+            return
+        }
         synchronized(lock) {
             if (interrupt) pending.removeAll { it.interruptible }
             pending += Item(text, interrupt)

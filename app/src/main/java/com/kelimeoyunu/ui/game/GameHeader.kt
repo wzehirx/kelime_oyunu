@@ -17,7 +17,7 @@ import com.kelimeoyunu.a11y.initialFocus
 @Composable
 fun GameHeader(state: GameUiState.Ready, modifier: Modifier = Modifier) {
     val description = Announcements.headerDescription(
-        state.levelNumber, state.coins, state.bonusMeter, state.bonusTarget, state.remainingWords,
+        state.levelNumber, state.coins, state.bonusMeter, state.bonusTarget, state.remainingWords, state.place,
     )
     Column(
         modifier.fillMaxWidth().initialFocus().semantics(mergeDescendants = true) {
@@ -26,6 +26,9 @@ fun GameHeader(state: GameUiState.Ready, modifier: Modifier = Modifier) {
         },
     ) {
         Text("Seviye ${state.levelNumber}", Modifier.clearAndSetSemantics {}, style = MaterialTheme.typography.headlineMedium)
+        state.place?.let {
+            Text(Announcements.placeProgress(it), Modifier.clearAndSetSemantics {}, style = MaterialTheme.typography.titleMedium)
+        }
         Text(
             "Jeton: ${state.coins}  |  Kalan kelime: ${state.remainingWords}  |  Bonus: ${state.bonusMeter} / ${state.bonusTarget}",
             Modifier.clearAndSetSemantics {},

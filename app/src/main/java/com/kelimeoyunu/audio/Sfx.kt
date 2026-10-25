@@ -6,7 +6,8 @@ import com.kelimeoyunu.ui.game.GameEvent
 enum class Sfx {
     LETTER_1, LETTER_2, LETTER_3, LETTER_4, LETTER_5, LETTER_6, LETTER_7,
     DELETE, CLEAR, CORRECT, BONUS, DUPLICATE, INVALID, SHUFFLE, HINT, COIN,
-    BONUS_FULL, LEVEL_COMPLETE, NAV, ERROR;
+    BONUS_FULL, LEVEL_COMPLETE, NAV, ERROR,
+    PLACE_AVRUPA, PLACE_ASYA, PLACE_ORTADOGU, PLACE_AFRIKA, PLACE_AMERIKA, PLACE_OKYANUSYA, PLACE_COMPLETE;
 
     /** assets/sounds altındaki dosya adı. */
     val fileName: String get() = name.lowercase() + ".wav"
@@ -31,6 +32,8 @@ fun sfxFor(event: GameEvent): List<Sfx> = listOf(
         is GameEvent.CoinsEarned -> Sfx.COIN
         GameEvent.BonusMeterFull -> Sfx.BONUS_FULL
         GameEvent.LevelCompleted, GameEvent.AllLevelsDone -> Sfx.LEVEL_COMPLETE
+        is GameEvent.PlaceEntered -> placeSfx(event.place.bolge)
+        is GameEvent.PlaceCompleted -> Sfx.PLACE_COMPLETE
     },
 )
 
@@ -46,4 +49,15 @@ fun letterSfx(position: Int): Sfx = when {
     position == 5 -> Sfx.LETTER_5
     position == 6 -> Sfx.LETTER_6
     else -> Sfx.LETTER_7
+}
+
+/** Bölge -> giriş melodisi. Yükleyici yalnızca bilinen bölgeleri kabul eder; bilinmeyen için nötr NAV. */
+fun placeSfx(bolge: String): Sfx = when (bolge) {
+    "avrupa" -> Sfx.PLACE_AVRUPA
+    "asya" -> Sfx.PLACE_ASYA
+    "ortadogu" -> Sfx.PLACE_ORTADOGU
+    "afrika" -> Sfx.PLACE_AFRIKA
+    "amerika" -> Sfx.PLACE_AMERIKA
+    "okyanusya" -> Sfx.PLACE_OKYANUSYA
+    else -> Sfx.NAV
 }

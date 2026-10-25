@@ -8,13 +8,16 @@ import com.kelimeoyunu.ui.game.GameUiState
 /**
  * [GameEvent]'leri Türkçe duyuruya çevirip [Announcer]'a verir. Anlık durum [state]'ten okunur (ipucu bakiyesi hariç: olay taşır).
  * Çift dokunuşla gelen ikinci gönderim (kelime zaten temizlendiği için `Empty`), anlamlı bir
- * sonuçtan sonraki [emptyGraceMs] içinde duyurulmaz.
+ * sonuçtan sonraki [emptyGraceMs] içinde duyurulmaz. Ses açıksa ülke girişi duyurusu [placeDelayMs] gecikir
+ * (önce bölge melodisi çalar, konuşma onunla çakışmaz); ses kapalıysa hemen söylenir.
  */
 class AnnouncingFeedbackSink(
     private val announcer: Announcer,
     private val state: () -> GameUiState,
     clock: () -> Long,
     emptyGraceMs: Long = 800,
+    private val soundOn: () -> Boolean = { false },
+    private val placeDelayMs: Long = 1000,
 ) : FeedbackSink {
     private val gate = DoubleSubmitGate(clock, emptyGraceMs)
 
@@ -33,6 +36,13 @@ class AnnouncingFeedbackSink(
             is GameEvent.CoinsEarned -> announcer.say(Announcements.coinsEarned(e.amount))
             GameEvent.BonusMeterFull -> announcer.say(Announcements.bonusMeterFull())
             GameEvent.LevelCompleted -> announcer.say(Announcements.levelCompleted(s?.levelNumber ?: 0))
+            is GameEvent.PlaceEntered -> announcer.say(
+                Announcements.placeEntered(e.place, e.placeLevelCount),
+                delayMs = if (soundOn()) placeDelayMs else 0,
+            )
+            is GameEvent.PlaceCompleted -> announcer.say(
+                Announcements.placeCompleted(e.place, e.bonusCoins, e.nextPlaceName),
+            )
             GameEvent.AllLevelsDone -> announcer.say(Announcements.allDone())
         }
     }

@@ -1,5 +1,6 @@
 package com.kelimeoyunu.audio
 
+import com.kelimeoyunu.domain.Place
 import com.kelimeoyunu.domain.SubmitResult
 import com.kelimeoyunu.ui.game.GameEvent
 import org.junit.Assert.assertEquals
@@ -25,7 +26,23 @@ class SfxMappingTest {
         GameEvent.BonusMeterFull to listOf(Sfx.BONUS_FULL),
         GameEvent.LevelCompleted to listOf(Sfx.LEVEL_COMPLETE),
         GameEvent.AllLevelsDone to listOf(Sfx.LEVEL_COMPLETE),
+        GameEvent.PlaceEntered(place("avrupa"), 20) to listOf(Sfx.PLACE_AVRUPA),
+        GameEvent.PlaceCompleted(place("avrupa"), 25, null) to listOf(Sfx.PLACE_COMPLETE),
     )
+
+    private fun place(bolge: String) = Place("x", "Ülke", "Asya", bolge, "Başkent", "a", "b")
+
+    @Test fun everyRegionHasItsOwnMelody() {
+        val expected = mapOf(
+            "avrupa" to Sfx.PLACE_AVRUPA, "asya" to Sfx.PLACE_ASYA, "ortadogu" to Sfx.PLACE_ORTADOGU,
+            "afrika" to Sfx.PLACE_AFRIKA, "amerika" to Sfx.PLACE_AMERIKA, "okyanusya" to Sfx.PLACE_OKYANUSYA,
+        )
+        for ((bolge, sfx) in expected) assertEquals(bolge, listOf(sfx), sfxFor(GameEvent.PlaceEntered(place(bolge), 50)))
+        assertEquals(6, expected.values.toSet().size)
+        assertEquals("place_ortadogu.wav", Sfx.PLACE_ORTADOGU.fileName)
+        assertEquals("place_complete.wav", Sfx.PLACE_COMPLETE.fileName)
+        assertEquals(listOf(Sfx.NAV), sfxFor(GameEvent.PlaceEntered(place("bilinmeyen"), 5)))
+    }
 
     @Test fun everyEventMapsAsSpecified() {
         for ((event, expected) in cases) assertEquals("$event", expected, sfxFor(event))
@@ -43,7 +60,7 @@ class SfxMappingTest {
         assertEquals("bonus_full.wav", Sfx.BONUS_FULL.fileName)
         assertEquals("letter_1.wav", Sfx.LETTER_1.fileName)
         assertEquals("letter_7.wav", Sfx.LETTER_7.fileName)
-        assertEquals(20, Sfx.entries.size)
+        assertEquals(27, Sfx.entries.size)
     }
 
     @Test fun letterSfxFollowsPositionAndClamps() {

@@ -25,6 +25,7 @@ val HowToPlayParagraphs = listOf(
     "Kelimeyi göndermek için Gönder düğmesine çift dokun. Sil son harfi, Temizle bütün harfleri kaldırır. Karıştır harflerin sırasını değiştirir.",
     "Listede olmayan ama geçerli bir kelime bulursan bonus kelime olur. Her 5 bonus kelime 20 jeton kazandırır. Seviyeyi bitirince 10 jeton kazanırsın.",
     "Takılırsan İpucu düğmesi 10 jetonla bir harf açar. Kelime aç düğmesi 30 jetonla bir kelimeyi tamamen açar.",
+    "Dünya turu: Seviyeler 100 ülkeye bölünür ve Türkiye'den başlarsın. Yeni bir ülkeye girince bölgesine özel bir melodi çalar ve ülke tanıtılır; ülkeyi bitirince 25 jeton ve ilginç bir bilgi kazanırsın. Ana menüdeki Dünya turu düğmesinden hangi ülkede olduğuna bakabilirsin.",
     "Her şey sesli olarak duyurulur; ekrana bakman gerekmez. Başlangıçta 50 jetonun var.",
 )
 

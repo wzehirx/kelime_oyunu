@@ -2,6 +2,8 @@ package com.kelimeoyunu.ui
 
 import android.os.SystemClock
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
@@ -15,6 +17,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+import com.kelimeoyunu.a11y.initialFocus
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import com.kelimeoyunu.AppContainer
@@ -23,6 +29,7 @@ import com.kelimeoyunu.a11y.Announcements
 import com.kelimeoyunu.a11y.Announcer
 import com.kelimeoyunu.audio.Sfx
 import com.kelimeoyunu.data.Progress
+import com.kelimeoyunu.domain.WorldTour
 import com.kelimeoyunu.ui.game.CompositeFeedbackSink
 import com.kelimeoyunu.ui.game.GameScreen
 import com.kelimeoyunu.ui.game.GameUiState
@@ -31,11 +38,12 @@ import com.kelimeoyunu.ui.game.SoundFeedbackSink
 import com.kelimeoyunu.ui.menu.HowToPlayScreen
 import com.kelimeoyunu.ui.menu.MainMenuScreen
 import com.kelimeoyunu.ui.settings.SettingsScreen
+import com.kelimeoyunu.ui.world.WorldTourScreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-enum class Screen { Menu, Game, HowToPlay, Settings }
+enum class Screen { Menu, Game, HowToPlay, Settings, World }
 
 /**
  * Basit durum tabanlı gezinme. Menü dışındaki ekranlardan geri tuşu menüye döner. Ses ayarı akışı ve
@@ -64,16 +72,20 @@ fun AppRoot(container: AppContainer, modifier: Modifier = Modifier) {
     when (screen) {
         Screen.Menu -> {
             val progress by container.progressRepository.progress.collectAsState(initial = null)
-            val levelCount by produceState<Int?>(null, container) {
-                value = withContext(Dispatchers.Default) { container.levelRepository.count }
+            val levels by produceState<Pair<Int, WorldTour?>?>(null, container) {
+                value = withContext(Dispatchers.Default) { container.levelRepository.count to container.worldTour }
             }
             val p = progress
-            val count = levelCount
+            val count = levels?.first
+            val tour = levels?.second
             // İkisi de okunana kadar seviye numarası verilmez (10001 gibi yanlış etiket görünmesin).
             val ready = p != null && count != null
             MainMenuScreen(
                 levelNumber = if (ready) p!!.levelIndex + 1 else null,
                 onContinue = { go(Screen.Game) },
+                place = if (ready) tour?.positionOf(p!!.levelIndex) else null,
+                onWorldTour = if (tour != null) ({ go(Screen.World) }) else null,
+                focusWorld = previous == Screen.World,
                 onHowToPlay = { go(Screen.HowToPlay) },
                 onSettings = { go(Screen.Settings) },
                 modifier = modifier,
@@ -82,6 +94,7 @@ fun AppRoot(container: AppContainer, modifier: Modifier = Modifier) {
             )
         }
         Screen.Game -> GameRoute(container, announcer, { go(Screen.Menu) }, modifier)
+        Screen.World -> WorldRoute(container, announcer, { go(Screen.Menu) }, modifier)
         Screen.HowToPlay -> HowToPlayScreen({ go(Screen.Menu) }, modifier)
         Screen.Settings -> {
             SettingsScreen(
@@ -114,9 +127,26 @@ private fun GameRoute(container: AppContainer, announcer: Announcer, onExit: () 
     DisposableEffect(store) { onDispose { store.clear() } }
     val feedback = remember(viewModel, announcer) {
         CompositeFeedbackSink(
-            AnnouncingFeedbackSink(announcer, { viewModel.state.value }, { SystemClock.elapsedRealtime() }),
+            AnnouncingFeedbackSink(
+                announcer, { viewModel.state.value }, { SystemClock.elapsedRealtime() },
+                soundOn = { container.soundManager.enabled },
+            ),
             SoundFeedbackSink(container.soundManager),
         )
     }
     GameScreen(viewModel, feedback, onExit, modifier)
+}
+
+/** Dünya turu listesi: tur ve ilerleme okunana kadar "Yükleniyor" başlığı gösterir. */
+@Composable
+private fun WorldRoute(container: AppContainer, announcer: Announcer, onBack: () -> Unit, modifier: Modifier) {
+    val tour by produceState<WorldTour?>(null, container) { value = withContext(Dispatchers.Default) { container.worldTour } }
+    val progress by container.progressRepository.progress.collectAsState(initial = null)
+    val t = tour
+    val p = progress
+    if (t == null || p == null) {
+        Text("Yükleniyor", modifier.padding(16.dp).initialFocus().semantics { heading() })
+    } else {
+        WorldTourScreen(t, p.levelIndex, { announcer.say(it) }, onBack, modifier)
+    }
 }

@@ -15,7 +15,9 @@ import com.kelimeoyunu.audio.SoundPoolBackend
 import com.kelimeoyunu.data.LevelRepository
 import com.kelimeoyunu.data.ProgressRepository
 import com.kelimeoyunu.data.SettingsRepository
+import com.kelimeoyunu.data.loadPlaces
 import com.kelimeoyunu.data.loadWords
+import com.kelimeoyunu.domain.WorldTour
 import com.kelimeoyunu.ui.game.GameViewModel
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -54,6 +56,16 @@ class AppContainer(
     val soundManager = SoundManager { SoundPoolBackend(app) }
     val levelRepository = LevelRepository { openLevelsGzip(app.assets) }
 
+    /**
+     * Dünya turu; yer listesi ya da seviyeler okunamazsa null (ülke özellikleri kapalı, oyun eskisi gibi).
+     * Seviye sayısını okuduğu için ana iş parçacığında değil arka planda ilk kez erişilmelidir.
+     */
+    val worldTour: WorldTour? by lazy {
+        val places = loadPlaces { app.assets.open("places.json") }
+        val total = levelRepository.count
+        if (places.isEmpty() || total <= 0) null else WorldTour(places, total)
+    }
+
     fun gameViewModelFactory(): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -64,6 +76,7 @@ class AppContainer(
                 progressRepository,
                 Random.Default,
                 loadDispatcher,
+                { worldTour },
             ) as T
         }
     }

@@ -76,12 +76,12 @@ class AppRootAdversarialTest {
 
     @Test fun fullJourneyMenuGameLevelEndNextLevelBackSettingsReset() {
         show()
-        rule.waitUntil(60_000) { existsPrefix("Devam et, Seviye 1") }
-        rule.onNodeWithContentDescription("Devam et, Seviye 1").assertIsFocused()
+        rule.waitUntil(60_000) { existsPrefix("Devam et, Türkiye, 1 / 20") }
+        rule.onNodeWithContentDescription("Devam et, Türkiye, 1 / 20").assertIsFocused()
 
-        tap("Devam et, Seviye 1")
-        rule.waitUntil(60_000) { exists("Seviye 1. 50 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5") }
-        rule.onNodeWithContentDescription("Seviye 1. 50 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5").assertIsFocused()
+        tap("Devam et, Türkiye, 1 / 20")
+        rule.waitUntil(60_000) { exists("Seviye 1, Türkiye 1 / 20. 50 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5") }
+        rule.onNodeWithContentDescription("Seviye 1, Türkiye 1 / 20. 50 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5").assertIsFocused()
 
         typeWord("boa"); tap("Gönder")
         rule.waitUntil(30_000) { exists("Kelime 1, 3 harfli, bulundu: BOA") }
@@ -94,12 +94,12 @@ class AppRootAdversarialTest {
         assertTrue(finale, finale.endsWith("Doğru, OBA. 10 jeton kazandın. Seviye 1 tamamlandı"))
 
         tap("Sonraki seviye")
-        rule.waitUntil(30_000) { exists("Seviye 2. 60 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5") }
-        rule.onNodeWithContentDescription("Seviye 2. 60 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5").assertIsFocused()
+        rule.waitUntil(30_000) { exists("Seviye 2, Türkiye 2 / 20. 60 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5") }
+        rule.onNodeWithContentDescription("Seviye 2, Türkiye 2 / 20. 60 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5").assertIsFocused()
 
         back() // oyundan menüye
-        rule.waitUntil(30_000) { exists("Devam et, Seviye 2") }
-        rule.onNodeWithContentDescription("Devam et, Seviye 2").assertIsFocused()
+        rule.waitUntil(30_000) { exists("Devam et, Türkiye, 2 / 20") }
+        rule.onNodeWithContentDescription("Devam et, Türkiye, 2 / 20").assertIsFocused()
 
         tap("Ayarlar")
         rule.waitUntil(30_000) { rule.onAllNodes(androidx.compose.ui.test.isHeading()).fetchSemanticsNodes().isNotEmpty() && exists("Ses efektleri") }
@@ -109,7 +109,7 @@ class AppRootAdversarialTest {
         rule.onNodeWithText("Evet, sıfırla").performClick()
         rule.waitUntil(10_000) { announcements().any { it == "İlerleme sıfırlandı" } }
         tap("Geri")
-        rule.waitUntil(30_000) { exists("Devam et, Seviye 1") }
+        rule.waitUntil(30_000) { exists("Devam et, Türkiye, 1 / 20") }
         back() // menüde geri: uygulama davranışı BackHandler'sız (etkinlik kapanır), çökmemeli
     }
 

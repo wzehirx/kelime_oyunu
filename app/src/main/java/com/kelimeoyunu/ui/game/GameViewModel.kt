@@ -7,7 +7,9 @@ import com.kelimeoyunu.data.ProgressRepository
 import com.kelimeoyunu.domain.CellState
 import com.kelimeoyunu.domain.GameEngine
 import com.kelimeoyunu.domain.Level
+import com.kelimeoyunu.domain.PlacePosition
 import com.kelimeoyunu.domain.SubmitResult
+import com.kelimeoyunu.domain.WorldTour
 import com.kelimeoyunu.domain.WordDictionary
 import kotlin.random.Random
 import kotlinx.coroutines.CancellationException
@@ -22,6 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -35,6 +38,7 @@ class GameViewModel(
     private val progressRepository: ProgressRepository,
     private val random: Random = Random.Default,
     private val dispatcher: CoroutineDispatcher,
+    private val worldTourProvider: () -> WorldTour? = { null },
 ) : ViewModel() {
 
     constructor(
@@ -43,13 +47,18 @@ class GameViewModel(
         progressRepository: ProgressRepository,
         random: Random = Random.Default,
         dispatcher: CoroutineDispatcher,
-    ) : this(levels, { dictionary }, progressRepository, random, dispatcher)
+        worldTour: WorldTour? = null,
+    ) : this(levels, { dictionary }, progressRepository, random, dispatcher, { worldTour })
 
     private val _state = MutableStateFlow<GameUiState>(GameUiState.Loading)
     val state: StateFlow<GameUiState> = _state.asStateFlow()
 
     private val _events = MutableSharedFlow<GameEvent>(replay = 0, extraBufferCapacity = 64)
-    val events: SharedFlow<GameEvent> = _events.asSharedFlow()
+    val events: SharedFlow<GameEvent> = _events.onSubscription {
+        // Yükleme dinleyiciden önce biterse ilk ülke girişi kaybolmasın: ilk dinleyici onu alır.
+        val pending = synchronized(lock) { pendingEntry.also { pendingEntry = null } }
+        if (pending != null) emit(pending)
+    }
 
     private val scope = CoroutineScope(SupervisorJob() + dispatcher)
     private val saves = Channel<Progress>(Channel.CONFLATED)
@@ -66,6 +75,9 @@ class GameViewModel(
     private var order: List<Int> = emptyList()
     private var selected: List<Int> = emptyList()
     private var levelPaid = false
+    private var tour: WorldTour? = null
+    private var lastEnteredPlace = -1
+    private var pendingEntry: GameEvent.PlaceEntered? = null
 
     init {
         scope.launch {
@@ -87,6 +99,8 @@ class GameViewModel(
             val (dict, saved) = withContext(dispatcher) {
                 val d = dictionaryProvider()
                 if (levels.count == 0) error("no levels")
+                // Tur yüklenemezse (ya da hata verirse) oyun eski davranışla sürer.
+                tour = try { worldTourProvider() } catch (_: Exception) { null }
                 d to progressRepository.progress.first()
             }
             synchronized(lock) {
@@ -100,6 +114,7 @@ class GameViewModel(
                 } else {
                     startLevel(saved.levelIndex, saved)
                     publish()
+                    announceEntry(deferIfNoListener = true)
                 }
             }
         } catch (e: CancellationException) {
@@ -219,6 +234,7 @@ class GameViewModel(
         } else {
             startLevel(next, null)
             commit()
+            announceEntry(deferIfNoListener = false)
         }
     }
 
@@ -253,7 +269,27 @@ class GameViewModel(
             coins += LEVEL_REWARD
             emit(GameEvent.CoinsEarned(LEVEL_REWARD))
             emit(GameEvent.LevelCompleted)
+            completePlaceIfDone()
         }
+    }
+
+    private fun place(): PlacePosition? = tour?.positionOf(levelIndex)
+
+    /** Ülkenin ilk seviyesi açıldıysa ve bu ülke bu ViewModel'de daha duyurulmadıysa [GameEvent.PlaceEntered] verir. */
+    private fun announceEntry(deferIfNoListener: Boolean) {
+        val p = place() ?: return
+        if (p.levelInPlace != 1 || p.placeIndex == lastEnteredPlace) return
+        lastEnteredPlace = p.placeIndex
+        val event = GameEvent.PlaceEntered(p.place, p.placeLevelCount)
+        if (deferIfNoListener && _events.subscriptionCount.value == 0) pendingEntry = event else emit(event)
+    }
+
+    private fun completePlaceIfDone() {
+        val t = tour ?: return
+        val p = place() ?: return
+        if (p.levelInPlace != p.placeLevelCount) return
+        coins += PLACE_REWARD
+        emit(GameEvent.PlaceCompleted(p.place, PLACE_REWARD, t.place(p.placeIndex + 1)?.ad))
     }
 
     private fun commit() {
@@ -295,6 +331,7 @@ class GameViewModel(
             bonusTarget = BONUS_TARGET,
             wordRows = rows,
             levelComplete = e.isComplete(),
+            place = place(),
         )
     }
 
@@ -306,6 +343,7 @@ class GameViewModel(
         const val BONUS_TARGET = 5
         const val BONUS_REWARD = 20
         const val LEVEL_REWARD = 10
+        const val PLACE_REWARD = 25
         const val HINT_LETTER_COST = 10
         const val HINT_WORD_COST = 30
     }

@@ -103,10 +103,10 @@ class FinalGateTest {
     @Test fun realPlayerFinishesLevelOneWithErrorsAndHintThenResumesAtLevelTwoAfterRestore() {
         val tester = StateRestorationTester(rule)
         tester.setContent { KelimeTheme { AppRoot(container) } }
-        rule.waitUntil(60_000) { exists("Devam et, Seviye 1") }
-        rule.onNodeWithContentDescription("Devam et, Seviye 1").assertIsFocused()
-        tap("Devam et, Seviye 1")
-        val header = "Seviye 1. 50 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5"
+        rule.waitUntil(60_000) { exists("Devam et, Türkiye, 1 / 20") }
+        rule.onNodeWithContentDescription("Devam et, Türkiye, 1 / 20").assertIsFocused()
+        tap("Devam et, Türkiye, 1 / 20")
+        val header = "Seviye 1, Türkiye 1 / 20. 50 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5"
         waitFor(header)
         rule.onNodeWithContentDescription(header).assertIsFocused()
 
@@ -125,20 +125,20 @@ class FinalGateTest {
         // c) Bonus kelime (sözlükte var, seviyede yok): sayaç 1/5.
         typeWord("ab"); tap("Gönder")
         waitHeard("Bonus kelime, AB")
-        waitFor("Seviye 1. 50 jeton. Kalan kelime: 2. Bonus sayacı: 1 / 5")
+        waitFor("Seviye 1, Türkiye 1 / 20. 50 jeton. Kalan kelime: 2. Bonus sayacı: 1 / 5")
 
         // d) İpucu: bakiye düşer, duyuru DÜŞÜLMÜŞ bakiyeyi söyler; ekran başlığı aynı sayıyı verir.
         tap("İpucu, harf aç, 10 jeton")
         waitHeard("İpucu kullanıldı, kalan jeton: 40")
-        waitFor("Seviye 1. 40 jeton. Kalan kelime: 2. Bonus sayacı: 1 / 5")
+        waitFor("Seviye 1, Türkiye 1 / 20. 40 jeton. Kalan kelime: 2. Bonus sayacı: 1 / 5")
 
         // e) İlk kelime, sonra aynı kelime ikinci kez.
         typeWord("boa"); tap("Gönder")
         waitHeard("Doğru, BOA")
-        waitFor("Seviye 1. 40 jeton. Kalan kelime: 1. Bonus sayacı: 1 / 5")
+        waitFor("Seviye 1, Türkiye 1 / 20. 40 jeton. Kalan kelime: 1. Bonus sayacı: 1 / 5")
         typeWord("boa"); tap("Gönder")
         waitHeard("Bu kelime zaten bulundu")
-        waitFor("Seviye 1. 40 jeton. Kalan kelime: 1. Bonus sayacı: 1 / 5") // değişmedi
+        waitFor("Seviye 1, Türkiye 1 / 20. 40 jeton. Kalan kelime: 1. Bonus sayacı: 1 / 5") // değişmedi
 
         // f) Son kelime: seviye biter, odak "Sonraki seviye"de, duyuru tek cümlede.
         typeWord("oba"); tap("Gönder")
@@ -151,7 +151,7 @@ class FinalGateTest {
 
         // g) Sonraki seviye: 2. seviye başlar, odak başlıkta.
         tap("Sonraki seviye")
-        val header2 = "Seviye 2. 50 jeton. Kalan kelime: 2. Bonus sayacı: 1 / 5"
+        val header2 = "Seviye 2, Türkiye 2 / 20. 50 jeton. Kalan kelime: 2. Bonus sayacı: 1 / 5"
         waitFor(header2)
         rule.onNodeWithContentDescription(header2).assertIsFocused()
 
@@ -168,8 +168,8 @@ class FinalGateTest {
 
         // j) Oyundan geri tuşu: menü artık "Seviye 2" der, odak Devam et'te.
         back()
-        rule.waitUntil(30_000) { exists("Devam et, Seviye 2") }
-        rule.onNodeWithContentDescription("Devam et, Seviye 2").assertIsFocused()
+        rule.waitUntil(30_000) { exists("Devam et, Türkiye, 2 / 20") }
+        rule.onNodeWithContentDescription("Devam et, Türkiye, 2 / 20").assertIsFocused()
     }
 
     // ---------- 2. Yetersiz jeton ----------
@@ -177,9 +177,9 @@ class FinalGateTest {
     @Test fun notEnoughCoinsIsAnnouncedAndNothingChanges() {
         runBlocking { container.progressRepository.save(Progress(coins = 5)) }
         show()
-        rule.waitUntil(60_000) { exists("Devam et, Seviye 1") }
-        tap("Devam et, Seviye 1")
-        val header = "Seviye 1. 5 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5"
+        rule.waitUntil(60_000) { exists("Devam et, Türkiye, 1 / 20") }
+        tap("Devam et, Türkiye, 1 / 20")
+        val header = "Seviye 1, Türkiye 1 / 20. 5 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5"
         waitFor(header)
         tap("İpucu, harf aç, 10 jeton")
         waitHeard("Yeterli jeton yok")
@@ -193,12 +193,12 @@ class FinalGateTest {
 
     @Test fun hintWordThenFinishLevelAnnouncesBalanceAfterCostOnly() {
         show()
-        rule.waitUntil(60_000) { exists("Devam et, Seviye 1") }
-        tap("Devam et, Seviye 1")
-        waitFor("Seviye 1. 50 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5")
+        rule.waitUntil(60_000) { exists("Devam et, Türkiye, 1 / 20") }
+        tap("Devam et, Türkiye, 1 / 20")
+        waitFor("Seviye 1, Türkiye 1 / 20. 50 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5")
         tap("Kelime aç, 30 jeton")
         waitHeard("İpucu kullanıldı, kalan jeton: 20")
-        waitFor("Seviye 1. 20 jeton. Kalan kelime: 1. Bonus sayacı: 0 / 5")
+        waitFor("Seviye 1, Türkiye 1 / 20. 20 jeton. Kalan kelime: 1. Bonus sayacı: 0 / 5")
         // Hangi kelimenin açıldığı rastgele: ikisini de dene; açılmış olana "zaten bulundu" denir.
         val candidates = listOf("boa", "oba")
         for (w in candidates) {
@@ -217,16 +217,16 @@ class FinalGateTest {
 
     @Test fun focusAfterSettingsAndAfterGameBackKey() {
         show()
-        rule.waitUntil(60_000) { exists("Devam et, Seviye 1") }
+        rule.waitUntil(60_000) { exists("Devam et, Türkiye, 1 / 20") }
         tap("Ayarlar"); waitFor("Ses efektleri")
-        tap("Geri"); waitFor("Devam et, Seviye 1")
+        tap("Geri"); waitFor("Devam et, Türkiye, 1 / 20")
         rule.onNodeWithContentDescription("Ayarlar").assertIsFocused()
         tap("Nasıl oynanır"); waitFor("Geri")
-        back(); waitFor("Devam et, Seviye 1")
-        rule.onNodeWithContentDescription("Devam et, Seviye 1").assertIsFocused()
-        tap("Devam et, Seviye 1"); waitFor("Seviye 1. 50 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5")
-        back(); waitFor("Devam et, Seviye 1")
-        rule.onNodeWithContentDescription("Devam et, Seviye 1").assertIsFocused()
+        back(); waitFor("Devam et, Türkiye, 1 / 20")
+        rule.onNodeWithContentDescription("Devam et, Türkiye, 1 / 20").assertIsFocused()
+        tap("Devam et, Türkiye, 1 / 20"); waitFor("Seviye 1, Türkiye 1 / 20. 50 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5")
+        back(); waitFor("Devam et, Türkiye, 1 / 20")
+        rule.onNodeWithContentDescription("Devam et, Türkiye, 1 / 20").assertIsFocused()
     }
 
     // ---------- 5. Ayarlar ekranı süreç ölümü: ekran ve açık sıfırlama diyaloğu geri gelir ----------
@@ -234,7 +234,7 @@ class FinalGateTest {
     @Test fun settingsScreenAndResetDialogSurviveStateRestoration() {
         val tester = StateRestorationTester(rule)
         tester.setContent { KelimeTheme { AppRoot(container) } }
-        rule.waitUntil(60_000) { exists("Devam et, Seviye 1") }
+        rule.waitUntil(60_000) { exists("Devam et, Türkiye, 1 / 20") }
         tap("Ayarlar"); waitFor("İlerlemeyi sıfırla")
         tap("İlerlemeyi sıfırla")
         rule.onNodeWithText("İlerleme sıfırlansın mı?").assertExists()
@@ -242,7 +242,7 @@ class FinalGateTest {
         waitFor("İlerlemeyi sıfırla")
         rule.onNodeWithText("İlerleme sıfırlansın mı?").assertExists()
         rule.onNodeWithText("Vazgeç").performClick()
-        tap("Geri"); waitFor("Devam et, Seviye 1")
+        tap("Geri"); waitFor("Devam et, Türkiye, 1 / 20")
     }
 
     // ---------- 6. Sıfırlama sonrası durum ----------
@@ -250,14 +250,14 @@ class FinalGateTest {
     @Test fun resetAfterProgressReturnsToLevelOneWithStartCoins() {
         runBlocking { container.progressRepository.save(Progress(levelIndex = 41, coins = 7, found = setOf("x"), bonusMeter = 3)) }
         show()
-        rule.waitUntil(60_000) { exists("Devam et, Seviye 42") }
+        rule.waitUntil(60_000) { exists("Devam et, Bulgaristan, 2 / 20") }
         tap("Ayarlar"); waitFor("İlerlemeyi sıfırla")
         tap("İlerlemeyi sıfırla")
         rule.onNodeWithText("Evet, sıfırla").performClick()
         waitHeard("İlerleme sıfırlandı")
-        tap("Geri"); waitFor("Devam et, Seviye 1")
-        tap("Devam et, Seviye 1")
-        waitFor("Seviye 1. 50 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5")
+        tap("Geri"); waitFor("Devam et, Türkiye, 1 / 20")
+        tap("Devam et, Türkiye, 1 / 20")
+        waitFor("Seviye 1, Türkiye 1 / 20. 50 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5")
     }
 
     // ---------- 7. Ses: kapalıyken tam seviye boyunca sessizlik; açıkken boş Gönder ERROR çalar ----------
@@ -281,7 +281,7 @@ class FinalGateTest {
                 )
             }
         }
-        waitFor("Seviye 1. 50 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5")
+        waitFor("Seviye 1, Türkiye 1 / 20. 50 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5")
         tap("Gönder")
         typeWord("abo"); tap("Gönder"); tap("Temizle")
         typeWord("ab"); tap("Gönder")
@@ -290,7 +290,7 @@ class FinalGateTest {
         typeWord("oba"); tap("Gönder")
         waitFor("Sonraki seviye", 30_000)
         tap("Sonraki seviye")
-        waitFor("Seviye 2. 50 jeton. Kalan kelime: 2. Bonus sayacı: 1 / 5")
+        waitFor("Seviye 2, Türkiye 2 / 20. 50 jeton. Kalan kelime: 2. Bonus sayacı: 1 / 5")
         assertTrue("ses kapalıyken çalınan: ${fake.played}", fake.played.isEmpty())
 
         Thread.sleep(900) // çift dokunuş tolerans penceresi (800 ms) geçsin
