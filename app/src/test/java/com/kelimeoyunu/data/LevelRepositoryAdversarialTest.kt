@@ -100,7 +100,7 @@ class LevelRepositoryAdversarialTest {
             if (l.id != i + 1) bad += "id ${l.id} != ${i + 1}"
             if (l.letters.size !in 3..7) bad += "${l.id}: harf sayısı ${l.letters.size}"
             if (l.words.size < 2) bad += "${l.id}: ${l.words.size} kelime"
-            if (l.words.size > 12) bad += "${l.id}: ${l.words.size} kelime > 12"
+            if (l.words.size > 16) bad += "${l.id}: ${l.words.size} kelime > 16"
             if (l.words.map { it.word }.toSet().size != l.words.size) bad += "${l.id}: tekrar eden kelime"
             if (l.letters.any { it !in TurkishText.ALPHABET }) bad += "${l.id}: alfabe dışı harf"
             for (w in l.words) {

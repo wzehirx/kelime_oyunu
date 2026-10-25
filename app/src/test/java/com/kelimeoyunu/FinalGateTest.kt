@@ -54,7 +54,7 @@ import org.robolectric.annotation.Config
 
 /**
  * Son kapı: gerçek AppContainer (gerçek words.txt + 10.000 seviye + gerçek DataStore dosyası) ile bir TalkBack
- * kullanıcısının gerçek 1. seviyeyi (harfler "uhş": şuh, huş) yalnızca etiketli düğmelerle bitirmesi,
+ * kullanıcısının gerçek 1. seviyeyi (harfler "oab": boa, oba) yalnızca etiketli düğmelerle bitirmesi,
  * hata yolları, kayıt/geri yükleme ve ses sessizliği. Erişilebilirlik duyuruları AccessibilityManager'a
  * gönderilen TYPE_ANNOUNCEMENT olaylarından okunur.
  */
@@ -115,16 +115,16 @@ class FinalGateTest {
         waitHeard("Önce harf seç")
 
         // b) Geçersiz kelime; kelime silinmez, Temizle ile boşaltılır.
-        typeWord("uhş"); tap("Gönder")
+        typeWord("abo"); tap("Gönder")
         waitHeard("Geçersiz kelime")
-        rule.onNodeWithContentDescription("Oluşturulan kelime: UHŞ").assertExists()
+        rule.onNodeWithContentDescription("Oluşturulan kelime: ABO").assertExists()
         tap("Temizle")
         waitHeard("Temizlendi")
         rule.onNodeWithContentDescription("Oluşturulan kelime: boş").assertExists()
 
         // c) Bonus kelime (sözlükte var, seviyede yok): sayaç 1/5.
-        typeWord("hu"); tap("Gönder")
-        waitHeard("Bonus kelime, HU")
+        typeWord("ab"); tap("Gönder")
+        waitHeard("Bonus kelime, AB")
         waitFor("Seviye 1. 50 jeton. Kalan kelime: 2. Bonus sayacı: 1 / 5")
 
         // d) İpucu: bakiye düşer, duyuru DÜŞÜLMÜŞ bakiyeyi söyler; ekran başlığı aynı sayıyı verir.
@@ -133,20 +133,20 @@ class FinalGateTest {
         waitFor("Seviye 1. 40 jeton. Kalan kelime: 2. Bonus sayacı: 1 / 5")
 
         // e) İlk kelime, sonra aynı kelime ikinci kez.
-        typeWord("şuh"); tap("Gönder")
-        waitHeard("Doğru, ŞUH")
+        typeWord("boa"); tap("Gönder")
+        waitHeard("Doğru, BOA")
         waitFor("Seviye 1. 40 jeton. Kalan kelime: 1. Bonus sayacı: 1 / 5")
-        typeWord("şuh"); tap("Gönder")
+        typeWord("boa"); tap("Gönder")
         waitHeard("Bu kelime zaten bulundu")
         waitFor("Seviye 1. 40 jeton. Kalan kelime: 1. Bonus sayacı: 1 / 5") // değişmedi
 
         // f) Son kelime: seviye biter, odak "Sonraki seviye"de, duyuru tek cümlede.
-        typeWord("huş"); tap("Gönder")
+        typeWord("oba"); tap("Gönder")
         waitFor("Sonraki seviye", 30_000)
         rule.onNodeWithContentDescription("Sonraki seviye").assertIsFocused()
         waitHeard("Seviye 1 tamamlandı")
         val finale = announcements().last { it.contains("tamamlandı") }
-        assertTrue(finale, finale.endsWith("Doğru, HUŞ. 10 jeton kazandın. Seviye 1 tamamlandı"))
+        assertTrue(finale, finale.endsWith("Doğru, OBA. 10 jeton kazandın. Seviye 1 tamamlandı"))
         rule.onNodeWithText("Tüm kelimeleri buldun. Toplam jeton: 50. Bonus sayacı: 1 / 5.").assertExists()
 
         // g) Sonraki seviye: 2. seviye başlar, odak başlıkta.
@@ -200,7 +200,7 @@ class FinalGateTest {
         waitHeard("İpucu kullanıldı, kalan jeton: 20")
         waitFor("Seviye 1. 20 jeton. Kalan kelime: 1. Bonus sayacı: 0 / 5")
         // Hangi kelimenin açıldığı rastgele: ikisini de dene; açılmış olana "zaten bulundu" denir.
-        val candidates = listOf("şuh", "huş")
+        val candidates = listOf("boa", "oba")
         for (w in candidates) {
             if (exists("Sonraki seviye")) break
             typeWord(w); tap("Gönder")
@@ -283,11 +283,11 @@ class FinalGateTest {
         }
         waitFor("Seviye 1. 50 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5")
         tap("Gönder")
-        typeWord("uhş"); tap("Gönder"); tap("Temizle")
-        typeWord("hu"); tap("Gönder")
+        typeWord("abo"); tap("Gönder"); tap("Temizle")
+        typeWord("ab"); tap("Gönder")
         tap("İpucu, harf aç, 10 jeton")
-        typeWord("şuh"); tap("Gönder"); typeWord("şuh"); tap("Gönder")
-        typeWord("huş"); tap("Gönder")
+        typeWord("boa"); tap("Gönder"); typeWord("boa"); tap("Gönder")
+        typeWord("oba"); tap("Gönder")
         waitFor("Sonraki seviye", 30_000)
         tap("Sonraki seviye")
         waitFor("Seviye 2. 50 jeton. Kalan kelime: 2. Bonus sayacı: 1 / 5")
