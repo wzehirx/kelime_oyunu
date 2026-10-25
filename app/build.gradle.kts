@@ -39,8 +39,10 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            // R8 bilerek kapalı: küçültülmüş çıktı bu ortamda bir cihazda çalıştırılıp doğrulanamıyor.
+            // Release APK, test edilen debug yapısıyla aynı kodu taşır (fark: imza ve debuggable=false).
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfigs.findByName("release")?.let { signingConfig = it }
         }
