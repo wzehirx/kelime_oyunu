@@ -68,7 +68,10 @@ class GameViewModelWorldTest {
     private fun newVm(r: ProgressRepository, withTour: Boolean = true) =
         GameViewModel(levels(), { dict }, r, Random(1), dispatcher, { if (withTour) tour else null })
 
-    private suspend fun GameViewModel.awaitReady() = withContext(Dispatchers.Default) { state.first { it !is GameUiState.Loading } }
+    // Ready, olayı işleyen birleşmemiş toplayıcıdan önce görülebilir; kısa bekleme yarışı kapatır (sim testindeki gibi).
+    private suspend fun GameViewModel.awaitReady() = withContext(Dispatchers.Default) {
+        state.first { it !is GameUiState.Loading }.also { delay(50) }
+    }
 
     private fun TestScope.collect(vm: GameViewModel): MutableList<GameEvent> {
         val list = ArrayList<GameEvent>()
@@ -94,6 +97,10 @@ class GameViewModelWorldTest {
 
     private suspend fun seed(r: ProgressRepository, levelIndex: Int, coins: Int = 50, found: Set<String> = emptySet()) =
         r.save(Progress(levelIndex, coins, found, emptySet(), emptySet(), 0))
+
+    private suspend fun ProgressRepository.awaitIntroduced(n: Int) = withContext(Dispatchers.Default) {
+        withTimeout(10_000) { var v = introducedPlaceIndex.first(); while (v != n) { delay(10); v = introducedPlaceIndex.first() } }
+    }
 
     private fun List<GameEvent>.places() = filter { it is GameEvent.PlaceEntered || it is GameEvent.PlaceCompleted }
 
@@ -237,7 +244,7 @@ class GameViewModelWorldTest {
         val r = repo()
         val first = newVm(r); val ev1 = collect(first); first.awaitReady()
         assertEquals(1, ev1.count { it is GameEvent.PlaceEntered })
-        r.introducedPlaceIndex.first { it == 0 }
+        r.awaitIntroduced(0)
         // menüye çık-gir ve "uygulamayı kapat-aç" aynı şeydir: yeni ViewModel
         repeat(2) {
             val again = newVm(r); val ev = collect(again); again.awaitReady()
@@ -252,7 +259,7 @@ class GameViewModelWorldTest {
         val r = repo(); seed(r, 19)
         val vm = newVm(r); collect(vm); vm.awaitReady()
         vm.finishLevel(); vm.onNextLevel()
-        r.introducedPlaceIndex.first { it == 1 }
+        r.awaitIntroduced(1)
         r.awaitProgress { it.levelIndex == 20 }
         val again = newVm(r); val ev = collect(again); again.awaitReady()
         assertTrue(ev.none { it is GameEvent.PlaceEntered })

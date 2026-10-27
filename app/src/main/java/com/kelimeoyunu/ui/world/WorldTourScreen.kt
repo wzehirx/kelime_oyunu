@@ -47,7 +47,8 @@ fun WorldTourScreen(
 ) {
     // Kayıtlı seviye bitmiş ama "Sonraki seviye"ye basılmamışsa o seviye ilerlemeye sayılır (ülke bitmiş görünür).
     val currentLevelIndex = savedLevelIndex + if (savedLevelDone) 1 else 0
-    val current = tour.positionOf(currentLevelIndex)?.placeIndex
+    // Odak ve kaydırma, "Devam et" ile aynı ülkede kalır (seviye bitmiş olsa da basılana kadar oradasın).
+    val current = tour.positionOf(savedLevelIndex)?.placeIndex
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = current ?: 0)
     Column(modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(

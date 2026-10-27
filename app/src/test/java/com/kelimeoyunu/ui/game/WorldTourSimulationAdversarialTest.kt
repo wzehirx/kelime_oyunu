@@ -254,9 +254,14 @@ class WorldTourSimulationAdversarialTest {
         vm.finishLevel()
         assertEquals(1, ev.count { it is GameEvent.PlaceCompleted })
         val saved = r.await { it.coins == 535 }
-        val st = tour.placeState(0, saved.levelIndex)
+        // Kayıtlı index 19 kalır; liste, seviyenin bittiğini kayıtlı kelimelerden (LevelRepository.isLevelComplete) çıkarıp
+        // efektif ilerlemeyi +1 sayar (WorldTourScreen savedLevelDone). Test başta saved.levelIndex'i doğrudan veriyordu.
+        val levels = LevelRepository { ByteArrayInputStream(gz) }
+        assertTrue(levels.isLevelComplete(saved.levelIndex, saved.found))
+        val effective = saved.levelIndex + 1
+        val st = tour.placeState(0, effective)
         assertTrue("liste: $st, fakat oyun 'Türkiye tamamlandı' dedi ve ödül verdi", st is PlaceState.Completed)
-        assertEquals("başlıkta tamamlanan ülke sayısı", 1, tour.completedPlaces(saved.levelIndex))
+        assertEquals("başlıkta tamamlanan ülke sayısı", 1, tour.completedPlaces(effective))
     }
 
     @Test fun listAfterNextLevelIsConsistent() = test {

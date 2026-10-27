@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performScrollToIndex
 import com.kelimeoyunu.TestPlaces
 import com.kelimeoyunu.domain.WorldTour
@@ -29,7 +30,8 @@ class WorldTourScreenAdversarialTest {
 
     @Test fun BUG_levelTwentyDoneButNextNotPressedListMustNotSayStillInProgress19of20() {
         // Oyun "Türkiye tamamlandı, 25 jeton" dedi; kayıtlı index hâlâ 19. Liste 19/20 ve "şu an buradasın" diyor.
-        show(19)
+        // Çağıran (AppRoot) kayıtlı seviyenin bittiğini LevelRepository.isLevelComplete ile hesaplayıp bildirir.
+        rule.setContent { KelimeTheme { WorldTourScreen(tour, 19, { }, { }, savedLevelDone = true) } }
         rule.onNodeWithContentDescription("Türkiye, tamamlandı", substring = true).assertExists()
     }
 
@@ -57,13 +59,13 @@ class WorldTourScreenAdversarialTest {
     @Test fun savedLevelDoneCountsAsProgress() {
         rule.setContent { KelimeTheme { WorldTourScreen(tour, 19, { }, { }, savedLevelDone = true) } }
         rule.onNodeWithContentDescription("Türkiye, tamamlandı", substring = true).assertExists()
-        rule.onNodeWithContentDescription("Dünya turu, 1 / 100 ülke tamamlandı").assertExists()
+        rule.onNodeWithText("Dünya turu, 1 / 100 ülke tamamlandı").assertExists()
         rule.onNodeWithContentDescription("Türkiye, 19 / 20", substring = true).assertDoesNotExist()
     }
 
     @Test fun savedLevelNotDoneKeepsInProgress() {
         rule.setContent { KelimeTheme { WorldTourScreen(tour, 19, { }, { }, savedLevelDone = false) } }
         rule.onNodeWithContentDescription("Türkiye, 19 / 20 seviye, şu an buradasın").assertExists()
-        rule.onNodeWithContentDescription("Dünya turu, 0 / 100 ülke tamamlandı").assertExists()
+        rule.onNodeWithText("Dünya turu, 0 / 100 ülke tamamlandı").assertExists()
     }
 }
