@@ -1,0 +1,11 @@
+Atkinson Hyperlegible Next (Braille Institute / The Atkinson Hyperlegible Next Project Authors)
+Lisans: SIL Open Font License 1.1 (tam metin: AtkinsonHyperlegibleNext-OFL.txt)
+Kaynak: https://github.com/google/fonts/tree/main/ofl/atkinsonhyperlegiblenext (AtkinsonHyperlegibleNext[wght].ttf)
+
+Neden "Next": ilk Atkinson Hyperlegible'da U+0130 (İ) yok; Next sürümü Türkçe harflerin tümünü içerir.
+Uygulamadaki dosyalar bu degisken yazi tipinden fontTools instancer ile uretilmis statik Regular (wght 400) ve Bold (wght 700)
+orneklerdir (app/src/main/res/font/atkinson_hyperlegible_regular.ttf, ..._bold.ttf). Ayrilmis Yazi Tipi Adi bildirilmemistir.
+Kaynak degisken dosya SHA-256: 5a455d1cfa099b601ab70751bb9673e8fe1854dc4500c80e1a220d0d75e31745
+Regular SHA-256: 6a8fb30da5fdf769729528fde799159913dd6e611dd80fb1e45e96ead6ab7b4b
+Bold SHA-256:    937395b2f36f8e4be6ae78cbfb07659b5a67d3801e3684e1002e62dcdf074818
+Dogrulama: python3 tools/fonts/verify_font_glyphs.py app/src/main/res/font/*.ttf

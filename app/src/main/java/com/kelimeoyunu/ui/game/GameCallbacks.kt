@@ -10,6 +10,8 @@ data class GameCallbacks(
     val onHintLetter: () -> Unit = {},
     val onHintWord: () -> Unit = {},
     val onNextLevel: () -> Unit = {},
+    /** Üst çubuktaki görsel "Menü" kısayolu (ekran okuyucudan gizli; geri hareketi aynı işi yapar). */
+    val onMenu: () -> Unit = {},
 ) {
     companion object {
         fun of(vm: GameViewModel) = GameCallbacks(

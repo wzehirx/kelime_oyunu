@@ -1,6 +1,8 @@
 package com.kelimeoyunu.ui.common
 
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.view.HapticFeedbackConstants
 import android.view.View
 import com.kelimeoyunu.domain.SubmitResult
@@ -19,6 +21,8 @@ fun interface HapticPerformer {
  * API 30 altında CONFIRM yerine KEYBOARD_TAP, REJECT yerine iki hafif KEYBOARD_TAP kullanılır.
  */
 class ViewHaptics(private val view: View, private val enabled: () -> Boolean) : HapticPerformer {
+    private val handler = Handler(Looper.getMainLooper())
+
     override fun perform(kind: Haptic) {
         if (!enabled()) return
         when (kind) {
@@ -31,7 +35,7 @@ class ViewHaptics(private val view: View, private val enabled: () -> Boolean) : 
                     view.performHapticFeedback(HapticFeedbackConstants.REJECT)
                 } else {
                     view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                    view.postDelayed({ if (enabled()) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP) }, 70)
+                    handler.postDelayed({ if (enabled()) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP) }, 70)
                 }
         }
     }

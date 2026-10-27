@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.KelimeOyunu" parent="@android:style/Theme.Material.Light.NoActionBar" />
+    <style name="Theme.KelimeOyunu" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <!-- Deniz kâğıdı zemin rengi: ilk karede beyaz parlama olmasın -->
+        <item name="android:windowBackground">#FFE8F0EE</item>
+    </style>
 </resources>

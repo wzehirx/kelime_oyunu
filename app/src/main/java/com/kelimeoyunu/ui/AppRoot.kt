@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -29,6 +30,9 @@ import com.kelimeoyunu.a11y.Announcements
 import com.kelimeoyunu.a11y.Announcer
 import com.kelimeoyunu.audio.Sfx
 import com.kelimeoyunu.domain.WorldTour
+import com.kelimeoyunu.ui.common.HapticFeedbackSink
+import com.kelimeoyunu.ui.common.ProvideMotion
+import com.kelimeoyunu.ui.common.ViewHaptics
 import com.kelimeoyunu.ui.game.CompositeFeedbackSink
 import com.kelimeoyunu.ui.game.GameScreen
 import com.kelimeoyunu.ui.game.GameUiState
@@ -60,6 +64,9 @@ fun AppRoot(container: AppContainer, modifier: Modifier = Modifier) {
     // İlk değer gelene kadar SoundManager.enabled = false (sessiz).
     val soundSetting by container.settingsRepository.soundEnabled.collectAsState(initial = null)
     SideEffect { container.soundManager.enabled = soundSetting == true }
+    // Titreşim ve animasyon ayarları varsayılan açıktır; değer gelene kadar da açık varsayılır.
+    val vibrationSetting by container.settingsRepository.vibrationEnabled.collectAsState(initial = true)
+    val animationsSetting by container.settingsRepository.animationsEnabled.collectAsState(initial = true)
 
     fun go(next: Screen) {
         container.soundManager.play(Sfx.NAV)
@@ -68,6 +75,7 @@ fun AppRoot(container: AppContainer, modifier: Modifier = Modifier) {
     }
     BackHandler(enabled = screen != Screen.Menu) { go(Screen.Menu) }
 
+    ProvideMotion(animationsSetting) {
     when (screen) {
         Screen.Menu -> {
             val progress by container.progressRepository.progress.collectAsState(initial = null)
@@ -90,9 +98,17 @@ fun AppRoot(container: AppContainer, modifier: Modifier = Modifier) {
                 modifier = modifier,
                 allDone = ready && count!! > 0 && p!!.levelIndex >= count,
                 focusSettings = previous == Screen.Settings,
+                coins = if (ready) p!!.coins else null,
+                totalLevels = if (ready) count else null,
+                worldCompleted = if (ready && tour != null) {
+                    // Dünya turu ekranıyla aynı sayım: biten ama "Sonraki seviye"ye basılmamış seviye ilerlemeye sayılır.
+                    val done = container.levelRepository.isLevelComplete(p!!.levelIndex, p.found)
+                    tour.completedPlaces(p.levelIndex + if (done) 1 else 0)
+                } else null,
+                worldTotal = if (ready) tour?.placeCount else null,
             )
         }
-        Screen.Game -> GameRoute(container, announcer, { go(Screen.Menu) }, modifier)
+        Screen.Game -> GameRoute(container, announcer, { go(Screen.Menu) }, modifier, vibrationSetting)
         Screen.World -> WorldRoute(container, announcer, { go(Screen.Menu) }, modifier)
         Screen.HowToPlay -> {
             // Tur kapalıysa (places.json yok/bozuk) Dünya turu anlatımı gösterilmez; bilinene kadar da gösterilmez.
@@ -103,6 +119,10 @@ fun AppRoot(container: AppContainer, modifier: Modifier = Modifier) {
             SettingsScreen(
                 soundEnabled = soundSetting ?: true,
                 onSoundChange = { scope.launch { container.settingsRepository.setSoundEnabled(it) } },
+                vibrationEnabled = vibrationSetting,
+                onVibrationChange = { scope.launch { container.settingsRepository.setVibrationEnabled(it) } },
+                animationsEnabled = animationsSetting,
+                onAnimationsChange = { scope.launch { container.settingsRepository.setAnimationsEnabled(it) } },
                 onResetConfirmed = {
                     scope.launch {
                         container.progressRepository.reset()
@@ -114,6 +134,7 @@ fun AppRoot(container: AppContainer, modifier: Modifier = Modifier) {
             )
         }
     }
+    }
 }
 
 /**
@@ -122,19 +143,24 @@ fun AppRoot(container: AppContainer, modifier: Modifier = Modifier) {
  * yaratılmaz, bkz. manifest configChanges.)
  */
 @Composable
-private fun GameRoute(container: AppContainer, announcer: Announcer, onExit: () -> Unit, modifier: Modifier) {
+private fun GameRoute(
+    container: AppContainer, announcer: Announcer, onExit: () -> Unit, modifier: Modifier, vibrationEnabled: Boolean,
+) {
+    val view = LocalView.current
+    val vibration = rememberUpdatedState(vibrationEnabled)
     val store = remember { ViewModelStore() }
     val viewModel = remember(store) {
         ViewModelProvider(store, container.gameViewModelFactory())[GameViewModel::class.java]
     }
     DisposableEffect(store) { onDispose { store.clear() } }
-    val feedback = remember(viewModel, announcer) {
+    val feedback = remember(viewModel, announcer, view) {
         CompositeFeedbackSink(
             AnnouncingFeedbackSink(
                 announcer, { viewModel.state.value }, { SystemClock.elapsedRealtime() },
                 soundOn = { container.soundManager.enabled },
             ),
             SoundFeedbackSink(container.soundManager),
+            HapticFeedbackSink(ViewHaptics(view) { vibration.value }),
         )
     }
     GameScreen(viewModel, feedback, onExit, modifier)

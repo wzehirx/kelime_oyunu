@@ -29,6 +29,14 @@ Oyun, Türkiye'den başlayıp ülke ülke ilerleyen bir yolculuktur. Görsel ark
 - Büyük yazı boyutunda ve küçük ekranlarda düzen taşmaz. Açık/koyu tema ve yüksek kontrast renkler kullanılır.
 - Not: Geliştirme ortamında gerçek TalkBack ile test yapılamadı. Erişilebilirlik; Compose semantik ağacı, duyuru metinleri ve odak davranışı üzerinden otomatik testlerle doğrulandı. Gerçek cihazda geri bildirim çok değerlidir.
 
+## Görsel tasarım (v2.0 çalışması)
+Görsel katman erişilebilirliğin ÜSTÜNE eklenir; TalkBack anlamsal ağacı, etiketler, okuma sırası ve duyuru zamanlaması değişmez (süs öğeleri `clearAndSetSemantics` ile gizlidir). Belirtim: [`visual-design.md`](docs/superpowers/specs/2026-10-27-visual-design.md), [`visual-handoff.md`](docs/superpowers/specs/2026-10-27-visual-handoff.md).
+- **Kimlik:** seyahat defteri. Açık "Deniz kâğıdı", koyu "Gece haritası"; fildişi harf jetonları; bölge damga mürekkepleri (altı bölge). Tüm metin/zemin çiftleri iki temada WCAG AA (metin 4,5:1, bileşen 3:1; `ThemeContrastTest`).
+- **Ekranlar:** karo logolu ana menü ve "Devam et" kahraman paneli; çizgili defter satırlı Dünya turu; pusula halkası harf çarkı, gerçek çapraz bulmaca ızgarası (ekran okuyucudan gizli), kompakt kelime listesi; ülke bitişinde damga, seviye bitişinde konfeti.
+- **Ayarlar:** Ses efektleri, **Titreşim** ve **Animasyonlar** (üçü de varsayılan açık). Sistem animasyon ölçeği 0 ya da Animasyonlar kapalıysa tüm hareket anlık olur. Titreşim `performHapticFeedback` ile verilir (izin yok).
+- **Yazı tipi:** [Atkinson Hyperlegible Next](https://github.com/googlefonts/atkinson-hyperlegible-next) (SIL OFL 1.1), Regular ve Bold, uygulamaya gömülü; lisans `assets/licenses/` altında. Türkçe harfler `tools/fonts/verify_font_glyphs.py` ile doğrulanır.
+- Simgeler Canvas ile çizilir; `material-icons-extended` ve yeni bağımlılık yoktur.
+
 ## İndirme
 Her sürümün **debug imzalı APK**'sı [Releases](https://github.com/wzehirx/kelime_oyunu/releases) sayfasındadır. Sürümler **v1.0–v1.5** ayrıca **release APK** içerir.
 
@@ -44,6 +52,8 @@ Her sürümün **debug imzalı APK**'sı [Releases](https://github.com/wzehirx/k
 | v1.3 | Dünya turu: 100 ülke, bölgeye özel giriş melodileri, ülke tanıtımı ve tamamlama bonusu (25 jeton), Dünya turu ekranı. Debug ve release APK |
 | v1.4 | Düzgün sözlük (Zemberek + sıklık listesi: fiil kökleri ve çekimli biçimler kabul, argo reddedilir, ızgarada yalnızca yaygın sözcükler), hızlı yükselen ve daha zor seviye eğrisi (3 harfli yalnızca ilk 6 seviye), jeton dengesi (seviye +5, bonus sayacı +10, harf ipucu 15, kelime aç 40). Debug ve release APK |
 | v1.5 | Veri temizliği: ızgaradan uygunsuz sözcükler ve özel isimler çıkarıldı, kabul setinden küfür kalıpları çıkarıldı, ilk 700 seviyede yalnızca yaygın sözcükler. Debug ve release APK |
+
+> Not: v2.0 görsel yenilemesi bu tabloda henüz listelenmedi; sürüm satırı yayın sırasında eklenecek.
 
 > Debug APK'lar depodaki ortak `app/debug.keystore` ile imzalanır; sürümler birbirinin üzerine kurulur. Release APK farklı bir anahtarla imzalıdır, debug ile aynı cihazda üst üste kurulmaz (önce birini kaldır).
 

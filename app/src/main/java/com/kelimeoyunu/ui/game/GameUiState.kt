@@ -10,6 +10,15 @@ data class LetterTile(val index: Int, val char: Char, val used: Boolean)
 /** [cells]: açık harf ya da gizliyse null. */
 data class WordRow(val number: Int, val length: Int, val cells: List<Char?>, val found: Boolean)
 
+/**
+ * Çapraz bulmaca ızgarasının görsel verisi (ekran okuyucuya sunulmaz; bilgi kelime listesindedir).
+ * [letter] yalnızca açık kutularda doludur (bulunmuş ya da ipucuyla açılmış); [hinted] ipucuyla açılmış ama
+ * henüz bir bulunmuş kelimenin parçası olmayan kutudur. Koordinatlar ızgara sınırlarına göre 0 tabanlıdır.
+ */
+data class GridCellUi(val row: Int, val col: Int, val letter: Char?, val hinted: Boolean)
+
+data class GridUi(val rows: Int, val cols: Int, val cells: List<GridCellUi>)
+
 sealed interface GameUiState {
     data object Loading : GameUiState
     data class Error(val message: String) : GameUiState
@@ -26,6 +35,10 @@ sealed interface GameUiState {
         val levelComplete: Boolean,
         /** Dünya turu konumu; tur kapalıysa null. */
         val place: PlacePosition? = null,
+        /** Seçili harflerin [LetterTile.index] kimlikleri, seçim sırasıyla (jeton sıra rozeti için). */
+        val selection: List<Int> = emptyList(),
+        /** Görsel ızgara; verilmemişse (testler) çizilmez. */
+        val grid: GridUi? = null,
     ) : GameUiState
 }
 

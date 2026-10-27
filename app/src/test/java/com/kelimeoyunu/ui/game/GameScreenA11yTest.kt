@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.assertCountEquals
 import com.kelimeoyunu.ui.assertNoUnlabeledClickables
 import com.kelimeoyunu.ui.theme.KelimeTheme
+import kotlin.math.atan2
+import androidx.compose.ui.test.assertIsEnabled
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -123,11 +125,69 @@ class GameScreenA11yTest {
         assertEquals(ys.sorted(), ys)
     }
 
-    @Test fun lettersWrapInRowsOfFour() {
+    // v2.0: harfler 4'lü satırlar yerine pusula halkasında; ilk jeton saat 12'de, eşit aralıklı, ortada Karıştır.
+    @Test fun lettersSitOnACompassRingStartingAtTwelveWithShuffleInTheMiddle() {
         show()
-        fun y(cd: String) = rule.onNodeWithContentDescription(cd).fetchSemanticsNode().positionInRoot.y
-        assertEquals(y("Harf K"), y("Harf E"), 0.5f)
-        assertTrue(y("Harf M") > y("Harf K"))
+        fun center(cd: String) = rule.onNodeWithContentDescription(cd).fetchSemanticsNode().boundsInRoot.center
+        val middle = center("Karıştır")
+        val points = "KALEM".map { center("Harf $it") }
+        val radii = points.map { (it - middle).getDistance() }
+        radii.forEach { assertEquals("jetonlar aynı halkada olmalı", radii[0], it, 1.5f) }
+        assertEquals("ilk jeton saat 12 yönünde", middle.x, points[0].x, 1.5f)
+        assertTrue(points[0].y < middle.y)
+        assertTrue("ikinci jeton saat yönünde (sağda)", points[1].x > middle.x)
+        val angles = points.map { Math.toDegrees(atan2((it.y - middle.y).toDouble(), (it.x - middle.x).toDouble())) }
+        for (i in 1 until angles.size) {
+            val step = ((angles[i] - angles[i - 1]) + 360.0) % 360.0
+            assertEquals("5 harfte jetonlar 72 derece arayla", 72.0, step, 1.0)
+        }
+    }
+
+    // Okuma sırasını geometri değil açık traversalIndex belirler (çarkta geometri saat yönüdür).
+    @Test fun traversalIndicesKeepTheOldReadingOrder() {
+        show()
+        fun idx(cd: String) = rule.onNodeWithContentDescription(cd).fetchSemanticsNode().config
+            .getOrNull(SemanticsProperties.TraversalIndex)!!
+        val order = listOf("Harf K", "Harf A", "Harf L", "Harf E", "Harf M") + actionLabels
+        val values = order.map { idx(it) }
+        assertEquals("traversalIndex okuma sırasını vermeli", values.sorted(), values)
+        assertEquals("indeksler benzersiz", values.size, values.toSet().size)
+    }
+
+    @Test fun crosswordGridIsHiddenFromAccessibilityAndWordListCarriesTheInfo() {
+        val grid = GridUi(
+            2, 3,
+            listOf(
+                GridCellUi(0, 0, 'k', false), GridCellUi(0, 1, 'a', false), GridCellUi(0, 2, 'l', false),
+                GridCellUi(1, 1, 'e', true), GridCellUi(1, 2, null, false),
+            ),
+        )
+        show(FakeStates.ready().copy(grid = grid))
+        // Izgara harfleri ağaçta yok (kelime listesi satırları etiketle okunur, görsel harf metni yok).
+        listOf("K", "A", "L", "E").forEach { rule.onAllNodes(androidx.compose.ui.test.hasText(it)).assertCountEquals(0) }
+        rule.onNodeWithContentDescription("Kelime 1, 3 harfli, bulundu: KAL").assertExists()
+        assertUnlabeledClickables()
+    }
+
+    @Test fun selectedTilesShowOrderBadgesOnlyVisually() {
+        val s = FakeStates.ready("ka", setOf(0, 1)).copy(selection = listOf(1, 0))
+        show(s)
+        // Rozet metni anlamsal ağaçta yok; etiket yalnızca "seçildi" der.
+        rule.onAllNodes(androidx.compose.ui.test.hasText("1")).assertCountEquals(0)
+        rule.onNodeWithContentDescription("Harf K, seçildi").assertHasClickAction()
+        rule.onNodeWithContentDescription("Harf A, seçildi").assertHasClickAction()
+    }
+
+    @Test fun emptySubmitStaysEnabledAndReportsThroughTheCallback() {
+        show()
+        rule.onNodeWithContentDescription("Gönder").assertIsEnabled().performScrollTo().performClick()
+        assertEquals(listOf("submit"), rec.calls)
+    }
+
+    @Test fun menuShortcutIsVisualOnlyAndNotInTheSemanticTree() {
+        show()
+        rule.onAllNodesWithContentDescription("Menü").assertCountEquals(0)
+        rule.onAllNodes(androidx.compose.ui.test.hasText("Menü")).assertCountEquals(0)
     }
 
     @Test fun clicksCallTheRightCallbacks() {

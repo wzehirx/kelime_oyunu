@@ -3,13 +3,12 @@ package com.kelimeoyunu.ui.game
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,13 +23,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kelimeoyunu.a11y.Announcements
 import com.kelimeoyunu.domain.TurkishText
+import com.kelimeoyunu.ui.common.IconKind
+import com.kelimeoyunu.ui.common.KIcon
+import com.kelimeoyunu.ui.theme.KelimeType
+import com.kelimeoyunu.ui.theme.Radius
+import com.kelimeoyunu.ui.theme.kelimeColors
 
-/** Kelime listesi: görsel olarak kutu kutu harfler, TalkBack'te kelime başına tek düğüm. */
+/**
+ * Kompakt kelime listesi: görsel olarak küçük (28 dp) harf kutuları, kısa kelimeler yan yana akar. TalkBack'te kelime
+ * başına tek düğüm ve eski etiketler aynen ("Kelime 2, 5 harfli, açık harfler: _ A _ E _").
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun WordList(rows: List<WordRow>, modifier: Modifier = Modifier) {
-    Column(
+    FlowRow(
         modifier.fillMaxWidth().semantics { collectionInfo = CollectionInfo(rows.size, 1) },
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         rows.forEach { WordRowView(it) }
     }
@@ -39,34 +48,35 @@ fun WordList(rows: List<WordRow>, modifier: Modifier = Modifier) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun WordRowView(row: WordRow) {
+    val k = kelimeColors
     FlowRow(
-        Modifier.fillMaxWidth().clearAndSetSemantics { contentDescription = Announcements.wordRowDescription(row) },
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        Modifier.clearAndSetSemantics { contentDescription = Announcements.wordRowDescription(row) },
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+        verticalArrangement = Arrangement.spacedBy(3.dp),
         itemVerticalAlignment = Alignment.CenterVertically,
     ) {
-        Text("${row.number}.", Modifier.padding(end = 4.dp), style = MaterialTheme.typography.bodyLarge)
+        Text("${row.number}.", Modifier.padding(end = 3.dp), style = KelimeType.small, color = k.inkMuted)
         row.cells.forEach { LetterBox(it, row.found) }
         // Bulundu bilgisi renkle değil, dolu kutu + kalın harf + onay işaretiyle de verilir.
-        if (row.found) Text("✓", style = MaterialTheme.typography.titleMedium)
+        if (row.found) KIcon(IconKind.Check, k.success, size = 18.dp)
     }
 }
 
 @Composable
 private fun LetterBox(letter: Char?, found: Boolean) {
-    val color = if (letter != null) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.background
+    val k = kelimeColors
     Surface(
-        color = color,
-        border = BorderStroke(if (found) 3.dp else 1.dp, MaterialTheme.colorScheme.outline),
-        shape = MaterialTheme.shapes.small,
-        modifier = Modifier.defaultMinSize(minWidth = 36.dp, minHeight = 36.dp),
+        color = if (letter != null) k.tile else k.surface,
+        border = BorderStroke(if (found) 2.5.dp else 1.dp, k.outline),
+        shape = RoundedCornerShape(Radius.cell),
+        modifier = Modifier.defaultMinSize(minWidth = 28.dp, minHeight = 28.dp),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
                 letter?.let { TurkishText.upper(it.toString()) } ?: "",
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                color = k.tileInk,
                 fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleMedium,
+                style = KelimeType.label,
             )
         }
     }

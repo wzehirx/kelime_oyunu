@@ -346,7 +346,26 @@ class GameViewModel(
             wordRows = rows,
             levelComplete = e.isComplete(),
             place = place(),
+            selection = selected,
+            grid = gridUi(lv, e),
         )
+    }
+
+    private fun gridUi(lv: Level, e: GameEngine): GridUi? {
+        val coords = LinkedHashMap<Pair<Int, Int>, Char>()
+        for (w in lv.words) w.cells().forEachIndexed { i, cell -> coords.putIfAbsent(cell, w.word[i]) }
+        if (coords.isEmpty()) return null
+        val minRow = coords.keys.minOf { it.first }
+        val minCol = coords.keys.minOf { it.second }
+        val cells = coords.map { (cell, ch) ->
+            val state = e.cellState(cell.first, cell.second)
+            GridCellUi(
+                cell.first - minRow, cell.second - minCol,
+                letter = if (state == CellState.Filled || state == CellState.Revealed) ch else null,
+                hinted = state == CellState.Revealed,
+            )
+        }
+        return GridUi(coords.keys.maxOf { it.first } - minRow + 1, coords.keys.maxOf { it.second } - minCol + 1, cells)
     }
 
     override fun onCleared() {

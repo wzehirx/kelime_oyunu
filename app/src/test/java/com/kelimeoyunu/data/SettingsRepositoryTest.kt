@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -58,5 +59,58 @@ class SettingsRepositoryTest {
         val s = store()
         s.edit { it[stringPreferencesKey("sound_enabled")] = "evet" }
         assertTrue(SettingsRepository(s).soundEnabled.first())
+    }
+
+    @Test fun vibrationAndAnimationsAreOnByDefault() = runTest {
+        val r = SettingsRepository(store())
+        assertTrue(r.vibrationEnabled.first())
+        assertTrue(r.animationsEnabled.first())
+    }
+
+    @Test fun vibrationAndAnimationsToggleIndependentlyOfSound() = runTest {
+        val r = SettingsRepository(store())
+        r.setVibrationEnabled(false)
+        assertFalse(r.vibrationEnabled.first())
+        assertTrue(r.animationsEnabled.first())
+        assertTrue(r.soundEnabled.first())
+        r.setAnimationsEnabled(false)
+        assertFalse(r.animationsEnabled.first())
+        r.setSoundEnabled(false)
+        assertFalse(r.soundEnabled.first())
+        assertFalse(r.vibrationEnabled.first())
+        r.setVibrationEnabled(true)
+        r.setAnimationsEnabled(true)
+        assertTrue(r.vibrationEnabled.first())
+        assertTrue(r.animationsEnabled.first())
+        assertFalse(r.soundEnabled.first())
+    }
+
+    @Test fun newSettingsSurviveNewInstanceOverSameFile() = runTest {
+        SettingsRepository(store()).apply { setVibrationEnabled(false); setAnimationsEnabled(false) }
+        scopes.forEach { it.cancel() }
+        val again = SettingsRepository(store())
+        assertFalse(again.vibrationEnabled.first())
+        assertFalse(again.animationsEnabled.first())
+        assertTrue(again.soundEnabled.first())
+    }
+
+    @Test fun wrongTypesForNewSettingsFallBackToTrue() = runTest {
+        val s = store()
+        s.edit {
+            it[stringPreferencesKey("vibration_enabled")] = "hayır"
+            it[stringPreferencesKey("animations_enabled")] = "hayır"
+        }
+        val r = SettingsRepository(s)
+        assertTrue(r.vibrationEnabled.first())
+        assertTrue(r.animationsEnabled.first())
+    }
+
+    @Test fun settingsKeysAreStable() = runTest {
+        // Kalıcı anahtar adları: değişirse eski kayıtlar sessizce varsayılana döner.
+        val s = store()
+        val r = SettingsRepository(s)
+        r.setVibrationEnabled(false); r.setAnimationsEnabled(false)
+        val keys = s.data.first().asMap().keys.map { it.name }.toSet()
+        assertEquals(setOf("vibration_enabled", "animations_enabled"), keys)
     }
 }

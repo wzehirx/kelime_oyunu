@@ -18,6 +18,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.kelimeoyunu.a11y.initialFocus
 import com.kelimeoyunu.ui.common.A11yButton
+import com.kelimeoyunu.ui.common.MinLetterHeight
+import com.kelimeoyunu.ui.theme.kelimeColors
 
 /** ViewModel'e bağlı oyun ekranı: durumu çizer, olayları [feedback]'e (duyuru, ileride ses) yönlendirir. */
 @Composable
@@ -28,8 +30,9 @@ fun GameScreen(
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
-    LaunchedEffect(viewModel, feedback) { viewModel.events.collect { feedback.onEvent(it) } }
-    val callbacks = remember(viewModel) { GameCallbacks.of(viewModel) }
+    val effects = remember(viewModel) { GameEffects() }
+    LaunchedEffect(viewModel, feedback) { viewModel.events.collect { feedback.onEvent(it); effects.onEvent(it) } }
+    val callbacks = remember(viewModel, onExitToMenu) { GameCallbacks.of(viewModel).copy(onMenu = onExitToMenu) }
     // Ekrana ilk girişte son durumda mıyız? Öyleyse hiçbir olay duyurusu gelmez; bağlamı odak taşır.
     val enteredAtEnd = remember { arrayOfNulls<Boolean>(1) }
     when (val s = state) {
@@ -43,7 +46,7 @@ fun GameScreen(
             if (enteredAtEnd[0] == null) enteredAtEnd[0] = false
             // Seviye başına: bu seviye ekrana zaten bitmiş olarak mı geldi (kayıttan yeniden açıldı)?
             val reopenedComplete = remember(s.levelNumber) { s.levelComplete }
-            GameContent(s, callbacks, modifier, levelCompleteHeadingFirst = reopenedComplete)
+            GameContent(s, callbacks, modifier, levelCompleteHeadingFirst = reopenedComplete, effects = effects)
         }
     }
 }
@@ -55,9 +58,10 @@ private fun MessageScreen(message: String, buttonLabel: String?, onButton: (() -
             message,
             Modifier.initialFocus().semantics { heading() },
             style = MaterialTheme.typography.headlineSmall,
+            color = kelimeColors.ink,
         )
         if (buttonLabel != null && onButton != null) {
-            A11yButton(buttonLabel, buttonLabel, onButton, Modifier.fillMaxWidth())
+            A11yButton(buttonLabel, buttonLabel, onButton, Modifier.fillMaxWidth(), minHeight = MinLetterHeight)
         }
     }
 }

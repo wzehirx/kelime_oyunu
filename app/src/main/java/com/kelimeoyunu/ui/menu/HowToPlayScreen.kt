@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import com.kelimeoyunu.a11y.initialFocus
 import com.kelimeoyunu.domain.GameEconomy
 import com.kelimeoyunu.ui.common.A11yButton
+import com.kelimeoyunu.ui.common.ButtonKind
+import com.kelimeoyunu.ui.theme.kelimeColors
 import com.kelimeoyunu.ui.common.MinLetterHeight
 
 private val IntroParagraphs = listOf(
@@ -49,8 +51,9 @@ fun HowToPlayScreen(onBack: () -> Unit, modifier: Modifier = Modifier, worldTour
             "Nasıl oynanır",
             Modifier.initialFocus().semantics { heading() },
             style = MaterialTheme.typography.headlineMedium,
+            color = kelimeColors.ink,
         )
-        howToPlayParagraphs(worldTourEnabled).forEach { Text(it, style = MaterialTheme.typography.bodyLarge) }
-        A11yButton("Geri", "Geri", onBack, Modifier.fillMaxWidth(), minHeight = MinLetterHeight)
+        howToPlayParagraphs(worldTourEnabled).forEach { Text(it, style = MaterialTheme.typography.bodyLarge, color = kelimeColors.ink) }
+        A11yButton("Geri", "Geri", onBack, Modifier.fillMaxWidth(), minHeight = MinLetterHeight, kind = ButtonKind.Secondary)
     }
 }
