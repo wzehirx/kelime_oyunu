@@ -12,12 +12,22 @@ v1.3'e kadar `words.txt` yalnızca TDK madde başlarıydı. Gerçek oyuncu üç 
 | Dosya | Anlam | Boyut |
 |---|---|---|
 | `tdk_words.txt` | `fetch_words.py` çıktısı (TDK madde başları, eski `words.txt`), boru hattının girdisi | 58.074 (2-15 harf) |
-| `app/src/main/assets/words.txt` | **Kabul seti**: oyuncunun yazdığı sözcüğün geçerli sayıldığı liste, 2-7 harf | **55.210** (2 harf 130, 3 harf 961, 4 harf 3.148, 5 harf 9.489, 6 harf 15.948, 7 harf 25.534) |
-| `grid_pool.txt` | **Izgara havuzu**: bulmacaya girebilen sözcükler, 3-7 harf, sıklık sırasıyla (uygulamaya girmez) | **9.780** (3 harf 631, 4 harf 1.464, 5 harf 3.211, 6 harf 2.506, 7 harf 1.968) |
-| `blocklist.txt` | Argo/küfür filtresi (92 sözcük) | 92 |
-| `blocklist_extra_forms.txt` | Elle eklenen engelli türemiş/çekimli biçimler (+ ırkçı/aşağılayıcı birkaç TDK sözcüğü) | 22 |
-| `pool_exclude.txt` | Kabul setinde kalan ama ızgaraya sorulmayan sözcükler ("ast" + cinsellik/anatomi/hakaret) | 29 |
+| `app/src/main/assets/words.txt` | **Kabul seti**: oyuncunun yazdığı sözcüğün geçerli sayıldığı liste, 2-7 harf | **55.055** (2 harf 131, 3 harf 957, 4 harf 3.139, 5 harf 9.469, 6 harf 15.898, 7 harf 25.461) |
+| `grid_pool.txt` | **Izgara havuzu**: bulmacaya girebilen sözcükler, 3-7 harf, sıklık sırasıyla (uygulamaya girmez) | **9.678** (3 harf 568, 4 harf 1.388, 5 harf 3.103, 6 harf 2.559, 7 harf 2.060) |
+| `blocklist.txt` | Argo/küfür filtresi (kabul setinden ve ızgaradan TAMAMEN çıkarılır) | 126 |
+| `blocklist_extra_forms.txt` | Elle eklenen engelli türemiş/çekimli biçimler ve küfür kalıpları (+ ırkçı/aşağılayıcı birkaç TDK sözcüğü) | 76 |
+| `pool_exclude.txt` | Kabul setinde kalabilen ama ızgaraya sorulmayan sözcükler ("ast", cinsellik/anatomi/hakaret, özel isimler, yabancı/şüpheli kısa sözcükler, i/ı yazım varyantları) | 359 |
 | `accept_exclude.txt` | Kabul setinden çıkarılan kısaltma/yabancı sözcükler | 5 |
+| `accept_include.txt` | Kabul setine elle eklenenler (build betiği uygular; engelli sözcük asla eklenmez): `ud` | 1 |
+
+### v1.4.1: bağımsız QA düzeltmeleri (2026-10)
+
+Bağımsız QA raporuna göre veri hattı düzeltildi (sürüm numarası değişmedi). Hepsi `build_wordlists.sh` ile üretilir:
+- **Kabul setinden tamamen çıkarılanlar** (`blocklist.txt` + `blocklist_extra_forms.txt`; çekimleri Zemberek çözümlemesiyle yakalanır): `düzüş*`, `işemek` çekimleri, `frikik`, `ibiş`, `kaşar`, `kavata`, `kerata`, `deyyus`, `dallama`, `kıç*`, `kodumu/kodumun/kodumuz`, `anan*` küfür kalıpları (`anan`, `ananı`, `ananın`, `ananla`, `ananızı`, `anasını`, `anasına` ...), `bacın`, `avrat`, `hödük`, `kıro`, `osuruk`, `gebert`, `zıkkım`, `yuh`, `oha`, `lan`, `ulan`, `penis`, `vajina`, `anüs`, `sperm`, `porno`, `orgazm`, `kondom`, `mastur`, `seksisi`, `seksüel`, `hitler`, `hitleri`, `çingene`, `kafir`. `ananas`, `anason`, `iş`, `işe`, `bacı`, `kod`, `kıçüstü` gibi masum sözcükler korunur (`işemek` mastarının kökü `işe` = iş + yönelme olduğundan `ROOT_ALLOW` ile kök eşlemesinden muaf tutulur; `işemek` biçimleri `blocklist_extra_forms.txt`'te tek tek listelidir).
+- **Kabul setinde kalır, ızgarada olmaz** (`pool_exclude.txt`): `hıyar öküz moruk gerzek embesil zampara lavuk geber defol sümük`, `penis ... leş` listesinin geri kalanı (taciz, cinsel, zina, meni, testis, meme, döl, kasık, sütyen, bakire, metres, çiş, apış, osur, kaka, kak, kuka, halt, yalaka, yalak, geberik, çirkef ...), ~210 kişi/yer adı (QA listesi + havuz taraması: `ali eren ayla kaya mine emin ... murat fatih yasemin ...`; havuzun tamamı elle gözden geçirildi), yabancı/şüpheli kısa sözcükler (`aut bop bre flu gri ski uzo yoo jig jip jem jen jul jüt rua ruz rop pog poy zom şom şua evç ekü` + benzerleri) ve yabancı yazımlar (`light`, `chat`, `sticker` ...).
+- **i/ı yazım varyantı** (`ayni kani kari akil akim ari ati atik adi bati bani`): bunlar `pool_exclude.txt`'te, ayrıca `build_wordlists.py` bir sözcükteki bazı `i` harfleri `ı` yapılınca kabul setinde bir sözcük çıkıyor ve o sözcük en az `IVAR_RATIO` = 5 kat yaygınsa (sıklık sayısı) sözcüğü ızgaradan otomatik eler (21 sözcük: `asil`, `cani`, `yakin`, `takim`, `sari` ...). `dişi`/`dışı`, `kir`/`kır`, `ayin`/`ayın` gibi 2-4 kat farklı gerçek çiftler korunur. Kabul setinde tüm bu yazılışlar kalır.
+- **`ud`** kabul setine `accept_include.txt` üzerinden eklendi (TDK listesinde ve sıklık yolunda yoktu).
+- **Eşikler.** Önce 3-4 harfli eşikler yükseltilip denendi (3: 200, 4: 40) ama alt sözcük arzı azalınca 5 harfli bant 31-700 yerine 31-2.100'e uzadı (6/7 harfli arz yetmedi). Bu yüzden kısa eşikler eski değerinde kaldı (3: 50, 4: 20) ve 6-7 harfli eşik 10 → 7'ye indi (adlar ve QA listeleri havuzdan ~500 sözcük çıkardığı için); bant yeniden 31-700. Bedeli: 6-7 harfli seviyelerde daha nadir TDK sözcükleri çıkabilir. Nadir kısa sözcükler artık eşik yerine `pool_exclude.txt` ile tek tek elenir.
 
 ### Yeniden üretim
 
@@ -45,7 +55,7 @@ Birleşim, sırayla (hepsi 2-7 harf, Türkçe alfabe, en az bir ünlü):
 
 ### Argo filtresi
 
-`blocklist.txt` = `blocklist_candidates.txt` (85 sözcük) + `blocklist_ambiguous.txt`'den **yalnızca** `seks, oral, anal, kerhane, travesti, gey, fuhuş`. Hafif hakaretler (aptal, salak, öküz, eşek ...) ve `meme, it, karı, kıç, döl, kaka` bilinçli olarak **kalır**. Uygulama:
+`blocklist.txt` = `blocklist_candidates.txt` (85 sözcük) + `blocklist_ambiguous.txt`'den **yalnızca** `seks, oral, anal, kerhane, travesti, gey, fuhuş`. Hafif hakaretler (aptal, salak, öküz, eşek ...) ve `meme, it, karı, döl, kaka` bilinçli olarak **kalır** (v1.4.1: `kıç`, `lan`, `ulan`, `yuh`, `oha`, `penis`, `porno`... artık listede; bkz. yukarıdaki "v1.4.1" bölümü). Uygulama:
 - Sözcüğün kendisi listede ya da listedeki bir mastarın köküyse (`sikmek` → `sik`, `siktirmek` → `siktir`) engellidir.
 - Zemberek çözümlemelerinden **hepsi** engelli bir lemma/köke gidiyorsa engellidir (`amlar`, `götü`, `sikti`, `boku`, `piçler`); temiz bir çözümlemesi de varsa engellenmez (`ama` bağlaçtır, `am`+yönelme değil). Bu, "amlar" gibi çekimli biçimleri yakalarken `ama`, `amca`, `sıçan` gibi temiz sözcükleri korur.
 - Zemberek'in türetme çözümlemesi yüzünden kaçan biçimler (`zenciye` ← `zen+ci`, `kancığa`, `sikle`) elle `blocklist_extra_forms.txt`'e eklendi (denetim: kök içeren tüm sözcükler listelenip tek tek bakıldı).
@@ -54,7 +64,7 @@ Birleşim, sırayla (hepsi 2-7 harf, Türkçe alfabe, en az bir ünlü):
 ### Izgara havuzu nasıl kurulur
 
 Kabul setinin alt kümesi, ve:
-- sıklık listesinde en az **N** geçiş: **3 harf 50, 4 harf 20, 5-7 harf 10** (kısa sözcükler daha yaygın olmalı çünkü "ast" gibi nadir kısa kayıtlar çok fazla; uzun sözcük sayısı ise düzey sayısını belirler),
+- sıklık listesinde en az **N** geçiş: **3 harf 50, 4 harf 20, 5 harf 10, 6-7 harf 7** (6-7 harf eşiği v1.4.1'de 10 → 7; aşağıdaki bölüme bakın) (kısa sözcükler daha yaygın olmalı çünkü "ast" gibi nadir kısa kayıtlar çok fazla; uzun sözcük sayısı ise düzey sayısını belirler),
 - **çekimsiz** içerik sözcüğü: Zemberek çözümlemesinde isim/sıfat/zarf için `lemma == sözcük`, fiil için `root == sözcük` (`kitap`, `sat`, `yat` evet; `evler`, `satar` hayır); özel isim, kısaltma, informal değil,
 - **TDK kapısı**: TDK madde başı ya da TDK mastarının kökü (Zemberek'in bildiği ama TDK'da olmayan `charter`, `sticker` gibi yabancı yazımlar elenir; 500 sözcük),
 - engelli listesi ve `pool_exclude.txt` (örneğin `ast`) çıkarılır.

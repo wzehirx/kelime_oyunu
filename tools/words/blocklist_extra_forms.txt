@@ -22,3 +22,58 @@ livata  # cinsel suç terimi/aşağılayıcı
 kavat  # aşağılayıcı (pezevenk)
 köpoğlu  # hakaret
 eşşoğlu  # hakaret
+# --- QA raporu (2026-10): küfür kalıpları ve çekimli biçimler
+anan  # ana (küfür kalıbı)
+anana  # ana (küfür kalıbı)
+ananı  # ana (küfür kalıbı)
+ananın  # ana (küfür kalıbı)
+ananız  # ana (küfür kalıbı)
+ananızı  # ana (küfür kalıbı)
+ananla  # ana (küfür kalıbı)
+ananda  # ana (küfür kalıbı)
+anandan  # ana (küfür kalıbı)
+anandır  # ana (küfür kalıbı)
+anasını  # ana (küfür kalıbı)
+anasına  # ana (küfür kalıbı)
+kodumu  # kod+um (küfür kalıbı: "kodumun")
+kodumun  # kod+um (küfür kalıbı: "kodumun")
+kodumuz  # kod+um (küfür kalıbı: "kodumun")
+bacın  # baca/bacı çekimi (küfür kalıbı)
+kavata  # kavat/kafir türevi
+kafirce  # kavat/kafir türevi
+kafiri  # kavat/kafir türevi
+kafirin  # kavat/kafir türevi
+seksisi  # seksi
+hitleri  # hitler
+işeme  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işemem  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işememe  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işememi  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işemen  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işemeni  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işemesi  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işemeye  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işemeyi  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işemez  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işemiş  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işeyen  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işeyin  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işeyip  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işeyiş  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işedi  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işediği  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işedik  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işedim  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işedin  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işer  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işerdi  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işerdim  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işerim  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işerken  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işerler  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işersen  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+işersin  # işemek çekimleri (blocklist'te "işemek" var ama kök "işe" = iş+yönelme korunur)
+penisi  # penis
+penisin  # penis
+sperma  # sperm
+masturi  # mastur

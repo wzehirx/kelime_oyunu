@@ -7,9 +7,12 @@ from collections import Counter
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from generate_levels import (  # noqa: E402
-    DEFAULT_BLOCKLIST, DEFAULT_OUT, DEFAULT_POOL, DEFAULT_WORDS, MAX_GRID, MAX_REPS, MIN_DIFF,
+    DEFAULT_BLOCKLIST, DEFAULT_OUT, DEFAULT_POOL, DEFAULT_WORDS, EASY_RANKS, MAX_GRID, MAX_REPS, MIN_DIFF,
     load_words, read_levels, parse_level,
 )
+
+# (son seviye id, ızgara sözcüğü havuz sırası < sınır): erken seviyeler yaygın sözcüklerden kurulur
+EARLY_RANK_LIMITS = ((60, EASY_RANKS[0]), (700, EASY_RANKS[1]))
 
 import gzip  # noqa: E402
 
@@ -210,6 +213,27 @@ def check_curve(levels):
     return errors
 
 
+def check_early_rank(levels, pool_list, limits=EARLY_RANK_LIMITS):
+    """Erken seviyelerde ızgara sözcüğünün sıklık sırası (grid_pool.txt'teki sıra, 0 = en yaygın) sınırın altında mı?
+    Döner (hatalar, {id sınırı: erken seviyelerdeki en büyük sıra})."""
+    rank = {w: i for i, w in enumerate(pool_list)}
+    errors = []
+    worst = {}
+    for last_id, limit in limits:
+        top = (-1, None, None)
+        for l in levels:
+            if l.id > last_id:
+                break
+            for p in l.words:
+                r = rank.get(p.word, 1 << 30)
+                if r > top[0]:
+                    top = (r, l.id, p.word)
+        worst[last_id] = top[0]
+        if top[0] >= limit:
+            errors.append("seviye %d (<= %d): '%s' havuz sırası %d >= %d" % (top[1], last_id, top[2], top[0], limit))
+    return errors, worst
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("levels", nargs="?", default=DEFAULT_OUT)
@@ -254,6 +278,9 @@ def main(argv=None):
     mono_errs, rep = check_monotonic(levels)
     reuse_errs, reuse = check_reuse(levels)
     curve_errs = check_curve(levels)
+    early_errs, early_worst = check_early_rank(levels, load_words(a.pool))
+    curve_errs += early_errs
+    print("erken seviyelerde en büyük havuz sırası: %s" % early_worst)
     for e in mono_errs + reuse_errs + curve_errs:
         print(e)
     bad += len(mono_errs) + len(reuse_errs) + len(curve_errs)

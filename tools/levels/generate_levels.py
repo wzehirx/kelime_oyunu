@@ -9,9 +9,17 @@ sıklık sırasıyla), doğrulama/bonus için kabul setinden (app/.../words.txt)
 
 Zorluk sırası (SERT kurallar): seviye numarası arttıkça harf sayısı ASLA düşmez ve kelime sayısı
 küresel olarak düşmez (id sırası (harf, kelime) çiftlerinin üzerinde monoton bir zincirdir).
-Hedef eğri (10.000 seviye): 3 harf ilk 6, 4 harf ~7-30, 5 harf ~31-200, 6 harf ~201-3500, kalanı 7 harf.
+Hedef eğri (10.000 seviye) ve GERÇEK sonuç (tools/levels/validate_levels.py bant tablosu): 3 harf 1-6,
+4 harf 7-30, 5 harf 31-700, 6 harf 701-~5260, kalanı 7 harf. Bu bantlar sabit değildir: 6. ve 7. harf
+bandı toplam 10.000 seviyeyi karşılayabilecek kadar arz vermezse 5 harfli bant EXT5_STEPS adımlarıyla
+uzatılır (aşağıya bakın). Şimdiki havuzda en küçük uzatma (+500) yeterli: 5 harf bandı 31-700.
 Küçük havuzda aynı harf kümesi en çok MAX_REPS kez, birbirinden en az %50 farklı kelime kümeleriyle
 yeniden kullanılır; 6/7 harf sınırı ile gerekirse 5/6 harf bandı, arzın izin verdiği kadar kaydırılır.
+
+Erken seviyeler kolay sözcüklerden kurulur (EASY_RANKS / EARLY_IDS): ızgara havuzu sıklık sırasıyla
+verildiğinden bir sözcüğün "sıklık sırası" havuzdaki sırasıdır. 3-4 harfli bantlar (id <= 30) ve 5 harfli
+bandın başı (id <= 60) yalnızca havuzun ilk 2000 sözcüğünden, 5 harfli bant (id <= 700) ilk 3000'inden kurulur;
+6 harfli bant 701'den başlar. Sonuç aynı seed ile deterministiktir.
 """
 import argparse
 import gzip
@@ -44,8 +52,14 @@ GROUPS = {
     6: (8, 13),
     7: (10, 16),
 }
-# 10.000 seviyelik hedef bantlar (kümülatif son seviye): 3 harf ilk 6, 4 harf 7-30, 5 harf 31-200, 6 harf 201-3500.
+# 10.000 seviyelik HEDEF bantlar (kümülatif son seviye): 3 harf 1-6, 4 harf 7-30, 5 harf 31-200, 6 harf 201-3500.
+# Gerçekte 5 harf bandı arz yüzünden uzatılır (bkz. EXT5_STEPS): sonuç 5 harf 31-700, 6 harf 701-~5260.
 BAND_ENDS = {3: 6, 4: 30, 5: 200, 6: 3500}
+# Erken seviyelerde ızgara sözcüğü sıklık sırası (havuzdaki sıra) sınırları: (son seviye id, sıra < sınır).
+# id <= 60 -> sıra < 2000; id <= 700 -> sıra < 3000. 3-4 harfli bantlar (id <= 30) ilk gruba, 5 harfli bant ikinciye girer.
+EASY_RANKS = (2000, 3000)
+EARLY_IDS = 700
+EASY_BUILDS = 3   # kolay havuzda sınıf başına yapı sayısı çarpanı (küçük havuz: daha çok seçenek, 8 kelimelik ızgaralar dahil)
 BASE_COUNT = 10000
 # 3-5 harfli bantlarda kelime sayısı tavanı (zincir: sonraki bant bu tavandan başlar); 6. bant için arama yapılır.
 WORD_CAPS = {3: 3, 4: 5, 5: 8}
@@ -190,6 +204,13 @@ class Grid:
 
 
 _COMMON = {}  # kelime -> 0..1 (1 = havuzun en yaygını); fork ile işçilere paylaşılır
+_RANK = {}    # kelime -> havuzdaki sıra (0 = en yaygın)
+
+
+def cand_tier(c):
+    """0: tüm kelimeler havuzun ilk EASY_RANKS[0]'ında, 1: ilk EASY_RANKS[1]'inde, 2: diğer."""
+    r = max(_RANK.get(w, 1 << 30) for w in c.words)
+    return 0 if r < EASY_RANKS[0] else (1 if r < EASY_RANKS[1] else 2)
 
 
 def word_weight(w):
@@ -255,7 +276,7 @@ _SHARED = None  # (index,) — fork ile işçilere paylaşılır
 
 def _build_class(args):
     """Bir anagram sınıfı (aynı harf çoklu kümesi) için birkaç aday kurar."""
-    seed, key, bases, index = args
+    seed, key, bases, index, builds = args
     L = len(key)
     lo, hi = GROUPS[L]
     rng = random.Random("%d:%s" % (seed, key))
@@ -264,7 +285,7 @@ def _build_class(args):
         return []
     out = []
     seen = set()
-    for _ in range(BUILDS_PER_CLASS[L]):
+    for _ in range(BUILDS_PER_CLASS[L] * builds):
         base = max(rng.sample(bases, min(2, len(bases))), key=lambda w: _COMMON.get(w, 0.0))
         drop = rng.choice((0.0, 0.0, 0.2, 0.4))
         pool = [w for w in cands if w == base or rng.random() >= drop]
@@ -282,17 +303,17 @@ def _build_class(args):
 
 
 def _build_shared(args):
-    seed, key, bases = args
-    return _build_class((seed, key, bases, _SHARED[0]))
+    seed, key, bases, builds = args
+    return _build_class((seed, key, bases, _SHARED[0], builds))
 
 
-def build_pool(words, seed, log=None, processes=None):
+def build_pool(words, seed, log=None, processes=None, max_len=7, builds=1):
     """{harf sayısı: [Candidate]} — havuz, seed ile bire bir yeniden üretilebilir."""
     index = build_index(words)
     jobs = []
     for key in sorted(index):
-        if len(key) in GROUPS:
-            jobs.append((seed, key, index[key]))
+        if len(key) in GROUPS and len(key) <= max_len:
+            jobs.append((seed, key, index[key], builds))
     if processes is None:
         processes = min(4, os.cpu_count() or 1) if len(jobs) > 500 else 1
     global _SHARED
@@ -312,10 +333,11 @@ def build_pool(words, seed, log=None, processes=None):
 
 
 # ---------------------------------------------------------------- seçim
-def _pick(cands, quota, wlo, whi, mode, used):
+def _pick(cands, quota, wlo, whi, mode, used, tiered=False):
     """Kelime sayısı [wlo, whi] aralığındaki adaylardan en çok `quota` seviye seçer.
 
-    mode "asc": düşük kelime sayısından başlayarak; "fill": sayılara eşit yayarak.
+    mode "asc": düşük kelime sayısından başlayarak; "fill": sayılara eşit yayarak. tiered: kolay (düşük sıralı)
+    sözcüklü adaylar önce seçilir.
     Önce her harf kümesinden bir seviye, sonra (MAX_REPS'e kadar, kelime kümesi >= MIN_DIFF farklı) tekrarlar.
     `used` {klass: [wordset]} yerinde güncellenir. Döner: seçilenler (seçim sırasıyla).
     """
@@ -325,7 +347,7 @@ def _pick(cands, quota, wlo, whi, mode, used):
         if wlo <= n <= whi:
             buckets.setdefault(n, []).append(c)
     for n in buckets:
-        buckets[n].sort(key=lambda c: (-c.score, c.klass, sorted(c.words)))
+        buckets[n].sort(key=lambda c: (cand_tier(c) if tiered else 0, -c.score, c.klass, sorted(c.words)))
     ws = sorted(buckets)
     chosen = []
 
@@ -387,12 +409,18 @@ def _band_sizes(count):
 EXT5_STEPS = (0, 100, 200, 350, 500, 700, 1000, 1400, 1900, 2500)
 
 
-def plan_levels(pool, count, log=None):
+def plan_levels(pool, count, log=None, easy=None, early_ids=0):
     """Zincirli seçim. Döner (seçilen aday listesi [(harf, [aday])], rapor).
 
     Bantlar 3, 4, 5 hedef boyutta seçilir; 6/7 sınırı (b) ve 6. bandın uzunluğu arza göre aranır. 6. ve 7.
     bandın toplam arzı kalan seviyeleri karşılamıyorsa 5 harfli bant EXT5_STEPS adımlarıyla uzatılır.
+
+    easy: {3: [...], 4: [...], 5: [...]} kolay sözcüklü adaylar (3-4 harf için yalnız tier 0, 5 harf için tier <= 1);
+    verilirse 3-5 harfli bantlar yalnızca bunlardan kurulur ve 5 harfli bant en az early_ids'e kadar uzatılır.
     """
+    if easy:
+        pool = dict(pool)
+        pool.update(easy)
     ends = _band_sizes(count)
     report = {}
     used3, used4 = {}, {}
@@ -403,7 +431,7 @@ def plan_levels(pool, count, log=None):
         quota = ends[L] - (ends[L - 1] if L > 3 else 0) + carry
         quota = min(quota, count - sum(len(x) for _, x in chosen))
         lo = max(floor, GROUPS[L][0])
-        picked = _pick(pool[L], quota, lo, max(lo, WORD_CAPS[L]), "fill", used) if quota > 0 else []
+        picked = _pick(pool[L], quota, lo, max(lo, WORD_CAPS[L]), "fill", used, tiered=bool(easy)) if quota > 0 else []
         carry = max(0, quota - len(picked))
         if picked:
             floor = max(len(c.words) for c in picked)
@@ -416,7 +444,9 @@ def plan_levels(pool, count, log=None):
         used5 = {}
         quota5 = min(base5 + ext, count - n34)
         lo = max(floor, GROUPS[5][0])
-        p5 = _pick(pool[5], quota5, lo, max(lo, WORD_CAPS[5]), "fill", used5) if quota5 > 0 else []
+        p5 = _pick(pool[5], quota5, lo, max(lo, WORD_CAPS[5]), "fill", used5, tiered=bool(easy)) if quota5 > 0 else []
+        if easy and n34 + len(p5) < early_ids and len(p5) >= quota5:
+            continue  # 3-5 harfli bantlar ilk early_ids seviyeyi kapsamalı (6 harfli bant daha geç başlasın)
         floor5 = max([len(c.words) for c in p5] or [floor])
         rest = count - n34 - len(p5)
         lo6 = max(floor5, GROUPS[6][0])
@@ -468,10 +498,34 @@ def generate(words, count, seed, log=None, processes=None, pool=None, blocked=()
     _COMMON.clear()
     for i, w in enumerate(grid_words):
         _COMMON[w] = 1.0 - i / n if pool is not None else 0.5
+    _RANK.clear()
+    for i, w in enumerate(grid_words):
+        _RANK[w] = i
     cand_pool = build_pool(grid_words, seed, log=log, processes=processes)
     rng = random.Random(seed)
 
-    chosen, report = plan_levels(cand_pool, count, log=log)
+    # Kolay sözcüklü adaylar (yalnızca gerçek, sıklık sıralı ve yeterince büyük havuzda): erken seviyeler için.
+    easy = None
+    early_ids = 0
+    if pool is not None and len(grid_words) > EASY_RANKS[1] and count >= 1000:
+        merged = {3: [], 4: [], 5: []}
+        seen = set()
+        sources = [cand_pool] + [build_pool(grid_words[:r], seed, processes=processes, max_len=5, builds=EASY_BUILDS) for r in EASY_RANKS]
+        for src in sources:
+            for L in merged:
+                for c in src[L]:
+                    key = (c.klass, c.words)
+                    if key not in seen:
+                        seen.add(key)
+                        merged[L].append(c)
+        easy = {3: [c for c in merged[3] if cand_tier(c) == 0],
+                4: [c for c in merged[4] if cand_tier(c) == 0],
+                5: [c for c in merged[5] if cand_tier(c) <= 1]}
+        early_ids = int(round(EARLY_IDS * count / BASE_COUNT))
+        if log:
+            log("kolay aday havuzu: " + ", ".join("%d harf: %d" % (L, len(v)) for L, v in sorted(easy.items())))
+
+    chosen, report = plan_levels(cand_pool, count, log=log, easy=easy, early_ids=early_ids)
     flat = [(L, c) for L, picked in chosen for c in picked]
     relaxed = 0
     if len(flat) < count:
@@ -497,8 +551,9 @@ def generate(words, count, seed, log=None, processes=None, pool=None, blocked=()
     for _, c in flat:
         rep_idx.append(seen_reps.get(c.klass, 0))
         seen_reps[c.klass] = rep_idx[-1] + 1
+    tiers = [cand_tier(c) if easy and L <= 5 else 0 for L, c in flat]
     order = sorted(range(len(flat)), key=lambda i: (
-        flat[i][0], len(flat[i][1].words), rep_idx[i], -flat[i][1].score, flat[i][1].klass, i))
+        flat[i][0], len(flat[i][1].words), rep_idx[i], tiers[i], -flat[i][1].score, flat[i][1].klass, i))
     levels = []
     for lid, i in enumerate(order, 1):
         c = flat[i][1]

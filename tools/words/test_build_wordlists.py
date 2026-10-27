@@ -51,6 +51,31 @@ class PolicyTest(unittest.TestCase):
         self.assertFalse(bw.pool_ok("ankara", [row("Ankara", sec="ProperNoun")], set()))
 
 
+class IVariantTest(unittest.TestCase):
+    def test_variants(self):
+        self.assertEqual(sorted(bw.ivariants("adi")), ["adı"])
+        self.assertEqual(sorted(bw.ivariants("kitap")), ["kıtap"])
+        self.assertEqual(sorted(bw.ivariants("aşık")), [])  # i yok
+        self.assertEqual(sorted(bw.ivariants("iki")), ["ikı", "ıki", "ıkı"])
+
+    def test_oddity_needs_much_more_common_variant(self):
+        acc = {"adi", "adı", "dişi", "dışı", "kil", "kıl"}
+        cnt = {"adi": 9020, "adı": 62958, "dişi": 5912, "dışı": 19534, "kil": 565, "kıl": 2280}
+        self.assertTrue(bw.is_ivariant_oddity("adi", acc, cnt))       # 7x: yadırgatıcı yazılış
+        self.assertFalse(bw.is_ivariant_oddity("dişi", acc, cnt))     # 3.3x: ayrı, yaygın sözcük
+        self.assertFalse(bw.is_ivariant_oddity("adı", acc, cnt))      # yön: yalnız i -> ı
+        self.assertFalse(bw.is_ivariant_oddity("adi", {"adi"}, cnt))  # ı'lı biçim kabul setinde değil
+
+
+class BlockedRootsTest(unittest.TestCase):
+    def test_isemek_blocks_forms_but_not_ise(self):
+        b = bw.blocked_set(["işemek"])
+        self.assertIn("işemek", b)
+        self.assertNotIn("işe", b)  # iş + yönelme ("işe yaramaz"); ROOT_ALLOW
+        self.assertTrue(bw.is_blocked_form("işedi", [row("işemek", "işe", "Verb")], b))
+        self.assertFalse(bw.is_blocked_form("işe", [row("iş"), row("işemek", "işe", "Verb")], b))
+
+
 def _read(path):
     with open(path, encoding="utf-8") as f:
         return [l.rstrip("\n") for l in f]
@@ -94,8 +119,59 @@ class OutputFilesTest(unittest.TestCase):
         self.assertTrue(cand <= self.blocklist)
         for w in bw.AMBIGUOUS_TAKEN:
             self.assertIn(w, self.blocklist)
-        for w in ("aptal", "salak", "öküz", "eşek", "meme", "it", "karı", "kıç", "döl", "kaka"):
-            self.assertNotIn(w, self.blocklist)  # hafif/nötr: oyunda kalır
+        for w in ("aptal", "salak", "öküz", "eşek", "meme", "it", "karı", "döl", "kaka",
+                  "hıyar", "moruk", "gerzek", "embesil", "zampara", "lavuk", "geber", "defol", "sümük"):
+            self.assertNotIn(w, self.blocklist)  # hafif/nötr: kabul setinde kalır (ızgaraya girmez, aşağıya bakın)
+
+    # ---- QA raporu (2026-10) regresyonları ----
+    QA_FULLY_REMOVED = (
+        "düzüş düzüşen düzüşme düzüşüp işemek işeme işedi işer işeyen frikik ibiş kaşar kaşara kavata kerata deyyus "
+        "dallama kıç kıça kıçı kıçım kıçında kodumu kodumun kodumuz anan ananı ananın ananla ananızı anasını anasına "
+        "bacın avrat hödük kıro osuruk gebert zıkkım yuh oha lan ulan penis penisi penise vajina anüs sperm sperma "
+        "porno orgazm kondom mastur masturi seksisi seksüel hitler hitleri çingene kafir kafirce").split()
+    QA_KEPT_ACCEPTED_NOT_IN_GRID = "hıyar öküz moruk gerzek embesil zampara lavuk geber defol sümük".split()
+    QA_POOL_EXCLUDED = (
+        "penis porno orgazm sperm kondom taciz cinsel zina meni testis kıç meme döl kasık sütyen bakire metres çiş apış "
+        "osur kaka kak kuka halt lavuk zampara yalaka yalak geberik geber moruk hıyar gerzek embesil defol çirkef leş "
+        "ali eren ayla kaya mine emin rina rami nisa sena alperen asuman hande nafiz feyzal gökmen bahadır aksu "
+        "aut bop bre flu gri ski uzo yoo jig jip jem jen jul jüt rua ruz rop pog poy zom şom şua evç ekü "
+        "ayni kani kari akil akim ari ati atik adi bati bani").split()
+
+    def test_qa_words_fully_removed_from_accept_set_and_grid(self):
+        for w in self.QA_FULLY_REMOVED:
+            self.assertNotIn(w, self.words, w)
+            self.assertNotIn(w, self.pool, w)
+
+    def test_qa_mild_insults_stay_accepted_but_never_in_grid(self):
+        for w in self.QA_KEPT_ACCEPTED_NOT_IN_GRID:
+            self.assertIn(w, self.words, w)
+            self.assertNotIn(w, self.pool, w)
+
+    def test_qa_pool_exclusions(self):
+        for w in self.QA_POOL_EXCLUDED:
+            self.assertNotIn(w, self.pool, w)
+        # kabul setinde kalabilenler: oyuncu yazarsa geçersiz sayılmasın
+        for w in ("taciz", "cinsel", "zina", "meme", "ali", "kaya", "emin", "ayni", "adi"):
+            self.assertIn(w, self.words, w)
+        # bağlam sözcükleri engellenmedi
+        for w in ("iş", "işe", "işte", "bacı", "ananas", "anason", "kod", "kıçüstü"):
+            self.assertIn(w, self.words, w)
+
+    def test_ud_added_through_accept_include(self):
+        self.assertIn("ud", bw.read_list(bw.ACCEPT_INCLUDE))
+        self.assertIn("ud", self.words)
+        self.assertNotIn("ud", self.pool)
+
+    def test_no_pool_word_has_odd_ivariant(self):
+        # ı'lı biçimi kabul setinde ve >= IVAR_RATIO kat yaygın olan i'li sözcük havuza girmez
+        freq = {}
+        for w, c in bw.read_freq(os.path.join(bw.HERE, ".cache", "tr_full.txt")) if os.path.exists(
+                os.path.join(bw.HERE, ".cache", "tr_full.txt")) else []:
+            freq.setdefault(w, c)
+        if not freq:
+            self.skipTest("sıklık önbelleği yok")
+        bad = [w for w in self.pool if bw.is_ivariant_oddity(w, self.words, freq)]
+        self.assertEqual(bad, [])
 
     def test_ast_accepted_but_not_in_grid_pool(self):
         self.assertIn("ast", self.words)

@@ -9,7 +9,9 @@ import generate_levels as gl  # noqa: E402
 from generate_levels import (  # noqa: E402
     Level, Placement, format_level, generate, parse_level, read_levels, write_levels,
 )
-from validate_levels import check_curve, check_monotonic, check_reuse, validate  # noqa: E402
+from validate_levels import (  # noqa: E402
+    EARLY_RANK_LIMITS, check_curve, check_early_rank, check_monotonic, check_reuse, validate,
+)
 
 WORDS = """kalem elma alem mal kal ala lem ela kale ekle leke kem mek kek
 kelam melek lale ekmek mele ele elem kama mama kamel amel lama
@@ -112,6 +114,42 @@ class ReuseAndCurveTest(unittest.TestCase):
         self.assertEqual(check_curve(weak[:5] + weak[5:]), [])  # 5 üç harfli, 40. seviye iyi
         bad40 = [self.lv(i, "abc", ["x", "y"]) for i in range(1, 41)]
         self.assertTrue(any("40. seviye" in e for e in check_curve(bad40)))
+
+
+class EarlyRankTest(unittest.TestCase):
+    POOL = ["bir", "ben", "çok", "kalem", "elma", "kitap"]
+
+    @staticmethod
+    def lv(i, word):
+        return Level(i, "abc", (Placement(word, 0, 0, "y"),))
+
+    def test_ok_and_violation(self):
+        pool = ["w%d" % i for i in range(3000)] + ["nadir"]
+        ok = [self.lv(i, "w%d" % (i - 1)) for i in range(1, 61)]
+        errs, worst = check_early_rank(ok, pool)
+        self.assertEqual((errs, worst[60]), ([], 59))
+        bad60 = [self.lv(1, "w2000")]  # id <= 60 -> sıra < 2000
+        self.assertEqual(len(check_early_rank(bad60, pool)[0]), 1)
+        ok700 = [self.lv(61, "w2999")]
+        self.assertEqual(check_early_rank(ok700, pool)[0], [])
+        bad700 = [self.lv(700, "w3000")]
+        self.assertEqual(len(check_early_rank(bad700, pool)[0]), 1)
+        late = [self.lv(701, "nadir")]  # id > 700: serbest
+        self.assertEqual(check_early_rank(late, pool)[0], [])
+        unknown = [self.lv(1, "havuzdayok")]
+        self.assertTrue(check_early_rank(unknown, pool)[0])
+
+    def test_limits_match_generator(self):
+        self.assertEqual(EARLY_RANK_LIMITS, ((60, gl.EASY_RANKS[0]), (gl.EARLY_IDS, gl.EASY_RANKS[1])))
+        self.assertEqual(gl.EASY_RANKS, (2000, 3000))
+        self.assertEqual(gl.EARLY_IDS, 700)
+
+    def test_cand_tier(self):
+        gl._RANK.clear()
+        gl._RANK.update({"a": 0, "b": 1999, "c": 2000, "d": 2999, "e": 3000})
+        mk = lambda *ws: gl.Candidate("k", "a", frozenset(ws), (), 0.0)
+        self.assertEqual([gl.cand_tier(mk(*w)) for w in (("a", "b"), ("a", "c"), ("d",), ("a", "e"))], [0, 1, 1, 2])
+        gl._RANK.clear()
 
 
 class MonotonicTest(unittest.TestCase):
@@ -228,6 +266,37 @@ class RealAssetTest(unittest.TestCase):
     def test_reuse_rules(self):
         errs, stats = check_reuse(self.levels)
         self.assertEqual(errs, [])
+
+    def test_bands_match_documented_curve(self):
+        """Üretici docstring'indeki gerçek bantlar: 3 harf 1-6, 4 harf 7-30, 5 harf 31-700, 6 harf 701-~5260."""
+        first = {}
+        last = {}
+        for l in self.levels:
+            n = len(l.letters)
+            first.setdefault(n, l.id)
+            last[n] = l.id
+        self.assertEqual((first[3], last[3]), (1, 6))
+        self.assertEqual((first[4], last[4]), (7, 30))
+        self.assertEqual((first[5], last[5]), (31, 700))
+        self.assertEqual(first[6], 701)
+        self.assertTrue(5200 <= last[6] <= 5300, last[6])
+        self.assertEqual(last[7], 10000)
+
+    def test_early_levels_use_common_words(self):
+        """id <= 60: havuz sırası < 2000; id <= 700: < 3000 (sıklık sırası = grid_pool.txt'teki sıra)."""
+        errs, worst = check_early_rank(self.levels, gl.load_words(gl.DEFAULT_POOL))
+        self.assertEqual(errs, [])
+        self.assertLess(worst[60], 2000)
+        self.assertLess(worst[700], 3000)
+
+    def test_qa_words_never_in_grid(self):
+        qa = set(("ayni kani kari akil akim ari ati atik adi bati bani ali eren ayla kaya mine emin rina rami nisa sena "
+                  "alperen asuman hande nafiz feyzal gökmen bahadır aksu aut bop bre flu gri ski uzo yoo jig jip jem jen "
+                  "jul jüt rua ruz rop pog poy zom şom şua evç ekü penis porno orgazm sperm kondom taciz cinsel zina meni "
+                  "testis kıç meme döl kasık sütyen bakire metres çiş apış osur kaka kak kuka halt lavuk zampara yalaka "
+                  "yalak geberik geber moruk hıyar gerzek embesil defol çirkef leş öküz sümük").split())
+        used = {p.word for l in self.levels for p in l.words}
+        self.assertEqual(used & qa, set())
 
     def test_each_level_has_a_full_use_word(self):
         for l in self.levels:

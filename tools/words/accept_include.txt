@@ -1,0 +1,4 @@
+# Kabul setine elle eklenen sözcükler (tdk_words.txt'te ya da Zemberek/sıklık yolunda yer almayan geçerli sözcükler).
+# build_wordlists.py bunları blocklist/accept_exclude uygulandıktan SONRA ekler; ızgaraya GİRMEZ (havuz ayrı süzülür).
+# Her satır: sözcük  # gerekçe
+ud  # çalgı (TDK: ud); kısa sözcük, oyuncu yazınca geçersiz sayılmasın (QA)

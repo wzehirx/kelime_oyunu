@@ -31,3 +31,337 @@ ibiş  # hakaret
 kofti  # argo
 bızdık  # hakaret
 deyyus  # hakaret
+# --- QA raporu (2026-10): cinsellik/anatomi/hakaret/küfre yakın; kabul setinde kalabilir ya da blocklist ile tamamen çıkarılmış olabilir
+penis  # cinsellik/anatomi/hakaret (QA)
+porno  # cinsellik/anatomi/hakaret (QA)
+orgazm  # cinsellik/anatomi/hakaret (QA)
+sperm  # cinsellik/anatomi/hakaret (QA)
+kondom  # cinsellik/anatomi/hakaret (QA)
+taciz  # cinsellik/anatomi/hakaret (QA)
+cinsel  # cinsellik/anatomi/hakaret (QA)
+zina  # cinsellik/anatomi/hakaret (QA)
+meni  # cinsellik/anatomi/hakaret (QA)
+testis  # cinsellik/anatomi/hakaret (QA)
+kıç  # cinsellik/anatomi/hakaret (QA)
+meme  # cinsellik/anatomi/hakaret (QA)
+döl  # cinsellik/anatomi/hakaret (QA)
+kasık  # cinsellik/anatomi/hakaret (QA)
+sütyen  # cinsellik/anatomi/hakaret (QA)
+bakire  # cinsellik/anatomi/hakaret (QA)
+metres  # cinsellik/anatomi/hakaret (QA)
+çiş  # cinsellik/anatomi/hakaret (QA)
+apış  # cinsellik/anatomi/hakaret (QA)
+osur  # cinsellik/anatomi/hakaret (QA)
+kaka  # cinsellik/anatomi/hakaret (QA)
+kak  # cinsellik/anatomi/hakaret (QA)
+kuka  # cinsellik/anatomi/hakaret (QA)
+halt  # cinsellik/anatomi/hakaret (QA)
+lavuk  # cinsellik/anatomi/hakaret (QA)
+zampara  # cinsellik/anatomi/hakaret (QA)
+yalaka  # cinsellik/anatomi/hakaret (QA)
+yalak  # cinsellik/anatomi/hakaret (QA)
+geberik  # cinsellik/anatomi/hakaret (QA)
+geber  # cinsellik/anatomi/hakaret (QA)
+moruk  # cinsellik/anatomi/hakaret (QA)
+hıyar  # cinsellik/anatomi/hakaret (QA)
+gerzek  # cinsellik/anatomi/hakaret (QA)
+embesil  # cinsellik/anatomi/hakaret (QA)
+defol  # cinsellik/anatomi/hakaret (QA)
+çirkef  # cinsellik/anatomi/hakaret (QA)
+leş  # cinsellik/anatomi/hakaret (QA)
+öküz  # cinsellik/anatomi/hakaret (QA)
+sümük  # cinsellik/anatomi/hakaret (QA)
+# --- Özel isimler (kişi adı/soyadı/yer adı); ızgaraya sorulmaz
+ali  # özel isim (QA)
+eren  # özel isim (QA)
+ayla  # özel isim (QA)
+kaya  # özel isim (QA)
+mine  # özel isim (QA)
+emin  # özel isim (QA)
+rina  # özel isim (QA)
+rami  # özel isim (QA)
+nisa  # özel isim (QA)
+sena  # özel isim (QA)
+alperen  # özel isim (QA)
+asuman  # özel isim (QA)
+hande  # özel isim (QA)
+nafiz  # özel isim (QA)
+feyzal  # özel isim (QA)
+gökmen  # özel isim (QA)
+bahadır  # özel isim (QA)
+aksu  # özel isim (QA)
+frank  # özel isim (kişi adı/soyadı), havuz taraması
+martin  # özel isim (kişi adı/soyadı), havuz taraması
+mark  # özel isim (kişi adı/soyadı), havuz taraması
+carla  # özel isim (kişi adı/soyadı), havuz taraması
+edna  # özel isim (kişi adı/soyadı), havuz taraması
+marley  # özel isim (kişi adı/soyadı), havuz taraması
+erin  # özel isim (kişi adı/soyadı), havuz taraması
+sam  # özel isim (kişi adı/soyadı), havuz taraması
+bert  # özel isim (kişi adı/soyadı), havuz taraması
+april  # özel isim (kişi adı/soyadı), havuz taraması
+mason  # özel isim (kişi adı/soyadı), havuz taraması
+jersey  # özel isim (kişi adı/soyadı), havuz taraması
+hakan  # özel isim (kişi adı/soyadı), havuz taraması
+cem  # özel isim (kişi adı/soyadı), havuz taraması
+kemal  # özel isim (kişi adı/soyadı), havuz taraması
+mesut  # özel isim (kişi adı/soyadı), havuz taraması
+selim  # özel isim (kişi adı/soyadı), havuz taraması
+murat  # özel isim (kişi adı/soyadı), havuz taraması
+fatih  # özel isim (kişi adı/soyadı), havuz taraması
+recep  # özel isim (kişi adı/soyadı), havuz taraması
+ulaş  # özel isim (kişi adı/soyadı), havuz taraması
+burcu  # özel isim (kişi adı/soyadı), havuz taraması
+begüm  # özel isim (kişi adı/soyadı), havuz taraması
+devin  # özel isim (kişi adı/soyadı), havuz taraması
+aydın  # özel isim (kişi adı/soyadı), havuz taraması
+yaşar  # özel isim (kişi adı/soyadı), havuz taraması
+yasemin  # özel isim (kişi adı/soyadı), havuz taraması
+yeşim  # özel isim (kişi adı/soyadı), havuz taraması
+suna  # özel isim (kişi adı/soyadı), havuz taraması
+cemal  # özel isim (kişi adı/soyadı), havuz taraması
+cemil  # özel isim (kişi adı/soyadı), havuz taraması
+canan  # özel isim (kişi adı/soyadı), havuz taraması
+filiz  # özel isim (kişi adı/soyadı), havuz taraması
+nail  # özel isim (kişi adı/soyadı), havuz taraması
+uğur  # özel isim (kişi adı/soyadı), havuz taraması
+şaban  # özel isim (kişi adı/soyadı), havuz taraması
+arif  # özel isim (kişi adı/soyadı), havuz taraması
+esin  # özel isim (kişi adı/soyadı), havuz taraması
+bora  # özel isim (kişi adı/soyadı), havuz taraması
+tolga  # özel isim (kişi adı/soyadı), havuz taraması
+cenk  # özel isim (kişi adı/soyadı), havuz taraması
+server  # özel isim (kişi adı/soyadı), havuz taraması
+baran  # özel isim (kişi adı/soyadı), havuz taraması
+başar  # özel isim (kişi adı/soyadı), havuz taraması
+hazar  # özel isim (kişi adı/soyadı), havuz taraması
+kerem  # özel isim (kişi adı/soyadı), havuz taraması
+kazım  # özel isim (kişi adı/soyadı), havuz taraması
+haluk  # özel isim (kişi adı/soyadı), havuz taraması
+öner  # özel isim (kişi adı/soyadı), havuz taraması
+sema  # özel isim (kişi adı/soyadı), havuz taraması
+seher  # özel isim (kişi adı/soyadı), havuz taraması
+yavuz  # özel isim (kişi adı/soyadı), havuz taraması
+utku  # özel isim (kişi adı/soyadı), havuz taraması
+aydemir  # özel isim (kişi adı/soyadı), havuz taraması
+cihat  # özel isim (kişi adı/soyadı), havuz taraması
+ceren  # özel isim (kişi adı/soyadı), havuz taraması
+levent  # özel isim (kişi adı/soyadı), havuz taraması
+korkut  # özel isim (kişi adı/soyadı), havuz taraması
+kıvanç  # özel isim (kişi adı/soyadı), havuz taraması
+alp  # özel isim (kişi adı/soyadı), havuz taraması
+tuba  # özel isim (kişi adı/soyadı), havuz taraması
+ezgi  # özel isim (kişi adı/soyadı), havuz taraması
+sedef  # özel isim (kişi adı/soyadı), havuz taraması
+defne  # özel isim (kişi adı/soyadı), havuz taraması
+kerim  # özel isim (kişi adı/soyadı), havuz taraması
+elif  # özel isim (kişi adı/soyadı), havuz taraması
+melike  # özel isim (kişi adı/soyadı), havuz taraması
+nazım  # özel isim (kişi adı/soyadı), havuz taraması
+nilüfer  # özel isim (kişi adı/soyadı), havuz taraması
+serap  # özel isim (kişi adı/soyadı), havuz taraması
+yılmaz  # özel isim (kişi adı/soyadı), havuz taraması
+seda  # özel isim (kişi adı/soyadı), havuz taraması
+sevim  # özel isim (kişi adı/soyadı), havuz taraması
+mert  # özel isim (kişi adı/soyadı), havuz taraması
+berk  # özel isim (kişi adı/soyadı), havuz taraması
+nafi  # özel isim (kişi adı/soyadı), havuz taraması
+sabi  # özel isim (kişi adı/soyadı), havuz taraması
+hülya  # özel isim (kişi adı/soyadı), havuz taraması
+diya  # özel isim (kişi adı/soyadı), havuz taraması
+füsun  # özel isim (kişi adı/soyadı), havuz taraması
+neşet  # özel isim (kişi adı/soyadı), havuz taraması
+polat  # özel isim (kişi adı/soyadı), havuz taraması
+şule  # özel isim (kişi adı/soyadı), havuz taraması
+belgin  # özel isim (kişi adı/soyadı), havuz taraması
+nedim  # özel isim (kişi adı/soyadı), havuz taraması
+nadim  # özel isim (kişi adı/soyadı), havuz taraması
+berat  # özel isim (kişi adı/soyadı), havuz taraması
+seçil  # özel isim (kişi adı/soyadı), havuz taraması
+cumhur  # özel isim (kişi adı/soyadı), havuz taraması
+ermin  # özel isim (kişi adı/soyadı), havuz taraması
+selva  # özel isim (kişi adı/soyadı), havuz taraması
+zerrin  # özel isim (kişi adı/soyadı), havuz taraması
+serim  # özel isim (kişi adı/soyadı), havuz taraması
+sanem  # özel isim (kişi adı/soyadı), havuz taraması
+safer  # özel isim (kişi adı/soyadı), havuz taraması
+firuze  # özel isim (kişi adı/soyadı), havuz taraması
+şebnem  # özel isim (kişi adı/soyadı), havuz taraması
+nihan  # özel isim (kişi adı/soyadı), havuz taraması
+alkan  # özel isim (kişi adı/soyadı), havuz taraması
+miraç  # özel isim (kişi adı/soyadı), havuz taraması
+muhlis  # özel isim (kişi adı/soyadı), havuz taraması
+resul  # özel isim (kişi adı/soyadı), havuz taraması
+hicran  # özel isim (kişi adı/soyadı), havuz taraması
+rüçhan  # özel isim (kişi adı/soyadı), havuz taraması
+yücel  # özel isim (kişi adı/soyadı), havuz taraması
+serhat  # özel isim (kişi adı/soyadı), havuz taraması
+ensar  # özel isim (kişi adı/soyadı), havuz taraması
+şefik  # özel isim (kişi adı/soyadı), havuz taraması
+ilhan  # özel isim (kişi adı/soyadı), havuz taraması
+nevzat  # özel isim (kişi adı/soyadı), havuz taraması
+nalan  # özel isim (kişi adı/soyadı), havuz taraması
+ismet  # özel isim (kişi adı/soyadı), havuz taraması
+saffet  # özel isim (kişi adı/soyadı), havuz taraması
+gürbüz  # özel isim (kişi adı/soyadı), havuz taraması
+şevket  # özel isim (kişi adı/soyadı), havuz taraması
+rakım  # özel isim (kişi adı/soyadı), havuz taraması
+esma  # özel isim (kişi adı/soyadı), havuz taraması
+görkem  # özel isim (kişi adı/soyadı), havuz taraması
+tevfik  # özel isim (kişi adı/soyadı), havuz taraması
+turgay  # özel isim (kişi adı/soyadı), havuz taraması
+ebru  # özel isim (kişi adı/soyadı), havuz taraması
+cemile  # özel isim (kişi adı/soyadı), havuz taraması
+mazhar  # özel isim (kişi adı/soyadı), havuz taraması
+acar  # özel isim (kişi adı/soyadı), havuz taraması
+gonca  # özel isim (kişi adı/soyadı), havuz taraması
+atıf  # özel isim (kişi adı/soyadı), havuz taraması
+buse  # özel isim (kişi adı/soyadı), havuz taraması
+müge  # özel isim (kişi adı/soyadı), havuz taraması
+necip  # özel isim (kişi adı/soyadı), havuz taraması
+özden  # özel isim (kişi adı/soyadı), havuz taraması
+semih  # özel isim (kişi adı/soyadı), havuz taraması
+haris  # özel isim (kişi adı/soyadı), havuz taraması
+yekta  # özel isim (kişi adı/soyadı), havuz taraması
+hamlet  # özel isim (kişi adı/soyadı), havuz taraması
+herkül  # özel isim (kişi adı/soyadı), havuz taraması
+kayra  # özel isim (kişi adı/soyadı), havuz taraması
+mahir  # özel isim (kişi adı/soyadı), havuz taraması
+oğuz  # özel isim (kişi adı/soyadı), havuz taraması
+dink  # özel isim (kişi adı/soyadı), havuz taraması
+efe  # özel isim (kişi adı/soyadı), havuz taraması
+ece  # özel isim (kişi adı/soyadı), havuz taraması
+çağla  # özel isim (kişi adı/soyadı), havuz taraması
+edi  # özel isim (kişi adı/soyadı), havuz taraması
+alim  # özel isim (kişi adı/soyadı), havuz taraması
+aysel  # özel isim (kişi adı/soyadı), havuz taraması
+gamze  # özel isim (kişi adı/soyadı), havuz taraması
+ozan  # özel isim (kişi adı/soyadı), havuz taraması
+batman  # yer adı
+bodrum  # yer adı
+menemen  # yer adı
+tuzla  # yer adı
+mersin  # yer adı
+samsun  # yer adı
+selanik  # yer adı
+ispanya  # yer adı
+tokyo  # yer adı
+lagos  # yer adı
+panama  # yer adı
+haliç  # yer adı
+çıldır  # yer adı
+dikili  # yer adı
+kula  # yer adı
+soma  # yer adı
+muş  # yer adı
+karaman  # yer adı
+karasu  # yer adı
+ergene  # yer adı
+bozkurt  # yer adı
+sahra  # yer adı
+amazon  # yer adı
+amber  # yer adı
+tatlısu  # yer adı
+kırım  # yer adı
+# --- Yabancı/şüpheli kısa sözcükler ve yabancı yazımlar
+aut  # yabancı/şüpheli kısa sözcük (QA)
+bop  # yabancı/şüpheli kısa sözcük (QA)
+bre  # yabancı/şüpheli kısa sözcük (QA)
+flu  # yabancı/şüpheli kısa sözcük (QA)
+gri  # yabancı/şüpheli kısa sözcük (QA)
+ski  # yabancı/şüpheli kısa sözcük (QA)
+uzo  # yabancı/şüpheli kısa sözcük (QA)
+yoo  # yabancı/şüpheli kısa sözcük (QA)
+jig  # yabancı/şüpheli kısa sözcük (QA)
+jip  # yabancı/şüpheli kısa sözcük (QA)
+jem  # yabancı/şüpheli kısa sözcük (QA)
+jen  # yabancı/şüpheli kısa sözcük (QA)
+jul  # yabancı/şüpheli kısa sözcük (QA)
+jüt  # yabancı/şüpheli kısa sözcük (QA)
+rua  # yabancı/şüpheli kısa sözcük (QA)
+ruz  # yabancı/şüpheli kısa sözcük (QA)
+rop  # yabancı/şüpheli kısa sözcük (QA)
+pog  # yabancı/şüpheli kısa sözcük (QA)
+poy  # yabancı/şüpheli kısa sözcük (QA)
+zom  # yabancı/şüpheli kısa sözcük (QA)
+şom  # yabancı/şüpheli kısa sözcük (QA)
+şua  # yabancı/şüpheli kısa sözcük (QA)
+evç  # yabancı/şüpheli kısa sözcük (QA)
+ekü  # yabancı/şüpheli kısa sözcük (QA)
+agu  # nadir/yabancı-şüpheli kısa sözcük
+mim  # nadir/yabancı-şüpheli kısa sözcük
+nev  # nadir/yabancı-şüpheli kısa sözcük
+kup  # nadir/yabancı-şüpheli kısa sözcük
+ket  # nadir/yabancı-şüpheli kısa sözcük
+kok  # nadir/yabancı-şüpheli kısa sözcük
+bis  # nadir/yabancı-şüpheli kısa sözcük
+ifa  # nadir/yabancı-şüpheli kısa sözcük
+rot  # nadir/yabancı-şüpheli kısa sözcük
+füg  # nadir/yabancı-şüpheli kısa sözcük
+yom  # nadir/yabancı-şüpheli kısa sözcük
+lop  # nadir/yabancı-şüpheli kısa sözcük
+gak  # nadir/yabancı-şüpheli kısa sözcük
+tol  # nadir/yabancı-şüpheli kısa sözcük
+vın  # nadir/yabancı-şüpheli kısa sözcük
+kös  # nadir/yabancı-şüpheli kısa sözcük
+nom  # nadir/yabancı-şüpheli kısa sözcük
+yek  # nadir/yabancı-şüpheli kısa sözcük
+bap  # nadir/yabancı-şüpheli kısa sözcük
+hık  # nadir/yabancı-şüpheli kısa sözcük
+şıp  # nadir/yabancı-şüpheli kısa sözcük
+çav  # nadir/yabancı-şüpheli kısa sözcük
+ged  # nadir/yabancı-şüpheli kısa sözcük
+cuk  # nadir/yabancı-şüpheli kısa sözcük
+zum  # nadir/yabancı-şüpheli kısa sözcük
+kik  # nadir/yabancı-şüpheli kısa sözcük
+kom  # nadir/yabancı-şüpheli kısa sözcük
+mas  # nadir/yabancı-şüpheli kısa sözcük
+lor  # nadir/yabancı-şüpheli kısa sözcük
+ley  # nadir/yabancı-şüpheli kısa sözcük
+ayn  # nadir/yabancı-şüpheli kısa sözcük
+tın  # nadir/yabancı-şüpheli kısa sözcük
+pıt  # nadir/yabancı-şüpheli kısa sözcük
+cay  # nadir/yabancı-şüpheli kısa sözcük
+fos  # nadir/yabancı-şüpheli kısa sözcük
+mah  # nadir/yabancı-şüpheli kısa sözcük
+şat  # nadir/yabancı-şüpheli kısa sözcük
+light  # yabancı yazım
+chat  # yabancı yazım
+mouse  # yabancı yazım
+center  # yabancı yazım
+change  # yabancı yazım
+guard  # yabancı yazım
+single  # yabancı yazım
+print  # yabancı yazım
+rating  # yabancı yazım
+casting  # yabancı yazım
+leasing  # yabancı yazım
+fitness  # yabancı yazım
+master  # yabancı yazım
+bold  # yabancı yazım
+sticker  # yabancı yazım
+charter  # yabancı yazım
+star  # yabancı yazım
+data  # yabancı yazım
+main  # yabancı yazım
+peeling  # yabancı yazım
+jogging  # yabancı yazım
+rafting  # yabancı yazım
+hacker  # yabancı yazım
+printer  # yabancı yazım
+sprint  # yabancı yazım
+puzzle  # yabancı yazım
+broker  # yabancı yazım
+blender  # yabancı yazım
+# --- i/ı yazım varyantı: ı'lı yazılışı normal, i'li yazılışı yadırgatıcı (build_wordlists.py ayrıca sıklık oranıyla otomatik eler)
+ayni  # ı/i yazım varyantı (QA)
+kani  # ı/i yazım varyantı (QA)
+kari  # ı/i yazım varyantı (QA)
+akil  # ı/i yazım varyantı (QA)
+akim  # ı/i yazım varyantı (QA)
+ari  # ı/i yazım varyantı (QA)
+ati  # ı/i yazım varyantı (QA)
+atik  # ı/i yazım varyantı (QA)
+adi  # ı/i yazım varyantı (QA)
+bati  # ı/i yazım varyantı (QA)
+bani  # ı/i yazım varyantı (QA)

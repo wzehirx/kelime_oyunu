@@ -7,6 +7,7 @@ Politika burada (Python, testlidir); Zemberek yalnızca ham çözümleme verir (
 Ayrıntı ve eşik gerekçeleri: tools/words/SOURCES.md bölüm "v1.4".
 """
 import argparse
+import itertools
 import os
 import sys
 from collections import defaultdict
@@ -21,6 +22,7 @@ BLOCKLIST = os.path.join(HERE, "blocklist.txt")
 BLOCKLIST_EXTRA = os.path.join(HERE, "blocklist_extra_forms.txt")
 POOL_EXCLUDE = os.path.join(HERE, "pool_exclude.txt")
 ACCEPT_EXCLUDE = os.path.join(HERE, "accept_exclude.txt")
+ACCEPT_INCLUDE = os.path.join(HERE, "accept_include.txt")
 VOWELS = frozenset("aeıioöuü")
 OUT_WORDS = os.path.join(REPO, "app", "src", "main", "assets", "words.txt")
 OUT_POOL = os.path.join(HERE, "grid_pool.txt")
@@ -31,7 +33,14 @@ POOL_MIN_LEN = 3                   # ızgara havuzu uzunluğu: 3-7
 # Eşikler (gerekçe SOURCES.md "v1.4" bölümünde)
 ACCEPT_MIN_COUNT = 20              # sıklık listesinden çekimli biçim kabulü için en az geçiş sayısı
 # Izgara havuzu: sıklık listesinde en az bu kadar geçiş; kısa sözcükler daha sıkı (SOURCES.md'ye bakın).
-POOL_MIN_COUNT = {3: 50, 4: 20, 5: 10, 6: 10, 7: 10}
+# 3-4 harfli eşikler QA raporu sonrası yükseltildi (3: 50 -> 200, 4: 20 -> 40): çok nadir/yabancı-şüpheli
+# kısa sözcükler (agu, kup, füg ...) ızgaraya girmesin.
+POOL_MIN_COUNT = {3: 50, 4: 20, 5: 10, 6: 7, 7: 7}
+# i/ı yazım varyantı: ızgara sözcüğünde bazı i'ler ı yapılınca KABUL SETİNDEKİ bir sözcük çıkıyor ve o,
+# bu sözcükten en az bu kadar kat yaygınsa (ayni/aynı, akil/akıl, adi/adı ...) sözcük ızgaraya girmez.
+IVAR_RATIO = 5
+# Kök eşlemesinde engellenmeyecek fiil kökleri: "işemek" engelli ama "işe" = iş + yönelme (işe yaramaz).
+ROOT_ALLOW = frozenset({"işe"})
 
 ACCEPT_POS = {"Noun", "Adjective", "Adverb", "Verb", "Pronoun", "Conjunction",
               "PostPositive", "Determiner", "Question", "Numeral"}
@@ -105,7 +114,7 @@ def blocked_set(block_words):
     yakalamak için lemma/root eşlemesinde kullanılır."""
     b = set(block_words)
     for w in list(b):
-        if w.endswith("mak") or w.endswith("mek"):
+        if (w.endswith("mak") or w.endswith("mek")) and w[:-3] not in ROOT_ALLOW:
             b.add(w[:-3])
     return b
 
@@ -116,6 +125,24 @@ def load_blocklist():
 
 def load_extra_blocked_forms():
     return read_list(BLOCKLIST_EXTRA) if os.path.exists(BLOCKLIST_EXTRA) else []
+
+
+def ivariants(w):
+    """w'deki i harflerinin bir kısmını ı yaparak elde edilen yazım varyantları (w hariç)."""
+    idx = [k for k, c in enumerate(w) if c == "i"]
+    for mask in itertools.product("iı", repeat=len(idx)):
+        v = list(w)
+        for k, c in zip(idx, mask):
+            v[k] = c
+        v = "".join(v)
+        if v != w:
+            yield v
+
+
+def is_ivariant_oddity(w, accept, count, ratio=IVAR_RATIO):
+    """True: w'nin ı'lı biçimi kabul setinde ve en az `ratio` kat yaygın (w yadırgatıcı yazılıştır)."""
+    cw = count.get(w, 0)
+    return any(v in accept and count.get(v, 0) >= ratio * max(cw, 1) for v in ivariants(w))
 
 
 def parse_analysis(path):
@@ -229,6 +256,10 @@ def select(cache, accept_min=ACCEPT_MIN_COUNT, pool_min=None, log=print):
             accept.add(w)
             n_freq += 1
     accept -= set(read_list(ACCEPT_EXCLUDE)) if os.path.exists(ACCEPT_EXCLUDE) else set()
+    # Elle eklenenler (ör. "ud"): engel listesi uygulandıktan sonra; ama engelli bir sözcük asla eklenmez.
+    include = set(read_list(ACCEPT_INCLUDE)) if os.path.exists(ACCEPT_INCLUDE) else set()
+    include = {w for w in include if is_word(w, MIN_LEN, MAX_LEN) and not blocked_word(w)}
+    accept |= include
     log("kabul seti: %d (tdk %d, +kök/+sıklık...), sıklıktan eklenen: %d, engellenen: %s"
         % (len(accept), len(tdk), n_freq, dict(why)))
 
@@ -236,7 +267,11 @@ def select(cache, accept_min=ACCEPT_MIN_COUNT, pool_min=None, log=print):
     # Kalite kapısı: ızgara kelimesi TDK madde başı ya da TDK mastarının kökü olmalı
     # (Zemberek'in bildiği ama TDK'de olmayan yabancı yazımlar 'charter', 'sticker' gibi elenir).
     tdk_gate = tdk | verb_roots_from_mastars(tdk_all)
+    count = {}
+    for w, c in freq:
+        count.setdefault(w, c)
     pool = []  # sıklık sırasıyla (en yaygın önce)
+    n_ivar = 0
     floor_count = min(pool_min.values())
     for w, c in freq:
         if c < floor_count:
@@ -245,7 +280,11 @@ def select(cache, accept_min=ACCEPT_MIN_COUNT, pool_min=None, log=print):
             continue
         rows = analysis.get(w)
         if rows and not blocked_word(w) and pool_ok(w, rows, blocked):
+            if is_ivariant_oddity(w, accept, count):
+                n_ivar += 1
+                continue
             pool.append(w)
+    log("ızgara havuzu: %d, i/ı varyantı nedeniyle elenen: %d" % (len(pool), n_ivar))
     return sorted(accept, key=sort_key), pool
 
 

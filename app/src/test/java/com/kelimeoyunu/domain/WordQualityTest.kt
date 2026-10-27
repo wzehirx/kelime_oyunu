@@ -40,6 +40,66 @@ class WordQualityTest {
         assertTrue("kabul edilen engelli kelimeler: $accepted", accepted.isEmpty())
     }
 
+    /** Bağımsız QA raporu (2026-10): kabul setinden TAMAMEN çıkarılan sözcükler (çekimleriyle). */
+    @Test
+    fun qaProfanityAndInsultsAreFullyRemoved() {
+        val removed = ("düzüş düzüşen düzüşme düzüşüp işemek işeme işedi işer işeyen frikik ibiş kaşar kaşara kavata kerata " +
+            "deyyus dallama kıç kıça kıçı kıçım kıçında kodumu kodumun kodumuz anan ananı ananın ananla ananızı anasını " +
+            "anasına bacın avrat hödük kıro osuruk gebert zıkkım yuh oha lan ulan penis penisi penise vajina anüs sperm " +
+            "sperma porno orgazm kondom mastur masturi seksisi seksüel hitler hitleri çingene kafir kafirce").split(" ")
+        val accepted = removed.filter { dict.contains(it) }
+        assertTrue("kabul edilen QA sözcükleri: $accepted", accepted.isEmpty())
+        // bağlam sözcükleri engellenmedi
+        for (w in listOf("iş", "işe", "işte", "bacı", "ananas", "anason", "kod", "kıçüstü")) {
+            assertTrue("$w kabul edilmeli", dict.contains(w))
+        }
+    }
+
+    @Test
+    fun qaMildInsultsStayAcceptedButNeverInGrid() {
+        val gridWords = (0 until levels.count).flatMap { levels.get(it)!!.words.map { w -> w.word } }.toHashSet()
+        for (w in "hıyar öküz moruk gerzek embesil zampara lavuk geber defol sümük".split(" ")) {
+            assertTrue("$w kabul edilmeli", dict.contains(w))
+            assertFalse("$w havuzda", w in pool)
+            assertFalse("$w ızgarada", w in gridWords)
+        }
+        assertTrue("ud kabul edilmeli", dict.contains("ud"))
+    }
+
+    @Test
+    fun qaGridExclusionsNeverAppearInAnyLevel() {
+        val excluded = ("penis porno orgazm sperm kondom taciz cinsel zina meni testis kıç meme döl kasık sütyen bakire " +
+            "metres çiş apış osur kaka kak kuka halt lavuk zampara yalaka yalak geberik geber moruk hıyar gerzek embesil " +
+            "defol çirkef leş ali eren ayla kaya mine emin rina rami nisa sena alperen asuman hande nafiz feyzal gökmen " +
+            "bahadır aksu aut bop bre flu gri ski uzo yoo jig jip jem jen jul jüt rua ruz rop pog poy zom şom şua evç ekü " +
+            "ayni kani kari akil akim ari ati atik adi bati bani").split(" ").toHashSet()
+        assertTrue("havuzda kalan: ${excluded.filter { it in pool }}", excluded.none { it in pool })
+        for (i in 0 until levels.count) {
+            val l = levels.get(i)!!
+            val bad = l.words.map { it.word }.filter { it in excluded }
+            assertTrue("seviye ${l.id}: $bad", bad.isEmpty())
+        }
+    }
+
+    /** Erken seviyeler yaygın sözcüklerden kurulur: id <= 60 -> havuz sırası < 2000, id <= 700 -> < 3000. */
+    @Test
+    fun earlyLevelsUseCommonWords() {
+        val rank = TestAssets.repoWordList("tools/words/grid_pool.txt").withIndex().associate { it.value to it.index }
+        var worst60 = -1
+        var worst700 = -1
+        for (i in 0 until 700) {
+            val l = levels.get(i)!!
+            for (w in l.words) {
+                val r = rank[w.word] ?: error("seviye ${l.id}: ${w.word} havuzda yok")
+                if (l.id <= 60) worst60 = maxOf(worst60, r)
+                worst700 = maxOf(worst700, r)
+            }
+        }
+        println("EarlyRank: id<=60 en büyük sıra $worst60, id<=700 en büyük sıra $worst700")
+        assertTrue("id<=60 sıra $worst60", worst60 < 2000)
+        assertTrue("id<=700 sıra $worst700", worst700 < 3000)
+    }
+
     @Test
     fun dictionaryHasExpectedSizeAndLoadsFast() {
         val t0 = System.nanoTime()
