@@ -57,3 +57,13 @@ jobs:
           files: dist/*.apk
           prerelease: ${{ startsWith(steps.ver.outputs.tag, 'v0.') }}
           generate_release_notes: true
+      - name: Refresh release APK on existing release
+        if: steps.ver.outputs.publish == 'false'
+        run: |
+          TAG="${{ steps.ver.outputs.tag }}"
+          F="apk/kelime-oyunu-${TAG}-release.apk"
+          if [ -f "$F" ]; then
+            gh release upload "${TAG}" "$F" --clobber
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
