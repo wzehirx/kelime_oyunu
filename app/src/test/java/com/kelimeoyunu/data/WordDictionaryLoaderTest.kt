@@ -23,6 +23,6 @@ class WordDictionaryLoaderTest {
         assertTrue(d.contains("ışık"))
         assertTrue(d.contains("IŞIK"))
         assertFalse(d.contains("xyz"))
-        assertTrue("en az 50.000 kelime", d.size >= 50_000)
+        assertTrue("kabul seti en az 50.000 kelime: ${d.size}", d.size >= 50_000)
     }
 }

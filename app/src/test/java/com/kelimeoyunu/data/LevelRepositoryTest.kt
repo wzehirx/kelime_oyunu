@@ -162,10 +162,16 @@ class LevelRepositoryTest {
         assertEquals(3, real.get(0)!!.letters.size)
         assertEquals(7, real.get(9999)!!.letters.size)
         val sizes = (0 until real.count).map { real.get(it)!!.letters.size }.groupingBy { it }.eachCount()
-        assertTrue("3 harfli seviye az", (sizes[3] ?: 0) >= 41)
-        assertTrue("4 harfli seviye az", (sizes[4] ?: 0) >= 400)
-        assertTrue("5 harfli seviye az", (sizes[5] ?: 0) >= 1500)
+        // v1.4 eğrisi: 3 harf yalnızca ilk 6, 4 harf ~24, 5 harf yüzlerce; ağırlık 6 ve 7 harfte
+        assertTrue("3 harfli seviye ${sizes[3]}", (sizes[3] ?: 0) in 2..6)
+        assertTrue("4 harfli seviye ${sizes[4]}", (sizes[4] ?: 0) in 20..60)
+        assertTrue("5 harfli seviye ${sizes[5]}", (sizes[5] ?: 0) in 100..2000)
+        assertTrue("6 harfli seviye ${sizes[6]}", (sizes[6] ?: 0) >= 3000)
+        assertTrue("7 harfli seviye ${sizes[7]}", (sizes[7] ?: 0) >= 3000)
         assertTrue("hiçbir grup %60'tan fazla olmamalı", sizes.values.all { it <= 6000 })
+        // 40. seviye artık kolay değil
+        val l40 = real.get(39)!!
+        assertTrue(l40.letters.size >= 4 && l40.words.size >= 4)
     }
 
     @Test

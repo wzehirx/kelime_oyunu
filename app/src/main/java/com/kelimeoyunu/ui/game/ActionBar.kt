@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.kelimeoyunu.domain.GameEconomy
 import com.kelimeoyunu.ui.common.A11yButton
 
 private class Action(val description: String, val label: String, val onClick: () -> Unit)
@@ -25,8 +26,8 @@ fun ActionBar(c: GameCallbacks, modifier: Modifier = Modifier) {
         Action("Sil", "Sil", c.onDelete),
         Action("Temizle", "Temizle", c.onClear),
         Action("Karıştır", "Karıştır", c.onShuffle),
-        Action("İpucu, harf aç, 10 jeton", "İpucu: harf aç, 10 jeton", c.onHintLetter),
-        Action("Kelime aç, 30 jeton", "Kelime aç, 30 jeton", c.onHintWord),
+        Action(GameEconomy.HINT_LETTER_DESCRIPTION, GameEconomy.HINT_LETTER_LABEL, c.onHintLetter),
+        Action(GameEconomy.HINT_WORD_DESCRIPTION, GameEconomy.HINT_WORD_LABEL, c.onHintWord),
     )
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         actions.chunked(2).forEach { pair ->

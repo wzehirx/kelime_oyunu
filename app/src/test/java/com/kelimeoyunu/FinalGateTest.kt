@@ -27,6 +27,7 @@ import com.kelimeoyunu.audio.FakeSoundBackend
 import com.kelimeoyunu.audio.Sfx
 import com.kelimeoyunu.audio.SoundManager
 import com.kelimeoyunu.data.Progress
+import com.kelimeoyunu.domain.GameEconomy
 import com.kelimeoyunu.domain.TurkishText
 import com.kelimeoyunu.ui.AppRoot
 import com.kelimeoyunu.ui.game.CompositeFeedbackSink
@@ -54,7 +55,7 @@ import org.robolectric.annotation.Config
 
 /**
  * Son kapı: gerçek AppContainer (gerçek words.txt + 10.000 seviye + gerçek DataStore dosyası) ile bir TalkBack
- * kullanıcısının gerçek 1. seviyeyi (harfler "oab": boa, oba) yalnızca etiketli düğmelerle bitirmesi,
+ * kullanıcısının gerçek 1. seviyeyi (harfler "oky": yok, koy) yalnızca etiketli düğmelerle bitirmesi,
  * hata yolları, kayıt/geri yükleme ve ses sessizliği. Erişilebilirlik duyuruları AccessibilityManager'a
  * gönderilen TYPE_ANNOUNCEMENT olaylarından okunur.
  */
@@ -115,50 +116,52 @@ class FinalGateTest {
         waitHeard("Önce harf seç")
 
         // b) Geçersiz kelime; kelime silinmez, Temizle ile boşaltılır.
-        typeWord("abo"); tap("Gönder")
+        typeWord("kyo"); tap("Gönder")
         waitHeard("Geçersiz kelime")
-        rule.onNodeWithContentDescription("Oluşturulan kelime: ABO").assertExists()
+        rule.onNodeWithContentDescription("Oluşturulan kelime: KYO").assertExists()
         tap("Temizle")
         waitHeard("Temizlendi")
         rule.onNodeWithContentDescription("Oluşturulan kelime: boş").assertExists()
 
         // c) Bonus kelime (sözlükte var, seviyede yok): sayaç 1/5.
-        typeWord("ab"); tap("Gönder")
-        waitHeard("Bonus kelime, AB")
+        typeWord("ok"); tap("Gönder")
+        waitHeard("Bonus kelime, OK")
         waitFor("Seviye 1, Türkiye 1 / 20. 50 jeton. Kalan kelime: 2. Bonus sayacı: 1 / 5")
 
+        val afterHint = 50 - GameEconomy.HINT_LETTER_COST
+        val afterLevel = afterHint + GameEconomy.LEVEL_REWARD
         // d) İpucu: bakiye düşer, duyuru DÜŞÜLMÜŞ bakiyeyi söyler; ekran başlığı aynı sayıyı verir.
-        tap("İpucu, harf aç, 10 jeton")
-        waitHeard("İpucu kullanıldı, kalan jeton: 40")
-        waitFor("Seviye 1, Türkiye 1 / 20. 40 jeton. Kalan kelime: 2. Bonus sayacı: 1 / 5")
+        tap(GameEconomy.HINT_LETTER_DESCRIPTION)
+        waitHeard("İpucu kullanıldı, kalan jeton: $afterHint")
+        waitFor("Seviye 1, Türkiye 1 / 20. $afterHint jeton. Kalan kelime: 2. Bonus sayacı: 1 / 5")
 
         // e) İlk kelime, sonra aynı kelime ikinci kez.
-        typeWord("boa"); tap("Gönder")
-        waitHeard("Doğru, BOA")
-        waitFor("Seviye 1, Türkiye 1 / 20. 40 jeton. Kalan kelime: 1. Bonus sayacı: 1 / 5")
-        typeWord("boa"); tap("Gönder")
+        typeWord("yok"); tap("Gönder")
+        waitHeard("Doğru, YOK")
+        waitFor("Seviye 1, Türkiye 1 / 20. $afterHint jeton. Kalan kelime: 1. Bonus sayacı: 1 / 5")
+        typeWord("yok"); tap("Gönder")
         waitHeard("Bu kelime zaten bulundu")
-        waitFor("Seviye 1, Türkiye 1 / 20. 40 jeton. Kalan kelime: 1. Bonus sayacı: 1 / 5") // değişmedi
+        waitFor("Seviye 1, Türkiye 1 / 20. $afterHint jeton. Kalan kelime: 1. Bonus sayacı: 1 / 5") // değişmedi
 
         // f) Son kelime: seviye biter, odak "Sonraki seviye"de, duyuru tek cümlede.
-        typeWord("oba"); tap("Gönder")
+        typeWord("koy"); tap("Gönder")
         waitFor("Sonraki seviye", 30_000)
         rule.onNodeWithContentDescription("Sonraki seviye").assertIsFocused()
         waitHeard("Seviye 1 tamamlandı")
         val finale = announcements().last { it.contains("tamamlandı") }
-        assertTrue(finale, finale.endsWith("Doğru, OBA. 10 jeton kazandın. Seviye 1 tamamlandı"))
-        rule.onNodeWithText("Tüm kelimeleri buldun. Toplam jeton: 50. Bonus sayacı: 1 / 5.").assertExists()
+        assertTrue(finale, finale.endsWith("Doğru, KOY. ${GameEconomy.LEVEL_REWARD} jeton kazandın. Seviye 1 tamamlandı"))
+        rule.onNodeWithText("Tüm kelimeleri buldun. Toplam jeton: $afterLevel. Bonus sayacı: 1 / 5.").assertExists()
 
         // g) Sonraki seviye: 2. seviye başlar, odak başlıkta.
         tap("Sonraki seviye")
-        val header2 = "Seviye 2, Türkiye 2 / 20. 50 jeton. Kalan kelime: 2. Bonus sayacı: 1 / 5"
+        val header2 = "Seviye 2, Türkiye 2 / 20. $afterLevel jeton. Kalan kelime: 2. Bonus sayacı: 1 / 5"
         waitFor(header2)
         rule.onNodeWithContentDescription(header2).assertIsFocused()
 
         // h) İlerleme diske yazıldı (yeni ViewModel/yeniden açılış bunu okur).
         rule.waitUntil(15_000) { progress().levelIndex == 1 }
         val p = progress()
-        assertEquals(1, p.levelIndex); assertEquals(50, p.coins); assertEquals(1, p.bonusMeter)
+        assertEquals(1, p.levelIndex); assertEquals(afterLevel, p.coins); assertEquals(1, p.bonusMeter)
         assertTrue("2. seviyede bulunmuş kelime olmamalı: ${p.found}", p.found.isEmpty())
 
         // i) Süreç ölümü/yeniden açılış benzetimi: saveable durum geri yüklenir, yeni ViewModel kayıttan 2. seviyeyi açar.
@@ -181,9 +184,9 @@ class FinalGateTest {
         tap("Devam et, Türkiye, 1 / 20")
         val header = "Seviye 1, Türkiye 1 / 20. 5 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5"
         waitFor(header)
-        tap("İpucu, harf aç, 10 jeton")
+        tap(GameEconomy.HINT_LETTER_DESCRIPTION)
         waitHeard("Yeterli jeton yok")
-        tap("Kelime aç, 30 jeton")
+        tap(GameEconomy.HINT_WORD_DESCRIPTION)
         rule.waitUntil(10_000) { announcements().count { it.contains("Yeterli jeton yok") } >= 2 }
         assertFalse(heard("İpucu kullanıldı"))
         waitFor(header)
@@ -196,11 +199,12 @@ class FinalGateTest {
         rule.waitUntil(60_000) { exists("Devam et, Türkiye, 1 / 20") }
         tap("Devam et, Türkiye, 1 / 20")
         waitFor("Seviye 1, Türkiye 1 / 20. 50 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5")
-        tap("Kelime aç, 30 jeton")
-        waitHeard("İpucu kullanıldı, kalan jeton: 20")
-        waitFor("Seviye 1, Türkiye 1 / 20. 20 jeton. Kalan kelime: 1. Bonus sayacı: 0 / 5")
+        tap(GameEconomy.HINT_WORD_DESCRIPTION)
+        val left = 50 - GameEconomy.HINT_WORD_COST
+        waitHeard("İpucu kullanıldı, kalan jeton: $left")
+        waitFor("Seviye 1, Türkiye 1 / 20. $left jeton. Kalan kelime: 1. Bonus sayacı: 0 / 5")
         // Hangi kelimenin açıldığı rastgele: ikisini de dene; açılmış olana "zaten bulundu" denir.
-        val candidates = listOf("boa", "oba")
+        val candidates = listOf("yok", "koy")
         for (w in candidates) {
             if (exists("Sonraki seviye")) break
             typeWord(w); tap("Gönder")
@@ -210,7 +214,7 @@ class FinalGateTest {
             if (!exists("Sonraki seviye")) tap("Temizle")
         }
         waitFor("Sonraki seviye", 30_000)
-        rule.onNodeWithText("Tüm kelimeleri buldun. Toplam jeton: 30. Bonus sayacı: 0 / 5.").assertExists()
+        rule.onNodeWithText("Tüm kelimeleri buldun. Toplam jeton: ${left + GameEconomy.LEVEL_REWARD}. Bonus sayacı: 0 / 5.").assertExists()
     }
 
     // ---------- 4. Ayarlar'dan ve oyundan dönüşte odak ----------
@@ -283,14 +287,14 @@ class FinalGateTest {
         }
         waitFor("Seviye 1, Türkiye 1 / 20. 50 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5")
         tap("Gönder")
-        typeWord("abo"); tap("Gönder"); tap("Temizle")
-        typeWord("ab"); tap("Gönder")
-        tap("İpucu, harf aç, 10 jeton")
-        typeWord("boa"); tap("Gönder"); typeWord("boa"); tap("Gönder")
-        typeWord("oba"); tap("Gönder")
+        typeWord("kyo"); tap("Gönder"); tap("Temizle")
+        typeWord("ok"); tap("Gönder")
+        tap(GameEconomy.HINT_LETTER_DESCRIPTION)
+        typeWord("yok"); tap("Gönder"); typeWord("yok"); tap("Gönder")
+        typeWord("koy"); tap("Gönder")
         waitFor("Sonraki seviye", 30_000)
         tap("Sonraki seviye")
-        waitFor("Seviye 2, Türkiye 2 / 20. 50 jeton. Kalan kelime: 2. Bonus sayacı: 1 / 5")
+        waitFor("Seviye 2, Türkiye 2 / 20. ${50 - GameEconomy.HINT_LETTER_COST + GameEconomy.LEVEL_REWARD} jeton. Kalan kelime: 2. Bonus sayacı: 1 / 5")
         assertTrue("ses kapalıyken çalınan: ${fake.played}", fake.played.isEmpty())
 
         Thread.sleep(900) // çift dokunuş tolerans penceresi (800 ms) geçsin

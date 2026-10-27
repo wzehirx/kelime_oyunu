@@ -1,0 +1,24 @@
+# Elle eklenen türemiş/çekimli engelli biçimler (Zemberek, türetme çözümlemesi yüzünden "sikle" gibi biçimleri
+# kaçırabiliyor). build_wordlists.py bunları kabul setinden ve ızgara havuzundan çıkarır. Her satır: sözcük  # gerekçe
+kancığa  # kancık
+kancığı  # kancık
+zencim  # zenci
+zencin  # zenci
+zencisi  # zenci
+zenciye  # zenci
+zenciyi  # zenci
+sikle  # sik (siklemek)
+sikler  # sik
+sekse  # seks
+seksi  # seks
+seksimi  # seks
+seksin  # seks
+seksine  # seks
+seksini  # seks
+domalan  # domalmak
+geye  # gey
+çıfıt  # ırkçı/aşağılayıcı sözcük (TDK'de var, oyunda istenmez)
+livata  # cinsel suç terimi/aşağılayıcı
+kavat  # aşağılayıcı (pezevenk)
+köpoğlu  # hakaret
+eşşoğlu  # hakaret

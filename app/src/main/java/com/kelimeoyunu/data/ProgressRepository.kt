@@ -1,6 +1,7 @@
 package com.kelimeoyunu.data
 
 import androidx.datastore.core.DataStore
+import com.kelimeoyunu.domain.GameEconomy
 import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -12,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
-const val START_COINS = 50
+const val START_COINS = GameEconomy.START_COINS
 
 data class Progress(
     val levelIndex: Int = 0,

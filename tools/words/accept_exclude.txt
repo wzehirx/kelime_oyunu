@@ -1,0 +1,7 @@
+# Sıklık listesinden gelip Zemberek tarafından sözcük sayılan ama kısaltma/yabancı olan kabul seti dışı bırakılanlar.
+# (Ünlüsüz diziler - kg, tv, dvd ... - kurala göre zaten alınmaz.) Her satır: sözcük  # gerekçe
+abd  # kısaltma
+abs  # kısaltma
+dna  # kısaltma
+oil  # yabancı sözcük
+pub  # yabancı sözcük

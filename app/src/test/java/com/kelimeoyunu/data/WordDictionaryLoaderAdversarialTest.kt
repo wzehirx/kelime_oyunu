@@ -18,7 +18,7 @@ class WordDictionaryLoaderAdversarialTest {
     fun realFileLinesAreCleanAndSorted() {
         val lines = TestAssets.file("words.txt").readLines(Charsets.UTF_8)
         assertTrue("BOM var", lines.first().firstOrNull() != '﻿')
-        val bad = lines.filter { it.isEmpty() || it.length !in 2..15 || it.any { c -> c !in TurkishText.ALPHABET } }
+        val bad = lines.filter { it.isEmpty() || it.length !in 2..7 || it.any { c -> c !in TurkishText.ALPHABET } }
         assertTrue("${bad.size} bozuk satır: ${bad.take(10)}", bad.isEmpty())
         assertEquals("tekrar var", lines.size, lines.toSet().size)
         assertEquals(lines.size, real.size)

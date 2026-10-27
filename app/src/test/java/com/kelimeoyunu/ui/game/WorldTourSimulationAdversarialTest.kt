@@ -1,5 +1,6 @@
 package com.kelimeoyunu.ui.game
 
+import com.kelimeoyunu.domain.GameEconomy
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import com.kelimeoyunu.TestPlaces
 import com.kelimeoyunu.data.LevelRepository
@@ -110,16 +111,16 @@ class WorldTourSimulationAdversarialTest {
                 1 -> repeat(rng.nextInt(1, 4)) { k ->
                     vm.spell(bonusWords[k])
                     meter++
-                    if (meter == 5) { meter = 0; coins += 20 }
+                    if (meter == GameEconomy.BONUS_TARGET) { meter = 0; coins += GameEconomy.BONUS_REWARD }
                 }
-                2 -> if (coins >= 30) { vm.onHintWord(); coins -= 30 }
+                2 -> if (coins >= GameEconomy.HINT_WORD_COST) { vm.onHintWord(); coins -= GameEconomy.HINT_WORD_COST }
                 3 -> { vm.onLetter(0); vm.onShuffle(); vm.onClear(); vm.onDelete() }
                 4 -> { vm.onNextLevel() /* tamamlanmamış seviyede etkisiz olmalı */ }
             }
             vm.finishLevel()
-            coins += 10
+            coins += GameEconomy.LEVEL_REWARD
             val pos = tour.positionOf(level)!!
-            if (pos.levelInPlace == pos.placeLevelCount) coins += 25
+            if (pos.levelInPlace == pos.placeLevelCount) coins += GameEconomy.PLACE_REWARD
             val done = vm.ready()
             assertTrue("seviye $level bitti", done.levelComplete)
             assertEquals("jeton, level=$level place=${pos.placeIndex}/${pos.levelInPlace}", coins, done.coins)
@@ -144,10 +145,10 @@ class WorldTourSimulationAdversarialTest {
                 is GameEvent.PlaceCompleted -> {
                     val idx = (0 until 100).first { tour.place(it) == e.place }
                     completed.merge(idx, 1, Int::plus); order += "C" to idx
-                    assertEquals(25, e.bonusCoins)
+                    assertEquals(GameEconomy.PLACE_REWARD, e.bonusCoins)
                     assertEquals(tour.place(idx + 1)?.ad, e.nextPlaceName)
                     assertEquals("PlaceCompleted'dan önce LevelCompleted", GameEvent.LevelCompleted(placeCompleted = true), ev[i - 1])
-                    assertEquals("ondan önce CoinsEarned(10)", GameEvent.CoinsEarned(10, silent = true), ev[i - 2])
+                    assertEquals("ondan önce CoinsEarned(LEVEL_REWARD)", GameEvent.CoinsEarned(GameEconomy.LEVEL_REWARD, silent = true), ev[i - 2])
                 }
                 else -> Unit
             }
@@ -179,12 +180,12 @@ class WorldTourSimulationAdversarialTest {
         val r = repo(); seed(r, 7)
         val vm = newVm(r); collect(vm); vm.awaitReady()
         vm.finishLevel()
-        r.await { it.coins == 510 }
+        r.await { it.coins == (500 + GameEconomy.LEVEL_REWARD) }
         val vm2 = newVm(r); val ev2 = collect(vm2); vm2.awaitReady()
         assertTrue(vm2.ready().levelComplete)
-        assertEquals(510, vm2.ready().coins)
+        assertEquals((500 + GameEconomy.LEVEL_REWARD), vm2.ready().coins)
         vm2.onNextLevel()
-        assertEquals(510, vm2.ready().coins)
+        assertEquals((500 + GameEconomy.LEVEL_REWARD), vm2.ready().coins)
         assertTrue("olay yok: $ev2", ev2.none { it is GameEvent.PlaceEntered || it is GameEvent.PlaceCompleted || it is GameEvent.CoinsEarned })
     }
 
@@ -192,24 +193,24 @@ class WorldTourSimulationAdversarialTest {
         val r = repo(); seed(r, 19)
         val vm = newVm(r); collect(vm); vm.awaitReady()
         vm.finishLevel()
-        r.await { it.coins == 535 }
+        r.await { it.coins == (500 + GameEconomy.LEVEL_REWARD + GameEconomy.PLACE_REWARD) }
         repeat(3) {
             val again = newVm(r); val ev = collect(again); again.awaitReady()
-            assertEquals(535, again.ready().coins)
+            assertEquals((500 + GameEconomy.LEVEL_REWARD + GameEconomy.PLACE_REWARD), again.ready().coins)
             assertTrue("kapat-aç #$it: $ev", ev.none { e -> e is GameEvent.PlaceCompleted || e is GameEvent.CoinsEarned || e is GameEvent.PlaceEntered })
         }
         val last = newVm(r); val ev = collect(last); last.awaitReady()
         last.onNextLevel(); last.onNextLevel()
         assertEquals(1, ev.count { e -> e is GameEvent.PlaceEntered })
-        assertEquals(535, last.ready().coins)
+        assertEquals((500 + GameEconomy.LEVEL_REWARD + GameEconomy.PLACE_REWARD), last.ready().coins)
     }
 
     @Test fun killedBetweenNextLevelAndSaveDoesNotLoseOrDoubleBonus() = test {
         // son kayıt: ülke bitti (index 19, tamamlanmış). Yeni VM + onNextLevel iki kez.
-        val r = repo(); seed(r, 19, coins = 535, found = setOf("ten", "net"))
+        val r = repo(); seed(r, 19, coins = 500 + GameEconomy.LEVEL_REWARD + GameEconomy.PLACE_REWARD, found = setOf("ten", "net"))
         val vm = newVm(r); val ev = collect(vm); vm.awaitReady()
         vm.onNextLevel(); vm.onNextLevel()
-        assertEquals(535, vm.ready().coins)
+        assertEquals((500 + GameEconomy.LEVEL_REWARD + GameEconomy.PLACE_REWARD), vm.ready().coins)
         assertEquals(1, ev.count { it is GameEvent.PlaceEntered })
     }
 
@@ -253,7 +254,7 @@ class WorldTourSimulationAdversarialTest {
         val vm = newVm(r); val ev = collect(vm); vm.awaitReady()
         vm.finishLevel()
         assertEquals(1, ev.count { it is GameEvent.PlaceCompleted })
-        val saved = r.await { it.coins == 535 }
+        val saved = r.await { it.coins == (500 + GameEconomy.LEVEL_REWARD + GameEconomy.PLACE_REWARD) }
         // Kayıtlı index 19 kalır; liste, seviyenin bittiğini kayıtlı kelimelerden (LevelRepository.isLevelComplete) çıkarıp
         // efektif ilerlemeyi +1 sayar (WorldTourScreen savedLevelDone). Test başta saved.levelIndex'i doğrudan veriyordu.
         val levels = LevelRepository { ByteArrayInputStream(gz) }

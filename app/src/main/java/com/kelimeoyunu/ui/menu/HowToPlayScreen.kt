@@ -15,6 +15,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.kelimeoyunu.a11y.initialFocus
+import com.kelimeoyunu.domain.GameEconomy
 import com.kelimeoyunu.ui.common.A11yButton
 import com.kelimeoyunu.ui.common.MinLetterHeight
 
@@ -23,14 +24,14 @@ private val IntroParagraphs = listOf(
     "Ekranın üstünde kelimelerin listesi bulunur. Her kelime için kaç harfli olduğu ve açılmış harfleri okunur.",
     "Harf düğmelerine çift dokunarak harf seçersin. Seçtiğin harflerden oluşan kelime okunur. Aynı harf düğmesini iki kez seçemezsin.",
     "Kelimeyi göndermek için Gönder düğmesine çift dokun. Sil son harfi, Temizle bütün harfleri kaldırır. Karıştır harflerin sırasını değiştirir.",
-    "Listede olmayan ama geçerli bir kelime bulursan bonus kelime olur. Her 5 bonus kelime 20 jeton kazandırır. Seviyeyi bitirince 10 jeton kazanırsın.",
-    "Takılırsan İpucu düğmesi 10 jetonla bir harf açar. Kelime aç düğmesi 30 jetonla bir kelimeyi tamamen açar.",
+    GameEconomy.HOW_BONUS,
+    GameEconomy.HOW_HINTS,
 )
 
 private const val WorldTourParagraph =
-    "Dünya turu: Seviyeler 100 ülkeye bölünür ve Türkiye'den başlarsın. Yeni bir ülkeye girince bölgesine özel bir melodi çalar ve ülke bir kez tanıtılır; ülkeyi bitirince 25 jeton ve ilginç bir bilgi kazanırsın. Ana menüdeki Dünya turu düğmesinden hangi ülkede olduğuna bakabilirsin."
+    "Dünya turu: Seviyeler 100 ülkeye bölünür ve Türkiye'den başlarsın. Yeni bir ülkeye girince bölgesine özel bir melodi çalar ve ülke bir kez tanıtılır; ${GameEconomy.HOW_WORLD_REWARD}. Ana menüdeki Dünya turu düğmesinden hangi ülkede olduğuna bakabilirsin."
 
-private const val OutroParagraph = "Her şey sesli olarak duyurulur; ekrana bakman gerekmez. Başlangıçta 50 jetonun var."
+private const val OutroParagraph = GameEconomy.HOW_OUTRO
 
 /** Dünya turu kapalıyken (ülke listesi okunamadı) ana menüde böyle bir düğme olmadığından o paragraf çıkarılır. */
 fun howToPlayParagraphs(worldTourEnabled: Boolean): List<String> =

@@ -177,10 +177,15 @@ class LevelRepositoryAdversarialTest {
 
     @Test
     fun difficultyCurveStartIsEasyAndEndIsHard() {
+        // v1.4: 3 harfli seviye yalnızca ilk 6; 40. seviye en az 4 harf ve 4 kelime
+        assertTrue("ilk 100'de en çok 6 üç harfli", allLevels.take(100).count { it.letters.size == 3 } <= 6)
         for (l in allLevels.take(50)) {
-            assertTrue("${l.id} harf ${l.letters.size}", l.letters.size in 3..4)
-            assertTrue("${l.id} kelime ${l.words.size}", l.words.size in 2..4)
+            assertTrue("${l.id} harf ${l.letters.size}", l.letters.size in 3..5)
+            assertTrue("${l.id} kelime ${l.words.size}", l.words.size in 2..8)
         }
+        val l40 = allLevels[39]
+        assertTrue("40. seviye ${l40.letters.size} harf", l40.letters.size >= 4)
+        assertTrue("40. seviye ${l40.words.size} kelime", l40.words.size >= 4)
         val tail = allLevels.takeLast(500)
         assertTrue("son 500'de 7 harfli yok", tail.any { it.letters.size == 7 })
         assertTrue(tail.map { it.words.size }.average() > allLevels.take(500).map { it.words.size }.average())

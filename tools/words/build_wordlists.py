@@ -19,6 +19,9 @@ REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 TDK_WORDS = os.path.join(HERE, "tdk_words.txt")
 BLOCKLIST = os.path.join(HERE, "blocklist.txt")
 BLOCKLIST_EXTRA = os.path.join(HERE, "blocklist_extra_forms.txt")
+POOL_EXCLUDE = os.path.join(HERE, "pool_exclude.txt")
+ACCEPT_EXCLUDE = os.path.join(HERE, "accept_exclude.txt")
+VOWELS = frozenset("aeıioöuü")
 OUT_WORDS = os.path.join(REPO, "app", "src", "main", "assets", "words.txt")
 OUT_POOL = os.path.join(HERE, "grid_pool.txt")
 
@@ -26,8 +29,9 @@ MIN_LEN, MAX_LEN = 2, 7           # kabul seti uzunluğu
 POOL_MIN_LEN = 3                   # ızgara havuzu uzunluğu: 3-7
 
 # Eşikler (gerekçe SOURCES.md "v1.4" bölümünde)
-ACCEPT_MIN_COUNT = 10              # sıklık listesinden çekimli biçim kabulü için en az geçiş sayısı
-POOL_MAX_RANK = 40000              # ızgara havuzu: sıklık sıralamasında ilk N satır
+ACCEPT_MIN_COUNT = 20              # sıklık listesinden çekimli biçim kabulü için en az geçiş sayısı
+# Izgara havuzu: sıklık listesinde en az bu kadar geçiş; kısa sözcükler daha sıkı (SOURCES.md'ye bakın).
+POOL_MIN_COUNT = {3: 50, 4: 20, 5: 10, 6: 10, 7: 10}
 
 ACCEPT_POS = {"Noun", "Adjective", "Adverb", "Verb", "Pronoun", "Conjunction",
               "PostPositive", "Determiner", "Question", "Numeral"}
@@ -174,7 +178,8 @@ def prepare(cache):
     print("aday sayısı: %d" % len(cands))
 
 
-def select(cache, accept_min=ACCEPT_MIN_COUNT, pool_rank=POOL_MAX_RANK, log=print):
+def select(cache, accept_min=ACCEPT_MIN_COUNT, pool_min=None, log=print):
+    pool_min = dict(POOL_MIN_COUNT if pool_min is None else pool_min)
     tdk_all = read_list(TDK_WORDS)
     tdk = {w for w in tdk_all if is_word(w, MIN_LEN, MAX_LEN)}
     freq = read_freq(os.path.join(cache, "tr_full.txt"))
@@ -201,6 +206,8 @@ def select(cache, accept_min=ACCEPT_MIN_COUNT, pool_rank=POOL_MAX_RANK, log=prin
     # 2) fiil kökleri: Zemberek + TDK mastarları
     roots = verb_roots_from_lexicon(lex) | verb_roots_from_mastars(tdk_all)
     for w in roots:
+        if VOWELS.isdisjoint(w):
+            continue
         if blocked_word(w):
             why["root_blocked"] += 1
         else:
@@ -210,8 +217,8 @@ def select(cache, accept_min=ACCEPT_MIN_COUNT, pool_rank=POOL_MAX_RANK, log=prin
     for w, c in freq:
         if c < accept_min:
             break
-        if not is_word(w, MIN_LEN, MAX_LEN) or w in accept:
-            continue
+        if not is_word(w, MIN_LEN, MAX_LEN) or w in accept or VOWELS.isdisjoint(w):
+            continue  # ünlüsüz diziler (kg, tv, dvd ...) kısaltmadır
         rows = analysis.get(w)
         if not rows:
             continue
@@ -221,20 +228,24 @@ def select(cache, accept_min=ACCEPT_MIN_COUNT, pool_rank=POOL_MAX_RANK, log=prin
         if good_rows(rows, blocked, ACCEPT_POS):
             accept.add(w)
             n_freq += 1
+    accept -= set(read_list(ACCEPT_EXCLUDE)) if os.path.exists(ACCEPT_EXCLUDE) else set()
     log("kabul seti: %d (tdk %d, +kök/+sıklık...), sıklıktan eklenen: %d, engellenen: %s"
         % (len(accept), len(tdk), n_freq, dict(why)))
 
-    pool = []
-    for rank, (w, c) in enumerate(freq):
-        if rank >= pool_rank:
+    pool_exclude = set(read_list(POOL_EXCLUDE)) if os.path.exists(POOL_EXCLUDE) else set()
+    # Kalite kapısı: ızgara kelimesi TDK madde başı ya da TDK mastarının kökü olmalı
+    # (Zemberek'in bildiği ama TDK'de olmayan yabancı yazımlar 'charter', 'sticker' gibi elenir).
+    tdk_gate = tdk | verb_roots_from_mastars(tdk_all)
+    pool = []  # sıklık sırasıyla (en yaygın önce)
+    floor_count = min(pool_min.values())
+    for w, c in freq:
+        if c < floor_count:
             break
-        if not is_word(w, POOL_MIN_LEN, MAX_LEN) or w not in accept:
+        if not is_word(w, POOL_MIN_LEN, MAX_LEN) or c < pool_min[len(w)] or w not in accept or w in pool_exclude or w not in tdk_gate:
             continue
         rows = analysis.get(w)
         if rows and not blocked_word(w) and pool_ok(w, rows, blocked):
             pool.append(w)
-    # ızgara: sıklık listesinde bulunmayan fiil kökleri (sat gibi yaygın olanlar zaten listede) alınmaz
-    pool = sorted(set(pool), key=sort_key)
     return sorted(accept, key=sort_key), pool
 
 

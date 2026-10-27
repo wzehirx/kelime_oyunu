@@ -12,8 +12,8 @@ android {
         applicationId = "com.kelimeoyunu"
         minSdk = 26
         targetSdk = 35
-        versionCode = 9
-        versionName = "1.3"
+        versionCode = 10
+        versionName = "1.4"
     }
 
     // Depodaki paylaşılan debug anahtarı: her derleme/CI aynı imzayı üretir, sürümler birbirinin üstüne kurulur.

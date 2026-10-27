@@ -15,5 +15,16 @@ object TestAssets {
             ?: error("Asset bulunamadı: $name (çalışma dizini ${File(".").absolutePath})")
     }
 
+    /** Depo kökündeki dosya (ör. tools/words/blocklist.txt); Gradle testi app/ altında çalışır. */
+    fun repoFile(path: String): File =
+        listOf(File("../$path"), File(path)).firstOrNull { it.isFile }
+            ?: error("Depo dosyası bulunamadı: $path (çalışma dizini ${File(".").absolutePath})")
+
+    /** '#' yorumlu, satır başına bir sözcük içeren depo listesi (blocklist.txt, grid_pool.txt). */
+    fun repoWordList(path: String): List<String> =
+        repoFile(path).readLines(Charsets.UTF_8)
+            .map { it.substringBefore('#').trim() }
+            .filter { it.isNotEmpty() }
+
     fun open(name: String): InputStream = FileInputStream(file(name))
 }

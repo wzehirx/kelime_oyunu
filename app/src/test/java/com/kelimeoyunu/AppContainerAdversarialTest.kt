@@ -1,5 +1,6 @@
 package com.kelimeoyunu
 
+import com.kelimeoyunu.domain.GameEconomy
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.kelimeoyunu.data.LevelRepository
@@ -57,13 +58,14 @@ class AppContainerAdversarialTest {
             repeat(words) { vm.onHintWord() }
             val done = vm.state.value as GameUiState.Ready
             assertTrue(done.levelComplete)
-            // +10 seviye ödülü, +25 son ülke (Dünya turu) bonusu
-            assertEquals(5000 - 30 * words + 10 + 25, done.coins)
+            // + seviye ödülü, + son ülke (Dünya turu) bonusu
+            val expected = 5000 - GameEconomy.HINT_WORD_COST * words + GameEconomy.LEVEL_REWARD + GameEconomy.PLACE_REWARD
+            assertEquals(expected, done.coins)
             vm.onNextLevel()
             assertEquals(GameUiState.AllDone, vm.state.value)
             withTimeout(30_000) { container.progressRepository.progress.first { it.levelIndex == repo.count } }
             val saved = container.progressRepository.progress.first()
-            assertEquals(5000 - 30 * words + 10 + 25, saved.coins)
+            assertEquals(expected, saved.coins)
             val vm2 = container.gameViewModelFactory().create(GameViewModel::class.java)
             withTimeout(60_000) { vm2.state.first { it !is GameUiState.Loading } }
             assertEquals(GameUiState.AllDone, vm2.state.value)

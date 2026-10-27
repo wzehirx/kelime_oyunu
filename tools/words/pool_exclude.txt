@@ -1,0 +1,33 @@
+# Izgara havuzundan elle çıkarılan nadir/uygunsuz sözcükler (kabul setinde kalabilirler).
+# biçim: sözcük  # gerekçe
+ast  # nadir isim (askerî rütbe bağlamı); kullanıcı şikâyeti
+# Aşağıdakiler kabul setinde kalır (geçerli sözcük sayılır) ama oyuncuya ızgara sorusu olarak sunulmaz:
+# cinsellik/anatomi/küfre yakın, aşağılayıcı ya da nadir-uygunsuz sözcükler.
+vagina  # anatomi
+vulva  # anatomi
+sperma  # anatomi
+makat  # anatomi
+büzük  # anatomi, kaba
+anüs  # anatomi
+fallus  # anatomi
+cicik  # kaba/çocuk dili
+eşey  # anatomi
+dölle  # üreme (dölleme)
+zifaf  # cinsellik
+erotizm  # cinsellik
+erojen  # cinsellik
+nüdist  # cinsellik
+sadizm  # cinsellik
+pedofil  # cinsel suç
+sifilis  # hastalık/cinsellik
+tecavüz  # cinsel suç
+ırz  # cinsel bağlam
+aşifte  # aşağılayıcı
+haspa  # aşağılayıcı
+yosma  # aşağılayıcı kullanılabilir
+avrat  # aşağılayıcı
+gaita  # dışkı
+ibiş  # hakaret
+kofti  # argo
+bızdık  # hakaret
+deyyus  # hakaret

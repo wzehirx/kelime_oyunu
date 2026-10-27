@@ -5,6 +5,7 @@ import com.kelimeoyunu.data.LevelRepository
 import com.kelimeoyunu.data.Progress
 import com.kelimeoyunu.data.ProgressRepository
 import com.kelimeoyunu.domain.CellState
+import com.kelimeoyunu.domain.GameEconomy
 import com.kelimeoyunu.domain.GameEngine
 import com.kelimeoyunu.domain.Level
 import com.kelimeoyunu.domain.PlacePosition
@@ -353,11 +354,12 @@ class GameViewModel(
     }
 
     companion object {
-        const val BONUS_TARGET = 5
-        const val BONUS_REWARD = 20
-        const val LEVEL_REWARD = 10
-        const val PLACE_REWARD = 25
-        const val HINT_LETTER_COST = 10
-        const val HINT_WORD_COST = 30
+        // Değerler tek yerde: domain/GameEconomy.kt
+        const val BONUS_TARGET = GameEconomy.BONUS_TARGET
+        const val BONUS_REWARD = GameEconomy.BONUS_REWARD
+        const val LEVEL_REWARD = GameEconomy.LEVEL_REWARD
+        const val PLACE_REWARD = GameEconomy.PLACE_REWARD
+        const val HINT_LETTER_COST = GameEconomy.HINT_LETTER_COST
+        const val HINT_WORD_COST = GameEconomy.HINT_WORD_COST
     }
 }

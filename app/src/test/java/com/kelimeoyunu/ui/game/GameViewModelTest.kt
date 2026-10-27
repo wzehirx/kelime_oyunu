@@ -4,6 +4,8 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import com.kelimeoyunu.data.LevelRepository
 import com.kelimeoyunu.data.Progress
 import com.kelimeoyunu.data.ProgressRepository
+import com.kelimeoyunu.data.START_COINS
+import com.kelimeoyunu.domain.GameEconomy
 import com.kelimeoyunu.domain.SubmitResult
 import com.kelimeoyunu.domain.WordDictionary
 import java.io.ByteArrayInputStream
@@ -244,7 +246,7 @@ class GameViewModelTest {
     }
 
     @Test
-    fun fifthBonusGivesTwentyCoinsAndResetsMeter() = test {
+    fun fifthBonusGivesBonusRewardAndResetsMeter() = test {
         val v = vm(repo())
         val ev = events(v)
         listOf("et", "en", "te", "ne").forEach { v.spell(it); v.onSubmit() }
@@ -253,10 +255,10 @@ class GameViewModelTest {
         assertFalse(GameEvent.BonusMeterFull in ev)
         v.spell("ent"); v.onSubmit()
         assertEquals(0, v.ready().bonusMeter)
-        assertEquals(70, v.ready().coins)
+        assertEquals(START_COINS + GameEconomy.BONUS_REWARD, v.ready().coins)
         val tail = ev.takeLast(3)
         assertEquals(GameEvent.Submitted(SubmitResult.Bonus("ent")), tail[0])
-        assertTrue(GameEvent.BonusMeterFull in tail && GameEvent.CoinsEarned(20) in tail)
+        assertTrue(GameEvent.BonusMeterFull in tail && GameEvent.CoinsEarned(GameEconomy.BONUS_REWARD) in tail)
     }
 
     @Test
@@ -274,17 +276,20 @@ class GameViewModelTest {
 
     @Test
     fun hintCostsAndEffects() = test {
-        val v = vm(repo())
+        val start = GameEconomy.HINT_LETTER_COST + GameEconomy.HINT_WORD_COST + 5 // iki ipucu + 5 artar; ikinci kelime ipucuna yetmez
+        val r = repo()
+        r.save(Progress(0, start, emptySet(), emptySet(), emptySet(), 0))
+        val v = vm(r)
         val ev = events(v)
         v.onHintLetter()
-        assertEquals(40, v.ready().coins)
+        assertEquals(start - GameEconomy.HINT_LETTER_COST, v.ready().coins)
         assertEquals(1, v.ready().wordRows.sumOf { r -> r.cells.count { it != null } })
-        assertTrue(GameEvent.HintUsed(40) in ev)
+        assertTrue(GameEvent.HintUsed(start - GameEconomy.HINT_LETTER_COST) in ev)
         v.onHintWord()
-        assertEquals(10, v.ready().coins)
+        assertEquals(5, v.ready().coins)
         assertEquals(1, v.ready().remainingWords)
-        v.onHintWord() // 10 < 30
-        assertEquals(10, v.ready().coins)
+        v.onHintWord() // 5 < HINT_WORD_COST
+        assertEquals(5, v.ready().coins)
         assertEquals(GameEvent.NotEnoughCoins, ev.last())
     }
 
@@ -295,24 +300,24 @@ class GameViewModelTest {
         val v = vm(r)
         val ev = events(v)
         repeat(5) { v.onHintLetter() } // ızgarada 5 kutu
-        assertEquals(50, v.ready().coins)
+        assertEquals(100 - 5 * GameEconomy.HINT_LETTER_COST, v.ready().coins)
         v.onHintLetter()
-        assertEquals(50, v.ready().coins)
+        assertEquals(100 - 5 * GameEconomy.HINT_LETTER_COST, v.ready().coins)
         assertEquals(GameEvent.NoHintAvailable, ev.last())
     }
 
     @Test
-    fun levelCompletionGivesTenCoinsOnce() = test {
+    fun levelCompletionGivesLevelRewardOnce() = test {
         val v = vm(repo())
         val ev = events(v)
         v.spell("ten"); v.onSubmit()
         assertFalse(v.ready().levelComplete)
         v.spell("net"); v.onSubmit()
         assertTrue(v.ready().levelComplete)
-        assertEquals(60, v.ready().coins)
-        assertTrue(GameEvent.LevelCompleted() in ev && GameEvent.CoinsEarned(10) in ev)
+        assertEquals(START_COINS + GameEconomy.LEVEL_REWARD, v.ready().coins)
+        assertTrue(GameEvent.LevelCompleted() in ev && GameEvent.CoinsEarned(GameEconomy.LEVEL_REWARD) in ev)
         v.onHintWord(); v.onHintLetter()
-        assertEquals(60, v.ready().coins)
+        assertEquals(START_COINS + GameEconomy.LEVEL_REWARD, v.ready().coins)
     }
 
     @Test
@@ -323,7 +328,7 @@ class GameViewModelTest {
         val ev = events(v)
         v.onHintWord(); v.onHintWord()
         assertTrue(v.ready().levelComplete)
-        assertEquals(100 - 60 + 10, v.ready().coins)
+        assertEquals(100 - 2 * GameEconomy.HINT_WORD_COST + GameEconomy.LEVEL_REWARD, v.ready().coins)
         assertTrue(GameEvent.LevelCompleted() in ev)
     }
 
@@ -359,7 +364,7 @@ class GameViewModelTest {
         v.spell("et"); v.onSubmit()
         v.onHintLetter()
         val before = v.ready()
-        r.awaitProgress { it.coins == 40 && it.revealed.size == 1 }
+        r.awaitProgress { it.coins == START_COINS - GameEconomy.HINT_LETTER_COST && it.revealed.size == 1 }
         val s = vm(r).ready()
         assertEquals(before.levelNumber, s.levelNumber)
         assertEquals(before.coins, s.coins)
@@ -377,7 +382,7 @@ class GameViewModelTest {
         r.awaitProgress { it.levelIndex == 1 }
         val s = vm(r).ready()
         assertEquals(2, s.levelNumber)
-        assertEquals(60, s.coins)
+        assertEquals(START_COINS + GameEconomy.LEVEL_REWARD, s.coins)
         assertEquals(2, s.remainingWords)
     }
 
@@ -386,10 +391,10 @@ class GameViewModelTest {
         val r = repo()
         val v = vm(r)
         v.spell("ten"); v.onSubmit(); v.spell("net"); v.onSubmit()
-        r.awaitProgress { it.coins == 60 && it.found.size == 2 }
+        r.awaitProgress { it.coins == START_COINS + GameEconomy.LEVEL_REWARD && it.found.size == 2 }
         val s = vm(r).ready()
         assertTrue(s.levelComplete)
-        assertEquals(60, s.coins)
+        assertEquals(START_COINS + GameEconomy.LEVEL_REWARD, s.coins)
     }
 
     @Test

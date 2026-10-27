@@ -1,5 +1,6 @@
 package com.kelimeoyunu
 
+import com.kelimeoyunu.domain.GameEconomy
 import android.app.Application
 import android.content.Context
 import android.view.accessibility.AccessibilityEvent
@@ -83,19 +84,19 @@ class AppRootAdversarialTest {
         rule.waitUntil(60_000) { exists("Seviye 1, Türkiye 1 / 20. 50 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5") }
         rule.onNodeWithContentDescription("Seviye 1, Türkiye 1 / 20. 50 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5").assertIsFocused()
 
-        typeWord("boa"); tap("Gönder")
-        rule.waitUntil(30_000) { exists("Kelime 1, 3 harfli, bulundu: BOA") }
-        typeWord("oba"); tap("Gönder")
+        typeWord("yok"); tap("Gönder")
+        rule.waitUntil(30_000) { exists("Kelime 1, 3 harfli, bulundu: YOK") }
+        typeWord("koy"); tap("Gönder")
         rule.waitUntil(30_000) { exists("Sonraki seviye") }
         rule.onNodeWithContentDescription("Sonraki seviye").assertIsFocused()
         rule.waitUntil(10_000) { announcements().any { it.contains("Seviye 1 tamamlandı") } }
         val finale = announcements().last { it.contains("tamamlandı") }
         // Test dokunuşları ms aralıklı; son harf ("Ş") aynı 120 ms penceresine girebilir, bu yüzden sonek denetlenir.
-        assertTrue(finale, finale.endsWith("Doğru, OBA. 10 jeton kazandın. Seviye 1 tamamlandı"))
+        assertTrue(finale, finale.endsWith("Doğru, KOY. ${GameEconomy.LEVEL_REWARD} jeton kazandın. Seviye 1 tamamlandı"))
 
         tap("Sonraki seviye")
-        rule.waitUntil(30_000) { exists("Seviye 2, Türkiye 2 / 20. 60 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5") }
-        rule.onNodeWithContentDescription("Seviye 2, Türkiye 2 / 20. 60 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5").assertIsFocused()
+        rule.waitUntil(30_000) { exists("Seviye 2, Türkiye 2 / 20. ${50 + GameEconomy.LEVEL_REWARD} jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5") }
+        rule.onNodeWithContentDescription("Seviye 2, Türkiye 2 / 20. ${50 + GameEconomy.LEVEL_REWARD} jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5").assertIsFocused()
 
         back() // oyundan menüye
         rule.waitUntil(30_000) { exists("Devam et, Türkiye, 2 / 20") }
@@ -155,7 +156,7 @@ class AppRootAdversarialTest {
     @Test fun savedCompletedLevelReopenedGivesContextNotJustNextButton() {
         // Seviye 1 bitmiş ama "Sonraki seviye"ye basılmadan çıkılmış kayıt.
         runBlocking {
-            container.progressRepository.save(Progress(levelIndex = 0, coins = 60, found = setOf("boa", "oba")))
+            container.progressRepository.save(Progress(levelIndex = 0, coins = 50 + GameEconomy.LEVEL_REWARD, found = setOf("yok", "koy")))
         }
         show()
         rule.waitUntil(60_000) { existsPrefix("Devam et") }

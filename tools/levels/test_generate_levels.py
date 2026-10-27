@@ -5,10 +5,11 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+import generate_levels as gl  # noqa: E402
 from generate_levels import (  # noqa: E402
     Level, Placement, format_level, generate, parse_level, read_levels, write_levels,
 )
-from validate_levels import check_monotonic, validate  # noqa: E402
+from validate_levels import check_curve, check_monotonic, check_reuse, validate  # noqa: E402
 
 WORDS = """kalem elma alem mal kal ala lem ela kale ekle leke kem mek kek
 kelam melek lale ekmek mele ele elem kama mama kamel amel lama
@@ -63,6 +64,54 @@ class GenerateTest(unittest.TestCase):
         self.assertEqual(l.id, 5)
         self.assertEqual(l.words[1], Placement("elma", 0, 1, "d"))
         self.assertEqual(format_level(l), "5|mlea|kalem,0,0,y;elma,0,1,d")
+
+
+class PoolAndBlocklistTest(unittest.TestCase):
+    """v1.4: ızgara kelimeleri yalnızca havuzdan, tüm kelimeler kabul setinden, engellilerden hiçbiri yok."""
+
+    def test_grid_words_come_only_from_pool(self):
+        pool = [w for w in WORDS if w not in ("kalp", "pala", "kaplan")]
+        levels = generate(WORDS, 8, 5, pool=pool)
+        grid_words = {p.word for l in levels for p in l.words}
+        self.assertTrue(grid_words <= set(pool), grid_words - set(pool))
+        self.assertTrue(grid_words.isdisjoint({"kaplan", "pala"}))
+
+    def test_blocked_words_never_placed(self):
+        blocked = {"kal", "mal"}
+        levels = generate(WORDS, 8, 5, blocked=blocked)
+        self.assertTrue({p.word for l in levels for p in l.words}.isdisjoint(blocked))
+
+    def test_validate_flags_pool_blocklist_and_dictionary(self):
+        good = L(1, "kalem", ("kalem", 0, 0, "y"), ("elma", 0, 3, "d"))
+        ws = {"kalem", "elma"}
+        self.assertEqual(validate(good, ws, pool_set=ws, blocked=set()), [])
+        self.assertTrue(any("havuzunda yok" in e for e in validate(good, ws, pool_set={"kalem"}, blocked=set())))
+        self.assertTrue(any("engelli" in e for e in validate(good, ws, pool_set=ws, blocked={"elma"})))
+        self.assertTrue(any("sözlükte yok" in e for e in validate(good, {"kalem"}, pool_set=ws, blocked=set())))
+
+
+class ReuseAndCurveTest(unittest.TestCase):
+    @staticmethod
+    def lv(i, letters, words):
+        return Level(i, letters, tuple(Placement(w, 0, 0, "y") for w in words))
+
+    def test_reuse_limits(self):
+        ok = [self.lv(1, "abcdef", list("abcdefgh")), self.lv(2, "fedcba", list("ghijklmn"))]
+        self.assertEqual(check_reuse(ok)[0], [])
+        same = [self.lv(1, "abcdef", list("abcdefgh")), self.lv(2, "fedcba", list("abcdefgx"))]
+        self.assertTrue(any("kelime farkı" in e for e in check_reuse(same)[0]))
+        four = [self.lv(i, "abcdef", [str(i) + x for x in "abcdefgh"]) for i in range(1, 5)]
+        self.assertTrue(any("4 kez" in e for e in check_reuse(four)[0]))
+
+    def test_curve_checks(self):
+        three = [self.lv(i, "abc", ["x", "y"]) for i in range(1, 8)]
+        self.assertTrue(any("üç harfli" in e for e in check_curve(three + three * 20)))
+        good = [self.lv(i, "abcd", list("wxyz")) for i in range(1, 60)]
+        self.assertEqual(check_curve(good), [])
+        weak = [self.lv(i, "abc", ["x", "y"]) for i in range(1, 6)] + [self.lv(i, "abcd", list("wxyz")) for i in range(6, 60)]
+        self.assertEqual(check_curve(weak[:5] + weak[5:]), [])  # 5 üç harfli, 40. seviye iyi
+        bad40 = [self.lv(i, "abc", ["x", "y"]) for i in range(1, 41)]
+        self.assertTrue(any("40. seviye" in e for e in check_curve(bad40)))
 
 
 class MonotonicTest(unittest.TestCase):
@@ -140,6 +189,49 @@ class ValidateTest(unittest.TestCase):
         ws = {"abcdefghij", "kal"}
         big = L(1, "abcdefg", ("abcdefghij", 0, 0, "y"), ("kal", 0, 0, "d"))
         self.assertTrue(any("sınır" in e for e in validate(big, ws)))
+
+
+REAL_LEVELS = os.path.join(gl.REPO, "app", "src", "main", "assets", "levels.txt.gz")
+
+
+@unittest.skipUnless(os.path.exists(REAL_LEVELS), "levels.txt.gz yok")
+class RealAssetTest(unittest.TestCase):
+    """Üretilmiş gerçek seviye dosyasının SERT kuralları (v1.4)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.levels = read_levels(REAL_LEVELS)
+        cls.words = set(gl.load_words(gl.DEFAULT_WORDS))
+        cls.pool = set(gl.load_words(gl.DEFAULT_POOL))
+        cls.blocked = set(gl.load_words(gl.DEFAULT_BLOCKLIST))
+
+    def test_count_ids_and_size(self):
+        self.assertEqual(len(self.levels), 10000)
+        self.assertEqual([l.id for l in self.levels], list(range(1, 10001)))
+        self.assertLess(os.path.getsize(REAL_LEVELS), 6 * 1024 * 1024)
+
+    def test_every_level_valid_against_pool_dictionary_blocklist(self):
+        for l in self.levels:
+            self.assertEqual(validate(l, self.words, self.pool, self.blocked), [], format_level(l))
+
+    def test_monotonic_letters_and_words(self):
+        errs, rep = check_monotonic(self.levels)
+        self.assertEqual((errs, rep["letter_drops"], rep["word_drops"]), ([], 0, 0))
+
+    def test_early_curve(self):
+        self.assertEqual(check_curve(self.levels), [])
+        self.assertLessEqual(sum(1 for l in self.levels[:100] if len(l.letters) == 3), 6)
+        l40 = self.levels[39]
+        self.assertGreaterEqual(len(l40.letters), 4)
+        self.assertGreaterEqual(len(l40.words), 4)
+
+    def test_reuse_rules(self):
+        errs, stats = check_reuse(self.levels)
+        self.assertEqual(errs, [])
+
+    def test_each_level_has_a_full_use_word(self):
+        for l in self.levels:
+            self.assertTrue(any(len(p.word) == len(l.letters) for p in l.words), format_level(l))
 
 
 if __name__ == "__main__":

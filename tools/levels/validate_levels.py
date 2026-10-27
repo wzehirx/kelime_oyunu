@@ -7,13 +7,16 @@ from collections import Counter
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from generate_levels import (  # noqa: E402
-    DEFAULT_OUT, DEFAULT_WORDS, MAX_GRID, load_words, read_levels, parse_level,
+    DEFAULT_BLOCKLIST, DEFAULT_OUT, DEFAULT_POOL, DEFAULT_WORDS, MAX_GRID, MAX_REPS, MIN_DIFF,
+    load_words, read_levels, parse_level,
 )
 
 import gzip  # noqa: E402
 
 
-def validate(level, words_set):
+def validate(level, words_set, pool_set=None, blocked=None):
+    """Tek seviye denetimi. pool_set verilirse ızgara kelimeleri havuzda olmalı; blocked verilirse
+    hiçbir kelime engelli listede olmamalı; words_set (kabul seti) her zaman denetlenir."""
     errors = []
     pool = Counter(level.letters)
     if not 3 <= len(level.letters) <= 7:
@@ -31,6 +34,10 @@ def validate(level, words_set):
             errors.append("kelime çok kısa: %s" % w)
         if w not in words_set:
             errors.append("sözlükte yok: %s" % w)
+        if pool_set is not None and w not in pool_set:
+            errors.append("ızgara havuzunda yok: %s" % w)
+        if blocked and w in blocked:
+            errors.append("engelli listede: %s" % w)
         need = Counter(w)
         if any(need[ch] > pool[ch] for ch in need):
             errors.append("havuzdan yazılamıyor: %s" % w)
@@ -133,6 +140,9 @@ def check_monotonic(levels):
     return errors, report
 
 
+BANDS = ((3, "3 harf"), (4, "4 harf"), (5, "5 harf"), (6, "6 harf"), (7, "7 harf"))
+
+
 def print_table(levels, step=1000):
     print("id aralığı: harf ort/min/maks | kelime ort/min/maks")
     for i in range(0, len(levels), step):
@@ -144,18 +154,80 @@ def print_table(levels, step=1000):
             sum(ws) / len(ws), min(ws), max(ws)))
 
 
+def print_band_table(levels):
+    print("harf sayısına göre dağılım: id aralığı | seviye | kelime min/ort/maks")
+    for L, name in BANDS:
+        chunk = [l for l in levels if len(l.letters) == L]
+        if not chunk:
+            print("%s: yok" % name)
+            continue
+        ws = [len(l.words) for l in chunk]
+        print("%s: %d-%d | %d | %d/%.1f/%d" % (name, chunk[0].id, chunk[-1].id, len(chunk), min(ws),
+                                          sum(ws) / len(ws), max(ws)))
+
+
+def check_reuse(levels):
+    """Harf kümesi tekrarları: en çok MAX_REPS, kelime kümeleri >= MIN_DIFF farklı. Döner (hatalar, istatistik)."""
+    from collections import defaultdict
+    groups = defaultdict(list)
+    for l in levels:
+        groups[("".join(sorted(l.letters)))].append(l)
+    errors = []
+    dist = []
+    for key, lst in groups.items():
+        if len(lst) > MAX_REPS:
+            errors.append("harf kümesi %s %d kez kullanılmış (en çok %d)" % (key, len(lst), MAX_REPS))
+        for i in range(len(lst)):
+            for j in range(i + 1, len(lst)):
+                a = frozenset(p.word for p in lst[i].words)
+                b = frozenset(p.word for p in lst[j].words)
+                d = 1.0 - len(a & b) / len(a | b)
+                if d < MIN_DIFF:
+                    errors.append("seviye %d ve %d aynı harf kümesi, kelime farkı %.2f < %.2f"
+                                  % (lst[i].id, lst[j].id, d, MIN_DIFF))
+                dist.append(abs(lst[j].id - lst[i].id))
+    stats = {
+        "classes": len(groups),
+        "reused_classes": sum(1 for v in groups.values() if len(v) > 1),
+        "by_count": {n: sum(1 for v in groups.values() if len(v) == n) for n in range(1, MAX_REPS + 1)},
+        "min_gap": min(dist) if dist else None,
+        "median_gap": sorted(dist)[len(dist) // 2] if dist else None,
+    }
+    return errors[:20], stats
+
+
+def check_curve(levels):
+    """Hedef eğrinin SERT kısımları (ilk 100 seviyede <= 6 üç harfli, 40. seviye >= 4 harf ve >= 4 kelime)."""
+    errors = []
+    first = levels[:100]
+    n3 = sum(1 for l in first if len(l.letters) == 3)
+    if n3 > 6:
+        errors.append("ilk 100 seviyede %d üç harfli seviye (en çok 6)" % n3)
+    if len(levels) >= 40:
+        l40 = levels[39]
+        if len(l40.letters) < 4 or len(l40.words) < 4:
+            errors.append("40. seviye: %d harf, %d kelime (en az 4 harf ve 4 kelime)" % (len(l40.letters), len(l40.words)))
+    return errors
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("levels", nargs="?", default=DEFAULT_OUT)
     ap.add_argument("--words", default=DEFAULT_WORDS)
+    ap.add_argument("--pool", default=DEFAULT_POOL)
+    ap.add_argument("--blocklist", default=DEFAULT_BLOCKLIST)
+    ap.add_argument("--max-bytes", type=int, default=6_000_000)
     a = ap.parse_args(argv)
     words_set = set(load_words(a.words))
+    pool_set = set(load_words(a.pool))
+    blocked = set(load_words(a.blocklist))
     bad = 0
     keys = set()
     dup = 0
     n = 0
     with gzip.open(a.levels, "rb") as f:
         lines = f.read().decode("utf-8").split("\n")
+    levels = []
     for line in lines:
         if not line.strip():
             continue
@@ -166,7 +238,8 @@ def main(argv=None):
             print("satır %d ayrıştırılamadı: %s" % (n, e))
             bad += 1
             continue
-        errs = validate(lv, words_set)
+        levels.append(lv)
+        errs = validate(lv, words_set, pool_set, blocked)
         if lv.id != n:
             errs.append("ardışık olmayan id (beklenen %d, bulunan %d)" % (n, lv.id))
         key = ("".join(sorted(lv.letters)), frozenset(p.word for p in lv.words))
@@ -178,16 +251,22 @@ def main(argv=None):
             bad += 1
             if bad <= 20:
                 print("seviye %d: %s" % (lv.id, "; ".join(errs)))
-    levels = [parse_level(l) for l in lines if l.strip()]
     mono_errs, rep = check_monotonic(levels)
-    for e in mono_errs:
+    reuse_errs, reuse = check_reuse(levels)
+    curve_errs = check_curve(levels)
+    for e in mono_errs + reuse_errs + curve_errs:
         print(e)
-    bad += len(mono_errs)
+    bad += len(mono_errs) + len(reuse_errs) + len(curve_errs)
     print("harf düşüşü: %d, kelime düşüşü: %d" % (rep["letter_drops"], rep["word_drops"]))
     for lid, x, y in rep["word_drop_places"]:
         print("  kelime düşüşü: seviye %d (%d -> %d)" % (lid, x, y))
     print_table(levels)
+    print_band_table(levels)
+    print("harf kümesi tekrarı: %s" % reuse)
     size = os.path.getsize(a.levels)
+    if size >= a.max_bytes:
+        print("dosya çok büyük: %d bayt" % size)
+        bad += 1
     print("seviye: %d, hatalı: %d, tekrar: %d, boyut: %d bayt (%.2f MB)" % (n, bad, dup, size, size / 1e6))
     return 1 if bad else 0
 

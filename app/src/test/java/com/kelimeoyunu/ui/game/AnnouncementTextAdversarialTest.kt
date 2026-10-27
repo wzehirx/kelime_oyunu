@@ -1,5 +1,6 @@
 package com.kelimeoyunu.ui.game
 
+import com.kelimeoyunu.domain.GameEconomy
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import com.kelimeoyunu.a11y.AnnouncingFeedbackSink
 import com.kelimeoyunu.a11y.Announcer
@@ -63,11 +64,12 @@ class AnnouncementTextAdversarialTest {
         val v = vm()
         v.onLetter(0); v.onLetter(1); v.onLetter(2); v.onSubmit()
         recorded.clear()
-        v.onHintWord() // 50 - 30 = 20 jeton kalır, sonra seviye ödülü +10
+        v.onHintWord() // 50 - HINT_WORD_COST kalır, sonra seviye ödülü LEVEL_REWARD
         deliver(v)
+        val left = 50 - GameEconomy.HINT_WORD_COST
         assertEquals(
-            "kalan jeton ödül eklenmeden önceki değer (20) olmalı, ödül ayrıca duyurulur",
-            "İpucu kullanıldı, kalan jeton: 20. 10 jeton kazandın. Seviye 1 tamamlandı",
+            "kalan jeton ödül eklenmeden önceki değer ($left) olmalı, ödül ayrıca duyurulur",
+            "İpucu kullanıldı, kalan jeton: $left. ${GameEconomy.LEVEL_REWARD} jeton kazandın. Seviye 1 tamamlandı",
             spoken.first(),
         )
     }

@@ -1,5 +1,6 @@
 package com.kelimeoyunu.ui.game
 
+import com.kelimeoyunu.domain.GameEconomy
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.hasContentDescription
@@ -89,7 +90,7 @@ class GameFlowAdversarialTest {
         tap("Harf T"); waitSpoken(7)
         tap("Gönder"); waitSpoken(8)
         assertEquals(
-            listOf("T", "E", "N", "Doğru, TEN", "N", "E", "T", "Doğru, NET. 10 jeton kazandın. Seviye 1 tamamlandı"),
+            listOf("T", "E", "N", "Doğru, TEN", "N", "E", "T", "Doğru, NET. ${GameEconomy.LEVEL_REWARD} jeton kazandın. Seviye 1 tamamlandı"),
             spoken.toList(),
         )
         rule.waitUntil(10_000) { exists("Sonraki seviye") }
@@ -108,8 +109,8 @@ class GameFlowAdversarialTest {
         tap("Harf N"); tap("Harf E"); tap("Harf T"); tap("Gönder")
         rule.waitUntil(10_000) { exists("Sonraki seviye") }
         tap("Sonraki seviye")
-        rule.waitUntil(10_000) { exists("Seviye 2. 60 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5") }
-        rule.onNodeWithContentDescription("Seviye 2. 60 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5").assertIsFocused()
+        rule.waitUntil(10_000) { exists("Seviye 2. ${50 + GameEconomy.LEVEL_REWARD} jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5") }
+        rule.onNodeWithContentDescription("Seviye 2. ${50 + GameEconomy.LEVEL_REWARD} jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5").assertIsFocused()
         assertFalse("eski seviye düğmesi kalmamalı", exists("Sonraki seviye"))
     }
 

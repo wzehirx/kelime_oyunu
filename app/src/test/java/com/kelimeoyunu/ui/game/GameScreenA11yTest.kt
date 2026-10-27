@@ -1,5 +1,6 @@
 package com.kelimeoyunu.ui.game
 
+import com.kelimeoyunu.domain.GameEconomy
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -36,7 +37,7 @@ class GameScreenA11yTest {
 
     private val rec = RecordingCallbacks()
     private val actionLabels = listOf(
-        "Gönder", "Sil", "Temizle", "Karıştır", "İpucu, harf aç, 10 jeton", "Kelime aç, 30 jeton",
+        "Gönder", "Sil", "Temizle", "Karıştır", GameEconomy.HINT_LETTER_DESCRIPTION, GameEconomy.HINT_WORD_DESCRIPTION,
     )
 
     private fun show(state: GameUiState.Ready = FakeStates.ready(), fontScale: Float = 1f) {
@@ -117,7 +118,7 @@ class GameScreenA11yTest {
             y("Oluşturulan kelime: boş"),
             y("Harf K"),
             y("Gönder"),
-            y("Kelime aç, 30 jeton"),
+            y(GameEconomy.HINT_WORD_DESCRIPTION),
         )
         assertEquals(ys.sorted(), ys)
     }
@@ -144,7 +145,7 @@ class GameScreenA11yTest {
         (listOf("Harf K", "Harf M") + actionLabels).forEach {
             rule.onNodeWithContentDescription(it).assertHasClickAction().assertHeightIsAtLeast(48.dp)
         }
-        rule.onNodeWithContentDescription("Kelime aç, 30 jeton").performScrollTo().performClick()
+        rule.onNodeWithContentDescription(GameEconomy.HINT_WORD_DESCRIPTION).performScrollTo().performClick()
         assertEquals(listOf("hintWord"), rec.calls)
     }
 

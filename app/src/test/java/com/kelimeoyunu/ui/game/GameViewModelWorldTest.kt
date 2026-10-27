@@ -1,5 +1,6 @@
 package com.kelimeoyunu.ui.game
 
+import com.kelimeoyunu.domain.GameEconomy
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import com.kelimeoyunu.TestPlaces
 import com.kelimeoyunu.data.LevelRepository
@@ -95,6 +96,8 @@ class GameViewModelWorldTest {
         }
     }
 
+    private val afterPlace = 50 + GameEconomy.LEVEL_REWARD + GameEconomy.PLACE_REWARD
+
     private suspend fun seed(r: ProgressRepository, levelIndex: Int, coins: Int = 50, found: Set<String> = emptySet()) =
         r.save(Progress(levelIndex, coins, found, emptySet(), emptySet(), 0))
 
@@ -154,31 +157,31 @@ class GameViewModelWorldTest {
         vm.finishLevel()
         val tail = ev.dropWhile { it !is GameEvent.CoinsEarned }
         assertEquals(
-            listOf(GameEvent.CoinsEarned(10, silent = true), GameEvent.LevelCompleted(placeCompleted = true), GameEvent.PlaceCompleted(TestPlaces.turkey, 25, "Ülke 1")),
+            listOf(GameEvent.CoinsEarned(GameEconomy.LEVEL_REWARD, silent = true), GameEvent.LevelCompleted(placeCompleted = true), GameEvent.PlaceCompleted(TestPlaces.turkey, GameEconomy.PLACE_REWARD, "Ülke 1")),
             tail,
         )
-        assertEquals(50 + 10 + 25, vm.ready().coins)
-        assertEquals(85, r.awaitProgress { it.coins == 85 }.coins)
+        assertEquals(afterPlace, vm.ready().coins)
+        assertEquals(afterPlace, r.awaitProgress { it.coins == afterPlace }.coins)
 
         // yinelenen işlemler ödülü tekrar vermez
         vm.onHintWord(); vm.onHintLetter(); vm.onSubmit()
-        assertEquals(85, vm.ready().coins)
+        assertEquals(afterPlace, vm.ready().coins)
         vm.onNextLevel(); vm.onNextLevel()
         assertEquals(1, ev.count { it is GameEvent.PlaceCompleted })
         assertEquals(listOf<GameEvent>(GameEvent.PlaceEntered(tour.place(1)!!, 20)), ev.places().drop(1))
-        assertEquals(85, vm.ready().coins)
+        assertEquals(afterPlace, vm.ready().coins)
         assertEquals(1, vm.ready().place!!.levelInPlace)
         assertEquals(1, vm.ready().place!!.placeIndex)
     }
 
     @Test fun reopeningCompletedLastLevelDoesNotPayAgain() = test {
-        val r = repo(); seed(r, 19, coins = 85, found = setOf("ten", "net"))
+        val r = repo(); seed(r, 19, coins = afterPlace, found = setOf("ten", "net"))
         val vm = newVm(r)
         val ev = collect(vm)
         vm.awaitReady()
         assertTrue(vm.ready().levelComplete)
         vm.onNextLevel() // bitmiş seviyeden devam
-        assertEquals(85, vm.ready().coins)
+        assertEquals(afterPlace, vm.ready().coins)
         assertTrue(ev.none { it is GameEvent.PlaceCompleted || it is GameEvent.CoinsEarned })
     }
 
@@ -188,7 +191,7 @@ class GameViewModelWorldTest {
         val ev = collect(vm)
         vm.awaitReady()
         vm.onHintWord(); vm.onHintWord()
-        assertEquals(100 - 60 + 10 + 25, vm.ready().coins)
+        assertEquals(100 - 2 * GameEconomy.HINT_WORD_COST + GameEconomy.LEVEL_REWARD + GameEconomy.PLACE_REWARD, vm.ready().coins)
         assertEquals(1, ev.count { it is GameEvent.PlaceCompleted })
     }
 
@@ -198,7 +201,7 @@ class GameViewModelWorldTest {
         val ev = collect(vm)
         vm.awaitReady()
         vm.finishLevel(); vm.onNextLevel()
-        assertEquals(60, vm.ready().coins)
+        assertEquals(50 + GameEconomy.LEVEL_REWARD, vm.ready().coins)
         assertTrue(ev.places().isEmpty())
         assertEquals(9, vm.ready().place!!.levelInPlace)
     }
@@ -209,7 +212,7 @@ class GameViewModelWorldTest {
         val ev = collect(vm)
         vm.awaitReady()
         vm.finishLevel()
-        assertEquals(GameEvent.PlaceCompleted(tour.place(2)!!, 25, null), ev.last())
+        assertEquals(GameEvent.PlaceCompleted(tour.place(2)!!, GameEconomy.PLACE_REWARD, null), ev.last())
         vm.onNextLevel()
         assertEquals(GameUiState.AllDone, vm.state.value)
         assertEquals(GameEvent.AllLevelsDone, ev.last())
@@ -222,9 +225,9 @@ class GameViewModelWorldTest {
         vm.awaitReady()
         assertNull(vm.ready().place)
         vm.finishLevel()
-        assertEquals(60, vm.ready().coins)
+        assertEquals(50 + GameEconomy.LEVEL_REWARD, vm.ready().coins)
         assertEquals(
-            listOf(GameEvent.Submitted(SubmitResult.Correct("net")), GameEvent.CoinsEarned(10), GameEvent.LevelCompleted()),
+            listOf(GameEvent.Submitted(SubmitResult.Correct("net")), GameEvent.CoinsEarned(GameEconomy.LEVEL_REWARD), GameEvent.LevelCompleted()),
             ev.takeLast(3),
         )
         vm.onNextLevel()
@@ -275,7 +278,7 @@ class GameViewModelWorldTest {
         val r = repo(); seed(r, 19)
         val vm = newVm(r); val ev = collect(vm); vm.awaitReady()
         vm.finishLevel()
-        assertTrue(ev.contains(GameEvent.CoinsEarned(10, silent = true)))
+        assertTrue(ev.contains(GameEvent.CoinsEarned(GameEconomy.LEVEL_REWARD, silent = true)))
         assertTrue(ev.contains(GameEvent.LevelCompleted(placeCompleted = true)))
         val sfx = ev.flatMap { com.kelimeoyunu.audio.sfxFor(it) }
         assertTrue(sfx.toString(), com.kelimeoyunu.audio.Sfx.PLACE_COMPLETE in sfx)
@@ -286,7 +289,7 @@ class GameViewModelWorldTest {
         val r = repo(); seed(r, 5)
         val vm = newVm(r); val ev = collect(vm); vm.awaitReady()
         vm.finishLevel()
-        assertTrue(ev.contains(GameEvent.CoinsEarned(10)))
+        assertTrue(ev.contains(GameEvent.CoinsEarned(GameEconomy.LEVEL_REWARD)))
         assertTrue(ev.contains(GameEvent.LevelCompleted()))
     }
 }

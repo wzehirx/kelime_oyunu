@@ -7,6 +7,8 @@ import androidx.datastore.preferences.core.mutablePreferencesOf
 import com.kelimeoyunu.data.LevelRepository
 import com.kelimeoyunu.data.Progress
 import com.kelimeoyunu.data.ProgressRepository
+import com.kelimeoyunu.data.START_COINS
+import com.kelimeoyunu.domain.GameEconomy
 import com.kelimeoyunu.domain.SubmitResult
 import com.kelimeoyunu.domain.WordDictionary
 import java.io.ByteArrayInputStream
@@ -183,7 +185,7 @@ class GameViewModelAdversarialTest {
         assertEquals(s, v.state.value)
         // onSubmit boşken Empty olayı üretebilir; diğerleri sessiz olmalı
         assertTrue(h.events.drop(n).all { it == GameEvent.Submitted(SubmitResult.Empty) })
-        assertEquals(60, v.ready().coins)
+        assertEquals(START_COINS + GameEconomy.LEVEL_REWARD, v.ready().coins)
     }
 
     @Test
@@ -193,7 +195,7 @@ class GameViewModelAdversarialTest {
         v.tap(0, 1, 2); v.onSubmit(); v.tap(2, 1, 0); v.onSubmit()
         v.onNextLevel(); v.onNextLevel(); v.onNextLevel()
         assertEquals(2, v.ready().levelNumber)
-        assertEquals(60, v.ready().coins)
+        assertEquals(START_COINS + GameEconomy.LEVEL_REWARD, v.ready().coins)
     }
 
     @Test
@@ -202,26 +204,27 @@ class GameViewModelAdversarialTest {
         val h = start(store)
         h.vm.onHintWord(); h.vm.onHintWord()
         runCurrent()
-        assertEquals(50, h.vm.ready().coins) // 100 - 60 + 10
+        val expected = 100 - 2 * GameEconomy.HINT_WORD_COST + GameEconomy.LEVEL_REWARD
+        assertEquals(expected, h.vm.ready().coins)
         clear(h.vm); runCurrent()
         val h2 = start(store)
         assertTrue(h2.vm.ready().levelComplete)
-        assertEquals(50, h2.vm.ready().coins)
+        assertEquals(expected, h2.vm.ready().coins)
         h2.vm.onHintWord(); h2.vm.onHintLetter()
-        assertEquals(50, h2.vm.ready().coins)
+        assertEquals(expected, h2.vm.ready().coins)
         h2.vm.onNextLevel()
         assertEquals(2, h2.vm.ready().levelNumber)
-        assertEquals(50, h2.vm.ready().coins)
+        assertEquals(expected, h2.vm.ready().coins)
     }
 
     // ---------- ipucu maliyeti / sınırlar ----------
 
     @Test
     fun exactCoinBoundaries() = runTest {
-        val store = FakeStore(prefs(Progress(0, 30, emptySet(), emptySet(), emptySet(), 0)))
+        val store = FakeStore(prefs(Progress(0, GameEconomy.HINT_WORD_COST, emptySet(), emptySet(), emptySet(), 0)))
         val h = start(store)
         val v = h.vm
-        v.onHintWord() // tam 30 -> 0
+        v.onHintWord() // tam HINT_WORD_COST -> 0
         assertEquals(0, v.ready().coins)
         v.onHintLetter(); v.onHintWord()
         assertEquals(0, v.ready().coins)
@@ -229,8 +232,8 @@ class GameViewModelAdversarialTest {
     }
 
     @Test
-    fun hintLetterAtExactlyTenCoinsLeavesZero() = runTest {
-        val store = FakeStore(prefs(Progress(0, 10, emptySet(), emptySet(), emptySet(), 0)))
+    fun hintLetterAtExactlyItsCostLeavesZero() = runTest {
+        val store = FakeStore(prefs(Progress(0, GameEconomy.HINT_LETTER_COST, emptySet(), emptySet(), emptySet(), 0)))
         val h = start(store)
         h.vm.onHintLetter()
         assertEquals(0, h.vm.ready().coins)
@@ -245,13 +248,14 @@ class GameViewModelAdversarialTest {
         val h = start(store)
         val v = h.vm
         repeat(5) { v.onHintLetter() }
-        assertEquals(950, v.ready().coins)
+        val afterLetters = 1000 - 5 * GameEconomy.HINT_LETTER_COST
+        assertEquals(afterLetters, v.ready().coins)
         v.onHintLetter()
-        assertEquals(950, v.ready().coins)
+        assertEquals(afterLetters, v.ready().coins)
         assertEquals(GameEvent.NoHintAvailable, h.events.last())
         assertEquals(2, v.ready().remainingWords) // harf açmak kelime bulmuş saymaz
         v.onHintWord()
-        assertEquals(920, v.ready().coins)
+        assertEquals(afterLetters - GameEconomy.HINT_WORD_COST, v.ready().coins)
     }
 
     // ---------- bonus ----------
@@ -268,11 +272,11 @@ class GameViewModelAdversarialTest {
         v.tap(1, 2); v.onSubmit() // "en"... zaten
         v.tap(2, 1); v.onSubmit() // "ne" yeni bonus: 4
         assertEquals(4, v.ready().bonusMeter)
-        v.tap(1, 2, 0); v.onSubmit() // "ent": 5 -> +20
+        v.tap(1, 2, 0); v.onSubmit() // "ent": 5 -> +BONUS_REWARD
         assertEquals(0, v.ready().bonusMeter)
-        assertEquals(70, v.ready().coins)
+        assertEquals(50 + GameEconomy.BONUS_REWARD, v.ready().coins)
         assertEquals(1, h.events.count { it == GameEvent.BonusMeterFull })
-        assertEquals(1, h.events.count { it == GameEvent.CoinsEarned(20) })
+        assertEquals(1, h.events.count { it == GameEvent.CoinsEarned(GameEconomy.BONUS_REWARD) })
     }
 
     @Test
@@ -282,7 +286,7 @@ class GameViewModelAdversarialTest {
         assertEquals(4, h.vm.ready().bonusMeter)
         h.vm.tap(1, 0); h.vm.onSubmit()
         assertEquals(0, h.vm.ready().bonusMeter)
-        assertEquals(70, h.vm.ready().coins)
+        assertEquals(50 + GameEconomy.BONUS_REWARD, h.vm.ready().coins)
     }
 
     @Test
@@ -340,7 +344,7 @@ class GameViewModelAdversarialTest {
         v.tap(2, 1, 0); v.onSubmit()
         runCurrent()
         assertEquals(setOf("ten", "net"), ProgressRepository(store).progress.first().found)
-        assertEquals(60, ProgressRepository(store).progress.first().coins)
+        assertEquals(START_COINS + GameEconomy.LEVEL_REWARD, ProgressRepository(store).progress.first().coins)
     }
 
     // ---------- yükleme / bozuk veri ----------
@@ -396,7 +400,7 @@ class GameViewModelAdversarialTest {
         assertEquals(1, s.remainingWords) // yalnızca "ten" geçerli
         assertEquals(listOf(true, false), s.wordRows.map { it.found })
         h.vm.onHintLetter()
-        assertTrue(h.vm.ready().coins in 40..50)
+        assertTrue(h.vm.ready().coins in (50 - GameEconomy.HINT_LETTER_COST)..50)
         h.vm.tap(2, 1, 0); h.vm.onSubmit()
         assertTrue(h.vm.ready().levelComplete)
     }
@@ -409,11 +413,11 @@ class GameViewModelAdversarialTest {
         v.tap(0, 1, 2); v.onSubmit()
         v.tap(0, 1); v.onSubmit() // bonus: "al"
         assertEquals(3, v.ready().bonusMeter)
-        v.onHintWord() // 15 jeton, yetmez
+        v.onHintWord() // 15 jeton, HINT_WORD_COST'a yetmez
         assertEquals(15, v.ready().coins)
         v.tap(1, 2); v.onSubmit() // "la" izgara kelimesi
         assertTrue(v.ready().levelComplete)
-        assertEquals(25, v.ready().coins)
+        assertEquals(15 + GameEconomy.LEVEL_REWARD, v.ready().coins)
         v.onNextLevel()
         assertEquals(GameUiState.AllDone, v.state.value)
         assertEquals(1, h.events.count { it == GameEvent.AllLevelsDone })
@@ -422,7 +426,7 @@ class GameViewModelAdversarialTest {
         runCurrent()
         val saved = ProgressRepository(store).progress.first()
         assertEquals(3, saved.levelIndex)
-        assertEquals(25, saved.coins)
+        assertEquals(15 + GameEconomy.LEVEL_REWARD, saved.coins)
         assertEquals(3, saved.bonusMeter)
         val h2 = start(store)
         assertEquals(GameUiState.AllDone, h2.vm.state.value)
@@ -493,8 +497,8 @@ class GameViewModelAdversarialTest {
                     4 -> v.onDelete()
                     5 -> if (!before.levelComplete) v.onSubmit() // tamamlanmış seviyede onSubmit: ayrı BUG testi
                     6 -> v.onShuffle()
-                    7 -> { v.onHintLetter(); cost = 10 }
-                    8 -> { v.onHintWord(); cost = 30 }
+                    7 -> { v.onHintLetter(); cost = GameEconomy.HINT_LETTER_COST }
+                    8 -> { v.onHintWord(); cost = GameEconomy.HINT_WORD_COST }
                     9 -> v.onNextLevel()
                     else -> { // yeniden başlat
                         runCurrent(); clear(v); runCurrent()

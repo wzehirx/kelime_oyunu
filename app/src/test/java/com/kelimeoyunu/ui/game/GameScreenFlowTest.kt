@@ -1,5 +1,6 @@
 package com.kelimeoyunu.ui.game
 
+import com.kelimeoyunu.domain.GameEconomy
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.hasContentDescription
@@ -78,7 +79,7 @@ class GameScreenFlowTest {
 
         tap("Sonraki seviye")
         rule.waitUntil(10_000) {
-            rule.onAllNodes(hasContentDescription("Seviye 2. 60 jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5")).fetchSemanticsNodes().isNotEmpty()
+            rule.onAllNodes(hasContentDescription("Seviye 2. ${50 + GameEconomy.LEVEL_REWARD} jeton. Kalan kelime: 2. Bonus sayacı: 0 / 5")).fetchSemanticsNodes().isNotEmpty()
         }
     }
 }
