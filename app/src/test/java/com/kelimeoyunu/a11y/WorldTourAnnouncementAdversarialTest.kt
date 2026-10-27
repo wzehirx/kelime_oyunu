@@ -41,7 +41,7 @@ class WorldTourAnnouncementAdversarialTest {
     @Test fun placeEntryWithSoundWaitsForMelodyThenSpeaks() = runTest {
         val s = sink()
         s.onEvent(GameEvent.PlaceEntered(place, 20))
-        advanceTimeBy(1000); runCurrent()
+        advanceTimeBy(PLACE_INTRO_DELAY_MS); runCurrent()
         assertTrue(spoken.isEmpty())
         advanceTimeBy(130); runCurrent()
         assertEquals(1, spoken.size)
@@ -62,7 +62,7 @@ class WorldTourAnnouncementAdversarialTest {
         advanceTimeBy(300)
         s.onEvent(GameEvent.LetterAdded('t', 0, 1)); advanceTimeBy(130); runCurrent()
         s.onEvent(GameEvent.LetterAdded('e', 1, 2)); advanceTimeBy(130); runCurrent()
-        advanceTimeBy(1000); runCurrent()
+        advanceTimeBy(PLACE_INTRO_DELAY_MS); runCurrent()
         // harf duyuruları sırayla, ülke duyurusu SONRA ve eksiksiz gelir (kaybolmaz, ezilmez)
         assertEquals(listOf("T", "E"), spoken.take(2).map { it.second })
         assertTrue(spoken.last().second.startsWith("Yeni ülke: Türkiye"))
@@ -72,7 +72,7 @@ class WorldTourAnnouncementAdversarialTest {
     @Test fun letterArrivingExactlyWhenDelayedCountryAnnouncementIsDueIsMergedInOneSentence() = runTest {
         val s = sink()
         s.onEvent(GameEvent.PlaceEntered(place, 20))
-        advanceTimeBy(1050)
+        advanceTimeBy(PLACE_INTRO_DELAY_MS + 50)
         s.onEvent(GameEvent.LetterAdded('t', 0, 1))
         advanceTimeBy(130); runCurrent()
         // harf, ülke metninden sonra aynı cümleye girer
@@ -83,8 +83,8 @@ class WorldTourAnnouncementAdversarialTest {
     @Test fun lastLevelOfCountryAnnouncementIsOneReadableSentence() = runTest {
         val s = sink()
         s.onEvent(GameEvent.Submitted(SubmitResult.Correct("net")))
-        s.onEvent(GameEvent.CoinsEarned(10))
-        s.onEvent(GameEvent.LevelCompleted)
+        s.onEvent(GameEvent.CoinsEarned(10, silent = true))
+        s.onEvent(GameEvent.LevelCompleted(placeCompleted = true))
         s.onEvent(GameEvent.PlaceCompleted(place, 25, "Yunanistan"))
         advanceTimeBy(130); runCurrent()
         assertEquals(1, spoken.size)
@@ -129,7 +129,7 @@ class WorldTourAnnouncementAdversarialTest {
         val rec = Recorder()
         val sink = SoundFeedbackSink(rec)
         listOf(
-            GameEvent.Submitted(SubmitResult.Correct("net")), GameEvent.CoinsEarned(10), GameEvent.LevelCompleted,
+            GameEvent.Submitted(SubmitResult.Correct("net")), GameEvent.CoinsEarned(10, silent = true), GameEvent.LevelCompleted(placeCompleted = true),
             GameEvent.PlaceCompleted(place, 25, "Yunanistan"),
         ).forEach(sink::onEvent)
         // aynı anda: CORRECT + COIN + LEVEL_COMPLETE(2.1 sn) + PLACE_COMPLETE(2.05 sn)
@@ -141,18 +141,18 @@ class WorldTourAnnouncementAdversarialTest {
         val sink = SoundFeedbackSink(rec)
         // son harf sesi hâlâ çalarken (0.35 sn) ülke biter: 1 harf + 4 efekt = 5 > MAX_STREAMS(4)
         listOf(
-            GameEvent.LetterAdded('t', 0, 3), GameEvent.Submitted(SubmitResult.Correct("net")), GameEvent.CoinsEarned(10),
-            GameEvent.LevelCompleted, GameEvent.PlaceCompleted(place, 25, null),
+            GameEvent.LetterAdded('t', 0, 3), GameEvent.Submitted(SubmitResult.Correct("net")), GameEvent.CoinsEarned(10, silent = true),
+            GameEvent.LevelCompleted(placeCompleted = true), GameEvent.PlaceCompleted(place, 25, null),
         ).forEach(sink::onEvent)
         assertTrue("eşzamanlı ${rec.played.size} > ${com.kelimeoyunu.audio.SoundManager.MAX_STREAMS}: ${rec.played}", rec.played.size <= com.kelimeoyunu.audio.SoundManager.MAX_STREAMS)
     }
 
     @Test fun BUG_spokenCountryIntroStartsOnlyAfterTheRegionMelodyHasEnded() {
-        val delayAndBatch = 1000L + 120L
+        val delayAndBatch = PLACE_INTRO_DELAY_MS + Announcer.DEFAULT_BATCH_MS
         for (r in listOf("avrupa", "asya", "ortadogu", "afrika", "amerika", "okyanusya")) {
             val f = TestAssets.file("sounds/place_$r.wav")
             val seconds = (f.length() - 44) / 2.0 / 44100.0
-            assertTrue("place_$r.wav ${"%.2f".format(seconds)} sn, konuşma ${delayAndBatch} ms sonra başlıyor (çakışma)", seconds * 1000 <= delayAndBatch)
+            assertTrue("place_$r.wav ${"%.2f".format(seconds)} sn, konuşma ${delayAndBatch} ms sonra başlıyor (çakışma)", seconds * 1000 + 50 <= delayAndBatch)
         }
     }
 
@@ -169,7 +169,7 @@ class WorldTourAnnouncementAdversarialTest {
         val order = ArrayList<String>()
         val a = com.kelimeoyunu.ui.game.FeedbackSink { order += "a:$it" }
         val b = com.kelimeoyunu.ui.game.FeedbackSink { order += "b:$it" }
-        CompositeFeedbackSink(a, b).onEvent(GameEvent.LevelCompleted)
-        assertEquals(listOf("a:LevelCompleted", "b:LevelCompleted"), order)
+        CompositeFeedbackSink(a, b).onEvent(GameEvent.LevelCompleted())
+        assertEquals(listOf("a:LevelCompleted(placeCompleted=false)", "b:LevelCompleted(placeCompleted=false)"), order)
     }
 }

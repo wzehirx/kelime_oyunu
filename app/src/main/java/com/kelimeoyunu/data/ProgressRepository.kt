@@ -1,6 +1,7 @@
 package com.kelimeoyunu.data
 
 import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
@@ -29,6 +30,7 @@ internal object ProgressKeys {
     const val BONUS_FOUND = "bonus_found"
     const val REVEALED = "revealed"
     const val BONUS_METER = "bonus_meter"
+    const val INTRODUCED_PLACE = "introduced_place_index"
 }
 
 /** İlerlemeyi Preferences DataStore'da tutar. Bozuk/eksik alanlar çökmeden varsayılana döner. */
@@ -37,15 +39,41 @@ class ProgressRepository(private val dataStore: DataStore<Preferences>) {
         .catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
         .map { decode(it) }
 
-    suspend fun save(p: Progress) {
+    /**
+     * Tanıtımı (melodi + "Yeni ülke…") en son yapılan ülkenin 0 tabanlı sırası; hiç yoksa -1. Monoton artar:
+     * ViewModel yeniden kurulsa da aynı ülke tekrar tanıtılmaz. Bozuk/eksik kayıt -1'dir.
+     */
+    val introducedPlaceIndex: Flow<Int> = dataStore.data
+        .catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
+        .map { int(it, ProgressKeys.INTRODUCED_PLACE, -1) }
+
+    /** [placeIndex] kayıtlıdan büyükse günceller (azalmaz). */
+    suspend fun markPlaceIntroduced(placeIndex: Int) {
         dataStore.edit {
-            it[intKey(ProgressKeys.LEVEL_INDEX)] = p.levelIndex
-            it[intKey(ProgressKeys.COINS)] = p.coins
-            it[intKey(ProgressKeys.BONUS_METER)] = p.bonusMeter
-            it[strKey(ProgressKeys.FOUND)] = p.found.joinToString(",")
-            it[strKey(ProgressKeys.BONUS_FOUND)] = p.bonusFound.joinToString(",")
-            it[strKey(ProgressKeys.REVEALED)] = p.revealed.joinToString(";") { (r, c) -> "$r,$c" }
+            val current = try { it[intKey(ProgressKeys.INTRODUCED_PLACE)] ?: -1 } catch (_: ClassCastException) { -1 }
+            if (placeIndex > current) it[intKey(ProgressKeys.INTRODUCED_PLACE)] = placeIndex
         }
+    }
+
+    /** "İlerlemeyi sıfırla": ilerleme varsayılana döner ve ülke tanıtımı da baştan çalar. */
+    suspend fun reset() {
+        dataStore.edit {
+            writeProgress(it, Progress())
+            it.remove(intKey(ProgressKeys.INTRODUCED_PLACE))
+        }
+    }
+
+    suspend fun save(p: Progress) {
+        dataStore.edit { writeProgress(it, p) }
+    }
+
+    private fun writeProgress(it: MutablePreferences, p: Progress) {
+        it[intKey(ProgressKeys.LEVEL_INDEX)] = p.levelIndex
+        it[intKey(ProgressKeys.COINS)] = p.coins
+        it[intKey(ProgressKeys.BONUS_METER)] = p.bonusMeter
+        it[strKey(ProgressKeys.FOUND)] = p.found.joinToString(",")
+        it[strKey(ProgressKeys.BONUS_FOUND)] = p.bonusFound.joinToString(",")
+        it[strKey(ProgressKeys.REVEALED)] = p.revealed.joinToString(";") { (r, c) -> "$r,$c" }
     }
 
     private fun intKey(n: String) = intPreferencesKey(n)

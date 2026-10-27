@@ -47,4 +47,23 @@ class WorldTourScreenAdversarialTest {
         show(9_999)
         rule.onNodeWithContentDescription("Ülke 99, ${tour.levelCountOf(99) - 1} / ${tour.levelCountOf(99)} seviye, şu an buradasın", substring = true).assertIsFocused()
     }
+
+    @Test fun collectionInfoReportsTheRealRowCount() {
+        show(0)
+        val info = rule.onNode(hasScrollAction()).fetchSemanticsNode().config.getOrNull(SemanticsProperties.CollectionInfo)!!
+        org.junit.Assert.assertEquals(100, info.rowCount)
+    }
+
+    @Test fun savedLevelDoneCountsAsProgress() {
+        rule.setContent { KelimeTheme { WorldTourScreen(tour, 19, { }, { }, savedLevelDone = true) } }
+        rule.onNodeWithContentDescription("Türkiye, tamamlandı", substring = true).assertExists()
+        rule.onNodeWithContentDescription("Dünya turu, 1 / 100 ülke tamamlandı").assertExists()
+        rule.onNodeWithContentDescription("Türkiye, 19 / 20", substring = true).assertDoesNotExist()
+    }
+
+    @Test fun savedLevelNotDoneKeepsInProgress() {
+        rule.setContent { KelimeTheme { WorldTourScreen(tour, 19, { }, { }, savedLevelDone = false) } }
+        rule.onNodeWithContentDescription("Türkiye, 19 / 20 seviye, şu an buradasın").assertExists()
+        rule.onNodeWithContentDescription("Dünya turu, 0 / 100 ülke tamamlandı").assertExists()
+    }
 }

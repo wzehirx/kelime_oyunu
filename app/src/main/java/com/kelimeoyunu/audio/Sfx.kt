@@ -14,7 +14,14 @@ enum class Sfx {
 }
 
 /** Olay -> çalınacak sesler (sırayla). Sealed `when` ile yeni olay eklenirse derleme hatası verir. */
-fun sfxFor(event: GameEvent): List<Sfx> = listOf(
+fun sfxFor(event: GameEvent): List<Sfx> {
+    // Ülke bitişinde yalnızca PLACE_COMPLETE çalar: seviye jingle'ı ve jeton sesi susar (MAX_STREAMS ve çakışma).
+    if (event is GameEvent.CoinsEarned && event.silent) return emptyList()
+    if (event is GameEvent.LevelCompleted && event.placeCompleted) return emptyList()
+    return listOf(sfxOf(event))
+}
+
+private fun sfxOf(event: GameEvent): Sfx =
     when (event) {
         is GameEvent.LetterAdded -> letterSfx(event.position)
         GameEvent.Deleted -> Sfx.DELETE
@@ -31,11 +38,10 @@ fun sfxFor(event: GameEvent): List<Sfx> = listOf(
         GameEvent.NotEnoughCoins, GameEvent.NoHintAvailable -> Sfx.ERROR
         is GameEvent.CoinsEarned -> Sfx.COIN
         GameEvent.BonusMeterFull -> Sfx.BONUS_FULL
-        GameEvent.LevelCompleted, GameEvent.AllLevelsDone -> Sfx.LEVEL_COMPLETE
+        is GameEvent.LevelCompleted, GameEvent.AllLevelsDone -> Sfx.LEVEL_COMPLETE
         is GameEvent.PlaceEntered -> placeSfx(event.place.bolge)
         is GameEvent.PlaceCompleted -> Sfx.PLACE_COMPLETE
-    },
-)
+    }
 
 /**
  * Kelimedeki sıraya göre harf sesi: [position] 1 tabanlı (currentWord uzunluğu). 1 en kalın,

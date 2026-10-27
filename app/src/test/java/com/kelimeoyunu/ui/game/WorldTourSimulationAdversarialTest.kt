@@ -146,8 +146,8 @@ class WorldTourSimulationAdversarialTest {
                     completed.merge(idx, 1, Int::plus); order += "C" to idx
                     assertEquals(25, e.bonusCoins)
                     assertEquals(tour.place(idx + 1)?.ad, e.nextPlaceName)
-                    assertEquals("PlaceCompleted'dan önce LevelCompleted", GameEvent.LevelCompleted, ev[i - 1])
-                    assertEquals("ondan önce CoinsEarned(10)", GameEvent.CoinsEarned(10), ev[i - 2])
+                    assertEquals("PlaceCompleted'dan önce LevelCompleted", GameEvent.LevelCompleted(placeCompleted = true), ev[i - 1])
+                    assertEquals("ondan önce CoinsEarned(10)", GameEvent.CoinsEarned(10, silent = true), ev[i - 2])
                 }
                 else -> Unit
             }

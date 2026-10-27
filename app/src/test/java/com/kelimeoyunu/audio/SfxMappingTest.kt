@@ -24,7 +24,7 @@ class SfxMappingTest {
         GameEvent.NoHintAvailable to listOf(Sfx.ERROR),
         GameEvent.CoinsEarned(3) to listOf(Sfx.COIN),
         GameEvent.BonusMeterFull to listOf(Sfx.BONUS_FULL),
-        GameEvent.LevelCompleted to listOf(Sfx.LEVEL_COMPLETE),
+        GameEvent.LevelCompleted() to listOf(Sfx.LEVEL_COMPLETE),
         GameEvent.AllLevelsDone to listOf(Sfx.LEVEL_COMPLETE),
         GameEvent.PlaceEntered(place("avrupa"), 20) to listOf(Sfx.PLACE_AVRUPA),
         GameEvent.PlaceCompleted(place("avrupa"), 25, null) to listOf(Sfx.PLACE_COMPLETE),
@@ -74,5 +74,13 @@ class SfxMappingTest {
         val all = (1..7).map(::letterSfx)
         assertEquals(7, all.toSet().size)
         assertEquals((1..7).map { "letter_$it.wav" }, all.map { it.fileName })
+    }
+
+    @Test fun placeFinishPlaysOnlyThePlaceJingle() {
+        assertEquals(emptyList<Sfx>(), sfxFor(GameEvent.LevelCompleted(placeCompleted = true)))
+        assertEquals(emptyList<Sfx>(), sfxFor(GameEvent.CoinsEarned(10, silent = true)))
+        assertEquals(listOf(Sfx.PLACE_COMPLETE), sfxFor(GameEvent.PlaceCompleted(com.kelimeoyunu.TestPlaces.turkey, 25, null)))
+        assertEquals(listOf(Sfx.LEVEL_COMPLETE), sfxFor(GameEvent.LevelCompleted()))
+        assertEquals(listOf(Sfx.COIN), sfxFor(GameEvent.CoinsEarned(10)))
     }
 }

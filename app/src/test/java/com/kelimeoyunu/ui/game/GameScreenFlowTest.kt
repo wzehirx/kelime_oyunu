@@ -73,8 +73,8 @@ class GameScreenFlowTest {
         rule.waitUntil(10_000) { rule.onAllNodes(hasContentDescription("Sonraki seviye")).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithContentDescription("Sonraki seviye").assertIsFocused()
         assertTrue(events.any { it == GameEvent.Submitted(SubmitResult.Correct("ten")) })
-        assertTrue(events.any { it == GameEvent.LevelCompleted })
-        assertEquals(1, events.count { it == GameEvent.LevelCompleted })
+        assertTrue(events.any { it == GameEvent.LevelCompleted() })
+        assertEquals(1, events.count { it == GameEvent.LevelCompleted() })
 
         tap("Sonraki seviye")
         rule.waitUntil(10_000) {

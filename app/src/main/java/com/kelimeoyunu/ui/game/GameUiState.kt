@@ -39,10 +39,12 @@ sealed interface GameEvent {
     data class HintUsed(val coinsLeft: Int) : GameEvent
     data object NotEnoughCoins : GameEvent
     data object NoHintAvailable : GameEvent
-    data class CoinsEarned(val amount: Int) : GameEvent
+    /** [silent]: ses efekti çalınmaz (ülke bitişinde tek jingle çalar); duyuru etkilenmez. */
+    data class CoinsEarned(val amount: Int, val silent: Boolean = false) : GameEvent
     data object BonusMeterFull : GameEvent
-    data object LevelCompleted : GameEvent
-    /** Bir ülkenin ilk seviyesi açıldı (ViewModel ömründe ülke başına bir kez). */
+    /** [placeCompleted]: bu seviye ülkenin sonuncusu; hemen ardından [PlaceCompleted] gelir (ses: yalnızca onun jingle'ı). */
+    data class LevelCompleted(val placeCompleted: Boolean = false) : GameEvent
+    /** Bir ülkenin ilk seviyesi açıldı (kalıcı olarak ülke başına bir kez). */
     data class PlaceEntered(val place: Place, val placeLevelCount: Int) : GameEvent
     /** Ülkenin son seviyesi bitti; [LevelCompleted]'dan hemen sonra gelir. [bonusCoins] zaten bakiyeye eklenmiştir. */
     data class PlaceCompleted(val place: Place, val bonusCoins: Int, val nextPlaceName: String?) : GameEvent

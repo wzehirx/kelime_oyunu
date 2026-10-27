@@ -36,7 +36,7 @@ class AnnouncingFeedbackSinkTest {
         state = ready()
         s.onEvent(GameEvent.Submitted(SubmitResult.Correct("kalem")))
         s.onEvent(GameEvent.CoinsEarned(10))
-        s.onEvent(GameEvent.LevelCompleted)
+        s.onEvent(GameEvent.LevelCompleted())
         flush()
         assertEquals(listOf("Doğru, KALEM. 10 jeton kazandın. Seviye 3 tamamlandı"), spoken)
     }
@@ -111,7 +111,7 @@ class AnnouncingFeedbackSinkTest {
     @Test fun placeEnteredWithSoundWaitsForMelody() = runTest {
         val s = AnnouncingFeedbackSink(Announcer({ spoken += it }, backgroundScope), { state }, { now }, soundOn = { true })
         s.onEvent(GameEvent.PlaceEntered(tr, 20))
-        advanceTimeBy(999 + 120); runCurrent()
+        advanceTimeBy(PLACE_INTRO_DELAY_MS - 1 + Announcer.DEFAULT_BATCH_MS); runCurrent()
         assertEquals(emptyList<String>(), spoken)
         advanceTimeBy(2); runCurrent()
         assertEquals(listOf(Announcements.placeEntered(tr, 20).trimEnd('.')), spoken)
@@ -129,7 +129,7 @@ class AnnouncingFeedbackSinkTest {
         state = ready()
         s.onEvent(GameEvent.Submitted(SubmitResult.Correct("kalem")))
         s.onEvent(GameEvent.CoinsEarned(10))
-        s.onEvent(GameEvent.LevelCompleted)
+        s.onEvent(GameEvent.LevelCompleted())
         s.onEvent(GameEvent.PlaceCompleted(tr, 25, "Yunanistan"))
         flush()
         assertEquals(

@@ -76,7 +76,7 @@ class GameViewModel(
     private var selected: List<Int> = emptyList()
     private var levelPaid = false
     private var tour: WorldTour? = null
-    private var lastEnteredPlace = -1
+    private var introducedPlace = -1 // kalıcı: tanıtımı yapılan en son ülke
     private var pendingEntry: GameEvent.PlaceEntered? = null
 
     init {
@@ -96,14 +96,17 @@ class GameViewModel(
 
     private suspend fun load() {
         try {
-            val (dict, saved) = withContext(dispatcher) {
+            val (dict, saved, introduced) = withContext(dispatcher) {
                 val d = dictionaryProvider()
                 if (levels.count == 0) error("no levels")
                 // Tur yüklenemezse (ya da hata verirse) oyun eski davranışla sürer.
                 tour = try { worldTourProvider() } catch (_: Exception) { null }
-                d to progressRepository.progress.first()
+                val progress = progressRepository.progress.first()
+                val introduced = try { progressRepository.introducedPlaceIndex.first() } catch (e: CancellationException) { throw e } catch (_: Exception) { -1 }
+                Triple(d, progress, introduced)
             }
             synchronized(lock) {
+                introducedPlace = introduced
                 dictionary = dict
                 coins = saved.coins
                 bonusMeter = saved.bonusMeter.coerceIn(0, BONUS_TARGET - 1)
@@ -267,22 +270,32 @@ class GameViewModel(
             levelPaid = true
             selected = emptyList()
             coins += LEVEL_REWARD
-            emit(GameEvent.CoinsEarned(LEVEL_REWARD))
-            emit(GameEvent.LevelCompleted)
+            val endsPlace = endsPlace()
+            emit(GameEvent.CoinsEarned(LEVEL_REWARD, silent = endsPlace))
+            emit(GameEvent.LevelCompleted(placeCompleted = endsPlace))
             completePlaceIfDone()
         }
     }
 
     private fun place(): PlacePosition? = tour?.positionOf(levelIndex)
 
-    /** Ülkenin ilk seviyesi açıldıysa ve bu ülke bu ViewModel'de daha duyurulmadıysa [GameEvent.PlaceEntered] verir. */
+    /**
+     * Ülkenin ilk seviyesi açıldıysa ve bu ülke daha hiç tanıtılmadıysa (kalıcı, monoton sayaç) [GameEvent.PlaceEntered]
+     * verir ve tanıtımı kaydeder; ViewModel yeniden kurulunca ya da uygulama yeniden açılınca tekrarlanmaz.
+     */
     private fun announceEntry(deferIfNoListener: Boolean) {
         val p = place() ?: return
-        if (p.levelInPlace != 1 || p.placeIndex == lastEnteredPlace) return
-        lastEnteredPlace = p.placeIndex
+        if (p.levelInPlace != 1 || p.placeIndex <= introducedPlace) return
+        introducedPlace = p.placeIndex
+        val index = p.placeIndex
+        scope.launch {
+            try { progressRepository.markPlaceIntroduced(index) } catch (e: CancellationException) { throw e } catch (_: Exception) { }
+        }
         val event = GameEvent.PlaceEntered(p.place, p.placeLevelCount)
         if (deferIfNoListener && _events.subscriptionCount.value == 0) pendingEntry = event else emit(event)
     }
+
+    private fun endsPlace(): Boolean = place()?.let { it.levelInPlace == it.placeLevelCount } ?: false
 
     private fun completePlaceIfDone() {
         val t = tour ?: return

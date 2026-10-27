@@ -310,7 +310,7 @@ class GameViewModelTest {
         v.spell("net"); v.onSubmit()
         assertTrue(v.ready().levelComplete)
         assertEquals(60, v.ready().coins)
-        assertTrue(GameEvent.LevelCompleted in ev && GameEvent.CoinsEarned(10) in ev)
+        assertTrue(GameEvent.LevelCompleted() in ev && GameEvent.CoinsEarned(10) in ev)
         v.onHintWord(); v.onHintLetter()
         assertEquals(60, v.ready().coins)
     }
@@ -324,7 +324,7 @@ class GameViewModelTest {
         v.onHintWord(); v.onHintWord()
         assertTrue(v.ready().levelComplete)
         assertEquals(100 - 60 + 10, v.ready().coins)
-        assertTrue(GameEvent.LevelCompleted in ev)
+        assertTrue(GameEvent.LevelCompleted() in ev)
     }
 
     @Test

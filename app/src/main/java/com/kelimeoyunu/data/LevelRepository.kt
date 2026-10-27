@@ -17,6 +17,13 @@ class LevelRepository(private val open: () -> InputStream) {
     /** 0 tabanlı sıra; aralık dışı için null. Level.id dosyadaki id'dir. */
     fun get(index: Int): Level? = levels.getOrNull(index)
 
+    /**
+     * [index]. seviyenin tüm ızgara kelimeleri [found] içinde mi (oyun "seviye tamamlandı" demiş ama oyuncu
+     * "Sonraki seviye"ye basmamış olabilir). Seviye yoksa false.
+     */
+    fun isLevelComplete(index: Int, found: Set<String>): Boolean =
+        get(index)?.words?.all { it.word in found } ?: false
+
     private fun load(): List<Level> {
         val result = ArrayList<Level>()
         try {

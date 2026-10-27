@@ -167,4 +167,14 @@ class LevelRepositoryTest {
         assertTrue("5 harfli seviye az", (sizes[5] ?: 0) >= 1500)
         assertTrue("hiçbir grup %60'tan fazla olmamalı", sizes.values.all { it <= 6000 })
     }
+
+    @Test
+    fun isLevelCompleteNeedsEveryGridWord() {
+        val r = repo("1|nte|ten,0,0,y;net,0,2,d\n")
+        assertEquals(false, r.isLevelComplete(0, emptySet()))
+        assertEquals(false, r.isLevelComplete(0, setOf("ten")))
+        assertEquals(true, r.isLevelComplete(0, setOf("ten", "net", "bonus")))
+        assertEquals(false, r.isLevelComplete(5, setOf("ten", "net")))
+        assertEquals(false, r.isLevelComplete(-1, setOf("ten", "net")))
+    }
 }

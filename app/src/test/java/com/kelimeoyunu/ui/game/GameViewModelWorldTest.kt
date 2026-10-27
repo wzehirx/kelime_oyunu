@@ -147,7 +147,7 @@ class GameViewModelWorldTest {
         vm.finishLevel()
         val tail = ev.dropWhile { it !is GameEvent.CoinsEarned }
         assertEquals(
-            listOf(GameEvent.CoinsEarned(10), GameEvent.LevelCompleted, GameEvent.PlaceCompleted(TestPlaces.turkey, 25, "Ülke 1")),
+            listOf(GameEvent.CoinsEarned(10, silent = true), GameEvent.LevelCompleted(placeCompleted = true), GameEvent.PlaceCompleted(TestPlaces.turkey, 25, "Ülke 1")),
             tail,
         )
         assertEquals(50 + 10 + 25, vm.ready().coins)
@@ -217,7 +217,7 @@ class GameViewModelWorldTest {
         vm.finishLevel()
         assertEquals(60, vm.ready().coins)
         assertEquals(
-            listOf(GameEvent.Submitted(SubmitResult.Correct("net")), GameEvent.CoinsEarned(10), GameEvent.LevelCompleted),
+            listOf(GameEvent.Submitted(SubmitResult.Correct("net")), GameEvent.CoinsEarned(10), GameEvent.LevelCompleted()),
             ev.takeLast(3),
         )
         vm.onNextLevel()
@@ -231,5 +231,55 @@ class GameViewModelWorldTest {
         vm.awaitReady()
         assertNull(vm.ready().place)
         assertTrue(ev.places().isEmpty())
+    }
+
+    @Test fun introIsNotRepeatedAfterRebuildButPlaysAgainAfterReset() = test {
+        val r = repo()
+        val first = newVm(r); val ev1 = collect(first); first.awaitReady()
+        assertEquals(1, ev1.count { it is GameEvent.PlaceEntered })
+        r.introducedPlaceIndex.first { it == 0 }
+        // menüye çık-gir ve "uygulamayı kapat-aç" aynı şeydir: yeni ViewModel
+        repeat(2) {
+            val again = newVm(r); val ev = collect(again); again.awaitReady()
+            assertTrue("tekrar tanıtım: $ev", ev.none { e -> e is GameEvent.PlaceEntered })
+        }
+        r.reset()
+        val fresh = newVm(r); val evFresh = collect(fresh); fresh.awaitReady()
+        assertEquals(listOf<GameEvent>(GameEvent.PlaceEntered(TestPlaces.turkey, 20)), evFresh.places())
+    }
+
+    @Test fun nextCountryIntroIsPersistedSoRebuildAtItsFirstLevelStaysQuiet() = test {
+        val r = repo(); seed(r, 19)
+        val vm = newVm(r); collect(vm); vm.awaitReady()
+        vm.finishLevel(); vm.onNextLevel()
+        r.introducedPlaceIndex.first { it == 1 }
+        r.awaitProgress { it.levelIndex == 20 }
+        val again = newVm(r); val ev = collect(again); again.awaitReady()
+        assertTrue(ev.none { it is GameEvent.PlaceEntered })
+    }
+
+    @Test fun middleOfCountryNeverIntroducesEvenWhenNothingIsRecorded() = test {
+        val r = repo(); seed(r, 5)
+        val vm = newVm(r); val ev = collect(vm); vm.awaitReady()
+        assertTrue(ev.none { it is GameEvent.PlaceEntered })
+    }
+
+    @Test fun countryFinishIsSilentForCoinAndLevelJingleButNotForSpeech() = test {
+        val r = repo(); seed(r, 19)
+        val vm = newVm(r); val ev = collect(vm); vm.awaitReady()
+        vm.finishLevel()
+        assertTrue(ev.contains(GameEvent.CoinsEarned(10, silent = true)))
+        assertTrue(ev.contains(GameEvent.LevelCompleted(placeCompleted = true)))
+        val sfx = ev.flatMap { com.kelimeoyunu.audio.sfxFor(it) }
+        assertTrue(sfx.toString(), com.kelimeoyunu.audio.Sfx.PLACE_COMPLETE in sfx)
+        assertTrue(sfx.toString(), com.kelimeoyunu.audio.Sfx.LEVEL_COMPLETE !in sfx && com.kelimeoyunu.audio.Sfx.COIN !in sfx)
+    }
+
+    @Test fun ordinaryLevelFinishStillHasCoinAndLevelJingle() = test {
+        val r = repo(); seed(r, 5)
+        val vm = newVm(r); val ev = collect(vm); vm.awaitReady()
+        vm.finishLevel()
+        assertTrue(ev.contains(GameEvent.CoinsEarned(10)))
+        assertTrue(ev.contains(GameEvent.LevelCompleted()))
     }
 }

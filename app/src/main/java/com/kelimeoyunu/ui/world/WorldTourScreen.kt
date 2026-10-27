@@ -14,7 +14,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.CollectionInfo
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.collectionInfo
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -31,17 +33,20 @@ import com.kelimeoyunu.ui.common.MinLetterHeight
 
 /**
  * Dünya turu listesi. Her satır tek TalkBack düğümüdür. Açılışta liste ve odak oyuncunun bulunduğu ülkeye
- * gelir (tüm ülkeler bitmişse başlığa). Satıra dokunmak bilgiyi [onSay] ile tekrar söyletir; kilitli
+ * gelir (tüm ülkeler bitmişse başlığa). [savedLevelDone]: kayıtlı seviyenin kelimeleri tamam. Satıra dokunmak bilgiyi [onSay] ile tekrar söyletir; kilitli
  * satır "Henüz bu ülkeye ulaşmadın" der.
  */
 @Composable
 fun WorldTourScreen(
     tour: WorldTour,
-    currentLevelIndex: Int,
+    savedLevelIndex: Int,
     onSay: (String) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    savedLevelDone: Boolean = false,
 ) {
+    // Kayıtlı seviye bitmiş ama "Sonraki seviye"ye basılmamışsa o seviye ilerlemeye sayılır (ülke bitmiş görünür).
+    val currentLevelIndex = savedLevelIndex + if (savedLevelDone) 1 else 0
     val current = tour.positionOf(currentLevelIndex)?.placeIndex
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = current ?: 0)
     Column(modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -50,7 +55,9 @@ fun WorldTourScreen(
             Modifier.then(if (current == null) Modifier.initialFocus() else Modifier).semantics { heading() },
             style = MaterialTheme.typography.headlineSmall,
         )
-        LazyColumn(Modifier.weight(1f).fillMaxWidth(), listState, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        LazyColumn(
+            Modifier.weight(1f).fillMaxWidth().semantics { collectionInfo = CollectionInfo(rowCount = tour.placeCount, columnCount = 1) },
+            listState, verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(tour.placeCount) { i ->
                 val place = tour.place(i)!!
                 PlaceRow(

@@ -15,8 +15,12 @@ import kotlinx.coroutines.launch
 class Announcer(
     private val sink: (String) -> Unit,
     private val scope: CoroutineScope,
-    private val batchMs: Long = 120,
+    private val batchMs: Long = DEFAULT_BATCH_MS,
 ) {
+    companion object {
+        const val DEFAULT_BATCH_MS = 120L
+    }
+
     private class Item(val text: String, val interruptible: Boolean)
 
     private val lock = Any()

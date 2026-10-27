@@ -18,19 +18,28 @@ import com.kelimeoyunu.a11y.initialFocus
 import com.kelimeoyunu.ui.common.A11yButton
 import com.kelimeoyunu.ui.common.MinLetterHeight
 
-val HowToPlayParagraphs = listOf(
+private val IntroParagraphs = listOf(
     "Amaç: Ekrandaki harflerle, listedeki gizli kelimeleri bulmak.",
     "Ekranın üstünde kelimelerin listesi bulunur. Her kelime için kaç harfli olduğu ve açılmış harfleri okunur.",
     "Harf düğmelerine çift dokunarak harf seçersin. Seçtiğin harflerden oluşan kelime okunur. Aynı harf düğmesini iki kez seçemezsin.",
     "Kelimeyi göndermek için Gönder düğmesine çift dokun. Sil son harfi, Temizle bütün harfleri kaldırır. Karıştır harflerin sırasını değiştirir.",
     "Listede olmayan ama geçerli bir kelime bulursan bonus kelime olur. Her 5 bonus kelime 20 jeton kazandırır. Seviyeyi bitirince 10 jeton kazanırsın.",
     "Takılırsan İpucu düğmesi 10 jetonla bir harf açar. Kelime aç düğmesi 30 jetonla bir kelimeyi tamamen açar.",
-    "Dünya turu: Seviyeler 100 ülkeye bölünür ve Türkiye'den başlarsın. Yeni bir ülkeye girince bölgesine özel bir melodi çalar ve ülke tanıtılır; ülkeyi bitirince 25 jeton ve ilginç bir bilgi kazanırsın. Ana menüdeki Dünya turu düğmesinden hangi ülkede olduğuna bakabilirsin.",
-    "Her şey sesli olarak duyurulur; ekrana bakman gerekmez. Başlangıçta 50 jetonun var.",
 )
 
+private const val WorldTourParagraph =
+    "Dünya turu: Seviyeler 100 ülkeye bölünür ve Türkiye'den başlarsın. Yeni bir ülkeye girince bölgesine özel bir melodi çalar ve ülke bir kez tanıtılır; ülkeyi bitirince 25 jeton ve ilginç bir bilgi kazanırsın. Ana menüdeki Dünya turu düğmesinden hangi ülkede olduğuna bakabilirsin."
+
+private const val OutroParagraph = "Her şey sesli olarak duyurulur; ekrana bakman gerekmez. Başlangıçta 50 jetonun var."
+
+/** Dünya turu kapalıyken (ülke listesi okunamadı) ana menüde böyle bir düğme olmadığından o paragraf çıkarılır. */
+fun howToPlayParagraphs(worldTourEnabled: Boolean): List<String> =
+    IntroParagraphs + listOfNotNull(WorldTourParagraph.takeIf { worldTourEnabled }) + OutroParagraph
+
+val HowToPlayParagraphs: List<String> = howToPlayParagraphs(worldTourEnabled = true)
+
 @Composable
-fun HowToPlayScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
+fun HowToPlayScreen(onBack: () -> Unit, modifier: Modifier = Modifier, worldTourEnabled: Boolean = true) {
     Column(
         modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -40,7 +49,7 @@ fun HowToPlayScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
             Modifier.initialFocus().semantics { heading() },
             style = MaterialTheme.typography.headlineMedium,
         )
-        HowToPlayParagraphs.forEach { Text(it, style = MaterialTheme.typography.bodyLarge) }
+        howToPlayParagraphs(worldTourEnabled).forEach { Text(it, style = MaterialTheme.typography.bodyLarge) }
         A11yButton("Geri", "Geri", onBack, Modifier.fillMaxWidth(), minHeight = MinLetterHeight)
     }
 }

@@ -7,6 +7,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.kelimeoyunu.TestPlaces
 import com.kelimeoyunu.domain.PlacePosition
@@ -75,5 +76,13 @@ class WorldTourMenuAndHeaderTest {
     @Test fun howToPlayExplainsWorldTour() {
         val text = HowToPlayParagraphs.joinToString(" ")
         assertTrue(text.contains("Dünya turu") && text.contains("100 ülke") && text.contains("25 jeton"))
+    }
+
+    @Test fun howToPlayWithoutWorldTourDoesNotMentionTheMenuButton() {
+        val text = com.kelimeoyunu.ui.menu.howToPlayParagraphs(worldTourEnabled = false).joinToString(" ")
+        assertTrue(!text.contains("Dünya turu") && !text.contains("Ana menüdeki"))
+        assertTrue(text.contains("Gönder"))
+        rule.setContent { KelimeTheme { com.kelimeoyunu.ui.menu.HowToPlayScreen({}, worldTourEnabled = false) } }
+        rule.onNodeWithText("Dünya turu", substring = true).assertDoesNotExist()
     }
 }

@@ -16,7 +16,10 @@ fun loadPlaces(open: () -> InputStream): List<Place> =
         val places = ArrayList<Place>(array.length())
         for (i in 0 until array.length()) {
             val o = array.getJSONObject(i)
-            fun field(name: String) = o.getString(name).trim().also { require(it.isNotEmpty()) { name } }
+            fun field(name: String): String {
+                require(!o.isNull(name)) { name } // JSON null "null" yazısına dönüşmesin
+                return o.getString(name).trim().also { require(it.isNotEmpty()) { name } }
+            }
             val bolge = field("bolge")
             require(bolge in REGIONS) { bolge }
             places += Place(

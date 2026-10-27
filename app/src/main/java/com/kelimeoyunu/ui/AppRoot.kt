@@ -28,7 +28,6 @@ import com.kelimeoyunu.a11y.AnnouncingFeedbackSink
 import com.kelimeoyunu.a11y.Announcements
 import com.kelimeoyunu.a11y.Announcer
 import com.kelimeoyunu.audio.Sfx
-import com.kelimeoyunu.data.Progress
 import com.kelimeoyunu.domain.WorldTour
 import com.kelimeoyunu.ui.game.CompositeFeedbackSink
 import com.kelimeoyunu.ui.game.GameScreen
@@ -95,14 +94,18 @@ fun AppRoot(container: AppContainer, modifier: Modifier = Modifier) {
         }
         Screen.Game -> GameRoute(container, announcer, { go(Screen.Menu) }, modifier)
         Screen.World -> WorldRoute(container, announcer, { go(Screen.Menu) }, modifier)
-        Screen.HowToPlay -> HowToPlayScreen({ go(Screen.Menu) }, modifier)
+        Screen.HowToPlay -> {
+            // Tur kapalıysa (places.json yok/bozuk) Dünya turu anlatımı gösterilmez; bilinene kadar da gösterilmez.
+            val tourOn by produceState(false, container) { value = withContext(Dispatchers.Default) { container.worldTour != null } }
+            HowToPlayScreen({ go(Screen.Menu) }, modifier, worldTourEnabled = tourOn)
+        }
         Screen.Settings -> {
             SettingsScreen(
                 soundEnabled = soundSetting ?: true,
                 onSoundChange = { scope.launch { container.settingsRepository.setSoundEnabled(it) } },
                 onResetConfirmed = {
                     scope.launch {
-                        container.progressRepository.save(Progress())
+                        container.progressRepository.reset()
                         announcer.say(Announcements.progressReset())
                     }
                 },
@@ -147,6 +150,7 @@ private fun WorldRoute(container: AppContainer, announcer: Announcer, onBack: ()
     if (t == null || p == null) {
         Text("Yükleniyor", modifier.padding(16.dp).initialFocus().semantics { heading() })
     } else {
-        WorldTourScreen(t, p.levelIndex, { announcer.say(it) }, onBack, modifier)
+        val done = container.levelRepository.isLevelComplete(p.levelIndex, p.found)
+        WorldTourScreen(t, p.levelIndex, { announcer.say(it) }, onBack, modifier, savedLevelDone = done)
     }
 }

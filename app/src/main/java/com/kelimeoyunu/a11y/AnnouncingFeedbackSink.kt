@@ -17,7 +17,7 @@ class AnnouncingFeedbackSink(
     clock: () -> Long,
     emptyGraceMs: Long = 800,
     private val soundOn: () -> Boolean = { false },
-    private val placeDelayMs: Long = 1000,
+    private val placeDelayMs: Long = PLACE_INTRO_DELAY_MS,
 ) : FeedbackSink {
     private val gate = DoubleSubmitGate(clock, emptyGraceMs)
 
@@ -35,7 +35,7 @@ class AnnouncingFeedbackSink(
             GameEvent.NoHintAvailable -> announcer.say(Announcements.noHint())
             is GameEvent.CoinsEarned -> announcer.say(Announcements.coinsEarned(e.amount))
             GameEvent.BonusMeterFull -> announcer.say(Announcements.bonusMeterFull())
-            GameEvent.LevelCompleted -> announcer.say(Announcements.levelCompleted(s?.levelNumber ?: 0))
+            is GameEvent.LevelCompleted -> announcer.say(Announcements.levelCompleted(s?.levelNumber ?: 0))
             is GameEvent.PlaceEntered -> announcer.say(
                 Announcements.placeEntered(e.place, e.placeLevelCount),
                 delayMs = if (soundOn()) placeDelayMs else 0,
@@ -47,3 +47,9 @@ class AnnouncingFeedbackSink(
         }
     }
 }
+
+/**
+ * Ülke girişi konuşmasının bekleme süresi (ses açıkken). Bölge melodileri en çok ~1,95 sn sürer;
+ * bu süre ile [Announcer.DEFAULT_BATCH_MS] toplamı melodiden uzun olmalıdır (SoundAssetsTest bunu denetler).
+ */
+const val PLACE_INTRO_DELAY_MS = 2000L

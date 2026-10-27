@@ -519,12 +519,12 @@ class GameViewModelAdversarialTest {
                     if (after.levelNumber == before.levelNumber) {
                         assertEquals("seed $seed adım $steps $new", before.coins + earned - spent, after.coins)
                     }
-                    paid.merge(before.levelNumber, new.count { it == GameEvent.LevelCompleted }, Int::plus)
+                    paid.merge(before.levelNumber, new.count { it == GameEvent.LevelCompleted() }, Int::plus)
                     assertTrue("seed $seed seviye iki kez ödendi", paid.values.all { it <= 1 })
                 } else {
                     break
                 }
-                if (new.count { it == GameEvent.LevelCompleted } > 1) throw AssertionError("çift LevelCompleted")
+                if (new.count { it == GameEvent.LevelCompleted() } > 1) throw AssertionError("çift LevelCompleted")
             }
         }
     }

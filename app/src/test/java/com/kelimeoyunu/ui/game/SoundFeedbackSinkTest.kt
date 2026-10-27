@@ -33,7 +33,7 @@ class SoundFeedbackSinkTest {
         manager.enabled = false
         val s = sink()
         listOf(
-            GameEvent.LetterAdded('A', 0, 1), GameEvent.Deleted, GameEvent.LevelCompleted,
+            GameEvent.LetterAdded('A', 0, 1), GameEvent.Deleted, GameEvent.LevelCompleted(),
             GameEvent.CoinsEarned(2), GameEvent.NotEnoughCoins,
         ).forEach(s::onEvent)
         assertTrue(backend.played.isEmpty())
