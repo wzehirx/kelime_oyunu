@@ -79,18 +79,18 @@ val DarkTokens = KelimeColors(
 
 val LocalKelimeColors = staticCompositionLocalOf { LightTokens }
 
-/** space-xs/sm/md/lg/xl */
+/** space-xs/sm/md/lg */
 object Space {
     val xs = 4.dp
     val sm = 8.dp
     val md = 16.dp
     val lg = 24.dp
-    val xl = 32.dp
 }
 
 /** Köşe yarıçapları: panel 14 dp, hücre 6 dp, hap ve jeton tam yuvarlak; satırlarda köşe yok. */
 object Radius {
     val panel = 14.dp
+    val button = 12.dp
     val cell = 6.dp
     val pill = 999.dp
 }
@@ -100,10 +100,7 @@ object Elevation {
     val panel = 2.dp
 }
 
-/** Dokunma hedefi alt sınırı ve jeton/birincil düğme ölçüleri. */
+/** Birincil düğme yüksekliği (jeton 64/56 dp ve 48 dp alt sınır ilgili bileşenlerde). */
 object Touch {
-    val min = 48.dp
-    val token = 64.dp
-    val tokenSmall = 56.dp
     val primary = 64.dp
 }

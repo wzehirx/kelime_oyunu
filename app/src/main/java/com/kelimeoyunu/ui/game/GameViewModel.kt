@@ -95,6 +95,14 @@ class GameViewModel(
         scope.launch { load() }
     }
 
+    /** Yükleme hatasından sonra "Yeniden dene": yalnızca Error durumundayken yeniden yükler. */
+    fun retry() {
+        val start = synchronized(lock) {
+            if (_state.value is GameUiState.Error) { _state.value = GameUiState.Loading; true } else false
+        }
+        if (start) scope.launch { load() }
+    }
+
     private suspend fun load() {
         try {
             val (dict, saved, introduced) = withContext(dispatcher) {

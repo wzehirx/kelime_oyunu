@@ -19,7 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.semantics.text
@@ -129,9 +131,16 @@ fun MainMenuScreen(
         }
         if (coins != null || totalLevels != null) {
             val parts = listOfNotNull(coins?.let { "Jeton: $it" }, totalLevels?.let { "Toplam seviye: $it" })
+            // Tek anlamsal satır (tıklanamaz): jeton, toplam seviye, ülke ilerlemesi ve dünya turu sayısı; son sırada okunur.
+            val spoken = (
+                parts + listOfNotNull(
+                    place?.takeUnless { allDone }?.let { "Ülke ilerlemesi: ${Announcements.placeProgress(it)}" },
+                    if (worldCompleted != null && worldTotal != null) "Dünya turu: $worldCompleted / $worldTotal ülke tamamlandı" else null,
+                )
+                ).joinToString(". ")
             Text(
                 parts.joinToString("   "),
-                Modifier.fillMaxWidth().clearAndSetSemantics {},
+                Modifier.fillMaxWidth().semantics { contentDescription = spoken },
                 style = KelimeType.small, color = k.inkMuted, textAlign = TextAlign.Center,
             )
         }

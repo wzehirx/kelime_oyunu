@@ -162,6 +162,17 @@ class ScreensA11yAdversarialTest {
         scan("hata ekranı")
     }
 
+    @Test fun errorScreenOffersRetryAndMenuAndLoadingHasNoExtraNodes() {
+        val repo = ProgressRepository(PreferenceDataStoreFactory.create(scope = scope) { File(dir, "p2.preferences_pb") })
+        val vm = GameViewModel(LevelRepository { ByteArrayInputStream(ByteArray(0)) }, WordDictionary(setOf("a")), repo, Random(1), Dispatchers.Default)
+        host { GameScreen(vm, {}, {}) }
+        rule.waitUntil(30_000) { rule.onAllNodes(hasClickAction()).fetchSemanticsNodes().size == 2 }
+        assertEquals(listOf("Yeniden dene", "Ana menü"), rule.onAllNodes(hasClickAction()).fetchSemanticsNodes().map { label(it) })
+        rule.onNodeWithContentDescription("Yeniden dene").performClick()
+        rule.waitUntil(30_000) { rule.onAllNodes(hasClickAction()).fetchSemanticsNodes().size == 2 }
+        scan("hata ekranı (yeniden dene)")
+    }
+
     @Test fun duplicateLabelsAmongClickablesAreOnlyRepeatedLetters() {
         host { GameContent(bigPad(), rec.callbacks) }
         val labels = rule.onAllNodes(hasClickAction()).fetchSemanticsNodes().map { label(it) }

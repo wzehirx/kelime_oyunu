@@ -3,7 +3,6 @@ package com.kelimeoyunu.ui.game
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -17,7 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -33,19 +34,17 @@ import com.kelimeoyunu.ui.theme.Space
 import com.kelimeoyunu.ui.theme.kelimeColors
 
 /**
- * Üst çubuk. Görünür "Menü" kısayolu yalnızca sighted kullanıcı içindir: ekran okuyucudan gizlidir (anlamsal ağaç
- * değişmez; geri hareketi aynı işi yapar). Seviye, ülke hapı, jeton hapı, kalan kelime ve bonus sayacı TEK başlık
+ * Üst çubuk başlığı. ("Menü" düğmesi [MenuChip], odak sırasının sonunda ayrı bir düğümdür.) Seviye, ülke hapı, jeton hapı, kalan kelime ve bonus sayacı TEK başlık
  * düğümüdür ve eski açıklamayı okur; içindeki görsel metinler gizlidir.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun GameHeader(state: GameUiState.Ready, modifier: Modifier = Modifier, onMenu: () -> Unit = {}) {
+fun GameHeader(state: GameUiState.Ready, modifier: Modifier = Modifier) {
     val k = kelimeColors
     val description = Announcements.headerDescription(
         state.levelNumber, state.coins, state.bonusMeter, state.bonusTarget, state.remainingWords, state.place,
     )
-    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Space.xs)) {
-        MenuChip(onMenu)
+    Column(modifier.fillMaxWidth()) {
         Column(
             Modifier.fillMaxWidth().initialFocus().semantics(mergeDescendants = true) {
                 heading()
@@ -80,23 +79,22 @@ fun GameHeader(state: GameUiState.Ready, modifier: Modifier = Modifier, onMenu: 
 }
 
 /**
- * 48 dp yüksekliğinde "Menü" kısayolu; yalnızca görsel. Tıklanabilir satır, anlamsal olarak temizlenen bir sarmalayıcının
- * ÇOCUĞUDUR (aynı düğümde olsaydı tıklama eylemi ağaçta kalırdı): ekran okuyucudan gizli, odak sırasına girmez.
+ * Görünür "Menü" düğmesi; TalkBack'te "Ana menüye dön" etiketiyle, odak sırasının SONUNDA okunur (çağıran bunu
+ * son çocuk olarak yazar ve büyük bir traversalIndex verir; mevcut sıra bozulmaz). Metin ve simge gizlidir.
  */
 @Composable
-private fun MenuChip(onMenu: () -> Unit) {
+fun MenuChip(onMenu: () -> Unit, modifier: Modifier = Modifier) {
     val k = kelimeColors
     val interaction = remember { MutableInteractionSource() }
-    Box(Modifier.clearAndSetSemantics {}) {
-        Row(
-            Modifier.focusRing(interaction, 24.dp).defaultMinSize(minHeight = 48.dp, minWidth = 48.dp)
-                .clickable(interactionSource = interaction, indication = androidx.compose.foundation.LocalIndication.current, onClick = onMenu)
-                .padding(horizontal = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            KIcon(IconKind.Menu, k.primary, size = 22.dp)
-            Text("Menü", style = KelimeType.label, color = k.primary)
-        }
+    Row(
+        modifier.focusRing(interaction, 24.dp).defaultMinSize(minHeight = 48.dp, minWidth = 48.dp)
+            .clickable(interactionSource = interaction, indication = androidx.compose.foundation.LocalIndication.current, role = Role.Button, onClick = onMenu)
+            .semantics { contentDescription = "Ana menüye dön" }
+            .padding(horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        KIcon(IconKind.Menu, k.primary, size = 22.dp)
+        Text("Menü", Modifier.clearAndSetSemantics {}, style = KelimeType.label, color = k.primary)
     }
 }

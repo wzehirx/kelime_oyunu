@@ -2,7 +2,6 @@ package com.kelimeoyunu.ui.common
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -49,7 +48,7 @@ fun A11yButton(
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
 ) {
     val k = kelimeColors
-    val radius = if (pill) Radius.pill else 12.dp
+    val radius = if (pill) Radius.pill else Radius.button
     val interaction = remember { MutableInteractionSource() }
     val resolved = colors ?: when (kind) {
         ButtonKind.Primary -> ButtonDefaults.buttonColors(
@@ -92,5 +91,3 @@ fun DangerButton(
     modifier: Modifier = Modifier,
     minHeight: Dp = MinLetterHeight,
 ) = A11yButton(description, label, onClick, modifier, minHeight, kind = ButtonKind.Danger)
-
-val ButtonGap = Arrangement.spacedBy(8.dp)

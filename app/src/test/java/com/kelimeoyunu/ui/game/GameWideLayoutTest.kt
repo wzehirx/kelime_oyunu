@@ -31,7 +31,7 @@ class GameWideLayoutTest {
             .map { it.config.getOrNull(SemanticsProperties.ContentDescription)?.firstOrNull() }
         assertEquals(
             listOf("Harf K, seçildi", "Harf A, seçildi", "Harf L", "Harf E", "Harf M", "Gönder", "Sil", "Temizle", "Karıştır",
-                GameEconomy.HINT_LETTER_DESCRIPTION, GameEconomy.HINT_WORD_DESCRIPTION),
+                GameEconomy.HINT_LETTER_DESCRIPTION, GameEconomy.HINT_WORD_DESCRIPTION, "Ana menüye dön"),
             labels,
         )
         rule.onNode(isHeading()).assertIsFocused()

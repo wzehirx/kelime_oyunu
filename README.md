@@ -38,7 +38,7 @@ Görsel katman erişilebilirliğin ÜSTÜNE eklenir; TalkBack anlamsal ağacı, 
 - Simgeler Canvas ile çizilir; `material-icons-extended` ve yeni bağımlılık yoktur.
 
 ## İndirme
-Her sürümün **debug imzalı APK**'sı [Releases](https://github.com/wzehirx/kelime_oyunu/releases) sayfasındadır. Sürümler **v1.0–v1.5** ayrıca **release APK** içerir.
+Her sürümün **debug imzalı APK**'sı [Releases](https://github.com/wzehirx/kelime_oyunu/releases) sayfasındadır. Sürümler **v1.0–v2.0** ayrıca **release APK** içerir.
 
 | Sürüm | İçerik |
 |---|---|
@@ -52,6 +52,7 @@ Her sürümün **debug imzalı APK**'sı [Releases](https://github.com/wzehirx/k
 | v1.3 | Dünya turu: 100 ülke, bölgeye özel giriş melodileri, ülke tanıtımı ve tamamlama bonusu (25 jeton), Dünya turu ekranı. Debug ve release APK |
 | v1.4 | Düzgün sözlük (Zemberek + sıklık listesi: fiil kökleri ve çekimli biçimler kabul, argo reddedilir, ızgarada yalnızca yaygın sözcükler), hızlı yükselen ve daha zor seviye eğrisi (3 harfli yalnızca ilk 6 seviye), jeton dengesi (seviye +5, bonus sayacı +10, harf ipucu 15, kelime aç 40). Debug ve release APK |
 | v1.5 | Veri temizliği: ızgaradan uygunsuz sözcükler ve özel isimler çıkarıldı, kabul setinden küfür kalıpları çıkarıldı, ilk 700 seviyede yalnızca yaygın sözcükler. Debug ve release APK |
+| v2.0 | Görsel yenileme: Deniz kâğıdı / Gece haritası temaları, bölge damgaları, Atkinson Hyperlegible Next yazı tipi, yeni menü, çapraz bulmaca ızgarası, pusula halkası harf çarkı, titreşim ve animasyon ayarları. TalkBack etiketleri ve okuma sırası korundu. Debug ve release APK |
 
 > Not: v2.0 görsel yenilemesi bu tabloda henüz listelenmedi; sürüm satırı yayın sırasında eklenecek.
 

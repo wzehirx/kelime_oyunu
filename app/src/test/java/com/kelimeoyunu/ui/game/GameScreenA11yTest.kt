@@ -41,6 +41,7 @@ class GameScreenA11yTest {
     private val actionLabels = listOf(
         "Gönder", "Sil", "Temizle", "Karıştır", GameEconomy.HINT_LETTER_DESCRIPTION, GameEconomy.HINT_WORD_DESCRIPTION,
     )
+    private val menuLabel = "Ana menüye dön"
 
     private fun show(state: GameUiState.Ready = FakeStates.ready(), fontScale: Float = 1f) {
         rule.setContent {
@@ -70,7 +71,7 @@ class GameScreenA11yTest {
     @Test fun clickableOrderIsLettersThenActionsInFixedOrder() {
         show()
         assertEquals(
-            listOf("Harf K", "Harf A", "Harf L", "Harf E", "Harf M") + actionLabels,
+            listOf("Harf K", "Harf A", "Harf L", "Harf E", "Harf M") + actionLabels + menuLabel,
             clickLabels(),
         )
     }
@@ -184,10 +185,51 @@ class GameScreenA11yTest {
         assertEquals(listOf("submit"), rec.calls)
     }
 
-    @Test fun menuShortcutIsVisualOnlyAndNotInTheSemanticTree() {
-        show()
-        rule.onAllNodesWithContentDescription("Menü").assertCountEquals(0)
+    @Test fun menuButtonIsExposedLastWithItsOwnLabel() {
+        val calls = ArrayList<String>()
+        rule.setContent { KelimeTheme { GameContent(FakeStates.ready(), rec.callbacks.copy(onMenu = { calls += "menu" })) } }
+        assertEquals(menuLabel, clickLabels().last())
+        rule.onNodeWithContentDescription(menuLabel).assertHasClickAction().assertHeightIsAtLeast(48.dp).performClick()
+        assertEquals(listOf("menu"), calls)
         rule.onAllNodes(androidx.compose.ui.test.hasText("Menü")).assertCountEquals(0)
+        // Açık traversalIndex: menü en sonda okunur.
+        val menuIdx = rule.onNodeWithContentDescription(menuLabel).fetchSemanticsNode().config.getOrNull(SemanticsProperties.TraversalIndex)!!
+        val lastAction = rule.onNodeWithContentDescription(GameEconomy.HINT_WORD_DESCRIPTION).fetchSemanticsNode().config.getOrNull(SemanticsProperties.TraversalIndex)!!
+        assertTrue(menuIdx > lastAction)
+    }
+
+    // Karıştır sonrası okuma sırası, tiles listesi sırasıyla aynıdır (havuz kimliğiyle değil).
+    @Test fun traversalFollowsTheShuffledTileListOrder() {
+        val base = FakeStates.ready()
+        val shuffled = base.copy(tiles = listOf(3, 1, 4, 0, 2).map { base.tiles[it] })
+        show(shuffled)
+        val letters = shuffled.tiles.map { "Harf ${it.char.uppercaseChar()}" }
+        val values = letters.map {
+            rule.onNodeWithContentDescription(it).fetchSemanticsNode().config.getOrNull(SemanticsProperties.TraversalIndex)!!
+        }
+        assertEquals(values.sorted(), values)
+        assertEquals(values.size, values.toSet().size)
+        val send = rule.onNodeWithContentDescription("Gönder").fetchSemanticsNode().config.getOrNull(SemanticsProperties.TraversalIndex)!!
+        assertTrue(send > values.last())
+    }
+
+    @Test fun wheelDoesNotShakeOnItsOwnWhenAnOldShakeCountExists() {
+        val effects = GameEffects().also { it.onEvent(GameEvent.Submitted(com.kelimeoyunu.domain.SubmitResult.Invalid("x"))) }
+        rule.mainClock.autoAdvance = false
+        rule.setContent { KelimeTheme { GameContent(FakeStates.ready(), rec.callbacks, effects = effects) } }
+        rule.mainClock.advanceTimeBy(50)
+        val x0 = rule.onNodeWithContentDescription("Harf K").fetchSemanticsNode().positionInRoot.x
+        rule.mainClock.advanceTimeBy(60)
+        val x1 = rule.onNodeWithContentDescription("Harf K").fetchSemanticsNode().positionInRoot.x
+        assertEquals("eski sayaç çarkı sallamamalı", x0, x1, 0.01f)
+        // Yeni geçersiz gönderim sallar.
+        effects.onEvent(GameEvent.Submitted(com.kelimeoyunu.domain.SubmitResult.Invalid("y")))
+        var maxMove = 0f
+        repeat(12) {
+            rule.mainClock.advanceTimeBy(16)
+            maxMove = maxOf(maxMove, kotlin.math.abs(rule.onNodeWithContentDescription("Harf K").fetchSemanticsNode().positionInRoot.x - x1))
+        }
+        assertTrue("yeni olay çarkı sallamalı", maxMove > 0.5f)
     }
 
     @Test fun clicksCallTheRightCallbacks() {

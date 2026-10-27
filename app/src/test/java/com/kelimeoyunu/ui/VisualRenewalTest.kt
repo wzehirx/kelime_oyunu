@@ -100,7 +100,11 @@ class VisualRenewalTest {
         val labels = rule.onAllNodes(hasClickAction()).fetchSemanticsNodes().map { label(it) }
         assertEquals(listOf("Devam et, Türkiye, 3 / 20", "Dünya turu", "Nasıl oynanır", "Ayarlar"), labels)
         rule.onAllNodes(hasText("12 / 100 ülke")).assertCountEquals(0)
-        rule.onAllNodes(hasText("Jeton: 50", substring = true)).assertCountEquals(0)
+        // Altbilgi tek anlamsal satırdır; Dünya turu/Devam et etiketleri değişmedi (yukarıdaki sıra testi).
+        val footer = rule.onNodeWithContentDescription(
+            "Jeton: 50. Toplam seviye: 10000. Ülke ilerlemesi: Türkiye 3 / 20. Dünya turu: 12 / 100 ülke tamamlandı",
+        ).fetchSemanticsNode()
+        assertTrue(footer.config.getOrNull(SemanticsProperties.Role) == null)
         rule.onAllNodes(isHeading() and hasText("Kelime Oyunu")).assertCountEquals(1)
         assertNoUnlabeledClickables(rule)
     }
@@ -173,7 +177,7 @@ class VisualRenewalTest {
         val rec = RecordingCallbacks()
         host { GameContent(gridState(), rec.callbacks) }
         val expected = listOf("Harf K", "Harf A", "Harf L", "Harf E", "Harf M", "Gönder", "Sil", "Temizle", "Karıştır") +
-            listOf(GameEconomy.HINT_LETTER_DESCRIPTION, GameEconomy.HINT_WORD_DESCRIPTION)
+            listOf(GameEconomy.HINT_LETTER_DESCRIPTION, GameEconomy.HINT_WORD_DESCRIPTION, "Ana menüye dön")
         for (s in listOf(1f, 2f)) {
             fontScale = s
             rule.waitForIdle()
@@ -213,5 +217,22 @@ class VisualRenewalTest {
             rule.waitForIdle()
             scanNoOverflowAndTargets("dünya @$s")
         }
+    }
+
+    // ---- eylem alanı alta sabit (yüksek ekran) ----
+
+    @Test @Config(qualifiers = "w360dp-h800dp") fun tallScreenShowsWheelAndSubmitOnTheFirstScreen() {
+        host { GameContent(gridState(), RecordingCallbacks().callbacks) }
+        val rootH = rule.onRoot().fetchSemanticsNode().size.height.toFloat()
+        for (cd in listOf("Harf K", "Harf M", "Gönder", "Karıştır", "Sil", "Temizle")) {
+            val b = rule.onNodeWithContentDescription(cd).fetchSemanticsNode().boundsInRoot
+            assertTrue("$cd ilk ekranda görünmeli: $b / $rootH", b.top >= 0f && b.bottom <= rootH + 1f)
+        }
+        // Üst kısım kaydırılabilir, okuma sırası ve etiketler aynı.
+        assertEquals(
+            listOf("Harf K", "Harf A", "Harf L", "Harf E", "Harf M", "Gönder", "Sil", "Temizle", "Karıştır",
+                GameEconomy.HINT_LETTER_DESCRIPTION, GameEconomy.HINT_WORD_DESCRIPTION, "Ana menüye dön"),
+            rule.onAllNodes(hasClickAction()).fetchSemanticsNodes().map { label(it) },
+        )
     }
 }

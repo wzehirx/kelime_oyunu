@@ -17,7 +17,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,23 +76,29 @@ fun PlayPanel(
     callbacks: GameCallbacks,
     modifier: Modifier = Modifier,
     submitDimmed: Boolean = false,
+    maxDiameter: Dp = 320.dp,
     effects: GameEffects = remember { GameEffects() },
 ) {
     val k = kelimeColors
     val motion = LocalMotion.current
     val n = tiles.size
     val shake = remember { Animatable(0f) }
+    // Tüketilmiş-olay sayacı: yalnızca bu kompozisyon açıkken artan sayaç sallar (seviye değişimi/yeniden kompozisyon sallamaz).
+    var handledShake by remember { mutableIntStateOf(effects.shakeTick) }
     LaunchedEffect(effects.shakeTick) {
-        if (effects.shakeTick > 0 && motion.enabled) {
-            // ±8 dp, 3 salınım, toplam 200 ms (doğrusal).
-            shake.snapTo(0f)
-            val step = 200 / 6
-            for (target in listOf(1f, -1f, 1f, -1f, 1f, 0f)) shake.animateTo(target, tween(step, easing = LinearEasing))
+        if (effects.shakeTick != handledShake) {
+            handledShake = effects.shakeTick
+            if (motion.enabled) {
+                // ±8 dp, 3 salınım, toplam 200 ms (doğrusal).
+                shake.snapTo(0f)
+                val step = 200 / 6
+                for (target in listOf(1f, -1f, 1f, -1f, 1f, 0f)) shake.animateTo(target, tween(step, easing = LinearEasing))
+            }
         }
     }
     BoxWithConstraints(modifier.fillMaxWidth().semantics { isTraversalGroup = true }) {
         val w = maxWidth
-        val diameter: Dp = if (w < 328.dp) w else minOf(w - 16.dp, 320.dp)
+        val diameter: Dp = if (w < 328.dp) minOf(w, maxDiameter) else minOf(w - 16.dp, maxDiameter)
         val tokenSize: Dp = if (n >= 7) 56.dp else 64.dp
         val shuffleSize = 56.dp
         val fontScale = LocalDensity.current.fontScale
@@ -112,7 +121,7 @@ fun PlayPanel(
                             badge = selection.indexOf(tile.index).takeIf { it >= 0 }?.plus(1),
                             size = tokenSize,
                             onClick = { callbacks.onLetter(tile.index) },
-                            modifier = Modifier.then(SlotData(TokenSlot(slot))).semantics { traversalIndex = tile.index.toFloat() },
+                            modifier = Modifier.then(SlotData(TokenSlot(slot))).semantics { traversalIndex = position.toFloat() },
                         )
                     }
                 }
